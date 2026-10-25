@@ -32,6 +32,16 @@ for (const [route, lang] of [
       }
     });
 
+    test('progetti: 4 in evidenza, homelab per primo, con nota sul metodo', async ({ page }) => {
+      await page.goto(route);
+      const projects = page.locator('#progetti article');
+      await expect(projects).toHaveCount(4);
+      await expect(projects.first().getByRole('heading', { level: 3 })).toHaveText('homelab');
+      await expect(page.locator('#progetti article', { hasText: 'my-adept' })).toContainText(
+        lang === 'en' ? 'Method: Written by hand.' : 'Metodo: Scritto a mano.',
+      );
+    });
+
     test('i dati mancanti sono segnaposto visibili', async ({ page }) => {
       await page.goto(route);
       await expect(page.getByText('TODO(Alessandro)').first()).toBeVisible();

@@ -5,5 +5,6 @@ language:
 method: ai-copilot
 status:
   todo: active / wip / archived
-featured: false
+featured: true
+rank: 2
 description: Lato Home Assistant della sincronizzazione con il Non Disturbare di Android.

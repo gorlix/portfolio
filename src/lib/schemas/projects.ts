@@ -11,6 +11,8 @@ export const projectSchema = z.strictObject({
   method: orTodo(z.enum(projectMethods)),
   status: orTodo(z.enum(['active', 'wip', 'archived'])),
   featured: z.boolean(),
+  /** Ordine tra i progetti in evidenza (1 = primo); assente = in coda. */
+  rank: z.number().int().positive().optional(),
 });
 
 export const projectTranslatable = ['description'];
