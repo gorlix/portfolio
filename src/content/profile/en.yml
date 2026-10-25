@@ -15,3 +15,5 @@ links:
   x: https://x.com/Goorlix
 cv:
   todo: CV PDF in English
+photo:
+  todo: Photo of Alessandro (file in src/assets and alt text)

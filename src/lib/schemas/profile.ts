@@ -15,8 +15,17 @@ export const profileSchema = z.strictObject({
     devto: orTodo(url),
     x: url,
   }),
-  /** Percorso del CV (PDF) per lingua. */
+  /** Percorso del CV (PDF) per lingua, sotto `public/` (es. `/cv/alessandro-gorla-it.pdf`). */
   cv: orTodo(text),
+  /** Foto reale per `/recruiter`: file in `src/assets/` (percorso dalla radice del repo) e testo alternativo. */
+  photo: orTodo(z.strictObject({ src: text, alt: text })),
 });
 
-export const profileTranslatable = ['role', 'location', 'availability', 'tagline', 'cv'];
+export const profileTranslatable = [
+  'role',
+  'location',
+  'availability',
+  'tagline',
+  'cv',
+  'photo.alt',
+];

@@ -42,6 +42,21 @@ for (const [route, lang] of [
       );
     });
 
+    test('apertura: ritratto, frase e CV (segnaposto finche mancano i file) anche nel menu', async ({
+      page,
+    }) => {
+      await page.goto(route);
+      const opening = page.locator('#profilo');
+      await expect(opening.locator('.portrait')).toBeVisible();
+      await expect(opening.getByText(/R[ée]sum[ée]|CV/)).toBeVisible();
+      await expect(
+        page
+          .locator('header nav')
+          .first()
+          .getByText(/R[ée]sum[ée]|CV/),
+      ).toBeVisible();
+    });
+
     test('i dati mancanti sono segnaposto visibili', async ({ page }) => {
       await page.goto(route);
       await expect(page.getByText('TODO(Alessandro)').first()).toBeVisible();
