@@ -64,4 +64,13 @@ describe('_headers', () => {
       expect(mentions, rule.path).toBe(heavyPaths.includes(rule.path));
     }
   });
+
+  it.each(['/llms.txt', '/agent.md', '/profile.json'])(
+    'file per macchine %s: Content-Type esplicito e CSP chiusa',
+    (path) => {
+      const h = rules.find((r) => r.path === path)?.headers ?? {};
+      expect(h['Content-Type']).toMatch(/charset=utf-8$/);
+      expect(h['Content-Security-Policy']).toBe("default-src 'none'; frame-ancestors 'none'");
+    },
+  );
 });
