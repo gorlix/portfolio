@@ -1,6 +1,7 @@
 import type { z } from 'astro/zod';
 import { automationSchema, automationTranslatable } from '../schemas/automations';
 import { certificationSchema, certificationTranslatable } from '../schemas/certifications';
+import { entranceSchema, entranceTranslatable } from '../schemas/entrance';
 import { experienceSchema, experienceTranslatable } from '../schemas/experiences';
 import { infrastructureSchema, infrastructureTranslatable } from '../schemas/infrastructure';
 import { profileSchema, profileTranslatable } from '../schemas/profile';
@@ -26,6 +27,7 @@ export const collections = {
   profile: { kind: 'singleton', schema: profileSchema, translatable: profileTranslatable },
   theme: { kind: 'singleton', schema: themeSchema, translatable: themeTranslatable },
   ui: { kind: 'singleton', schema: uiSchema, translatable: uiTranslatable },
+  entrance: { kind: 'singleton', schema: entranceSchema, translatable: entranceTranslatable },
   infrastructure: {
     kind: 'singleton',
     schema: infrastructureSchema,

@@ -1,0 +1,93 @@
+---
+import { getSingleton } from '../lib/data';
+import { localizedPath } from '../lib/i18n';
+import type { Locale } from '../lib/schemas/common';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const [entrance, profile] = await Promise.all([
+  getSingleton('entrance', locale),
+  getSingleton('profile', locale),
+]);
+---
+
+<section class="terminal" aria-labelledby="terminal-title">
+  <header class="bar">
+    <h1 id="terminal-title">{profile.name}</h1>
+  </header>
+  <div class="screen">
+    <p class="cmd">{entrance.command}</p>
+    {entrance.greeting.map((line) => <p>{line}</p>)}
+    <p id="who" class="question">{entrance.question}</p>
+    <ol class="choices" aria-labelledby="who">
+      {
+        entrance.choices.map((c) => (
+          <li>
+            <a href={localizedPath(c.path, locale)}>{c.label}</a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .terminal {
+    max-width: 44rem;
+    margin: 2rem auto;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg-alt);
+    font-family: var(--font-mono);
+    overflow: hidden;
+  }
+  .bar {
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  h1 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .screen {
+    padding: 1rem;
+    line-height: 1.6;
+  }
+  .screen p {
+    margin: 0;
+  }
+  .screen .cmd {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .screen .question {
+    margin-top: 1rem;
+    font-weight: 700;
+  }
+  .choices {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: choice;
+  }
+  .choices li {
+    counter-increment: choice;
+  }
+  .choices li::before {
+    content: counter(choice) ") ";
+    color: var(--text-muted);
+  }
+  .choices a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .choices a:hover {
+    background: var(--surface);
+  }
+</style>

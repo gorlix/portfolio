@@ -1,0 +1,10 @@
+command: $ ./introduce.sh
+greeting:
+  - Hey human 👋 Welcome to Alessandro Gorla's portfolio.
+  - "Three Proxmox nodes, two sites, a house that switches itself on:"
+  - let's say he makes things work. Usually on the first try.
+question: So, who are you?
+choices:
+  - { id: human, label: Human, path: /human }
+  - { id: recruiter, label: Recruiter, path: /recruiter }
+  - { id: agent, label: AI Agent, path: /agent }
