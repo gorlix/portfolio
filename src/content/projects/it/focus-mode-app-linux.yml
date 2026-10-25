@@ -1,0 +1,10 @@
+name: focus-mode-app-linux
+repo: https://github.com/gorlix/focus-mode-app-linux
+language:
+  todo: Linguaggio principale
+method: ai-copilot
+status:
+  todo: active / wip / archived
+featured: false
+description: Sincronizza il Non Disturbare di Android con Home Assistant; migrazione da Python a
+  Rust/Tauri in corso.

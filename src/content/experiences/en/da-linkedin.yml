@@ -1,0 +1,12 @@
+company:
+  todo: Azienda (da LinkedIn)
+role:
+  todo: Role (from LinkedIn)
+start:
+  todo: Data di inizio
+end:
+  todo: Data di fine (o in corso)
+results:
+  todo: One or two results
+stack:
+  todo: Stack

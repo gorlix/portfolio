@@ -1,0 +1,10 @@
+name: homelab
+repo: https://github.com/gorlix/homelab
+language:
+  todo: Linguaggio principale
+method:
+  todo: a mano / con AI / vibecoded
+status:
+  todo: active / wip / archived
+featured: true
+description: Homelab su due siti con Proxmox VE, Tailscale, OpenTofu e Ansible, documentato con ADR.

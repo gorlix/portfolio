@@ -1,0 +1,17 @@
+sections:
+  - id: lavori
+    title: Work
+  - id: homelab
+    title: Homelab
+  - id: domotica
+    title: Home automation
+  - id: certificazioni
+    title: Certifications
+  - id: sport
+    title: Sport
+  - id: interessi
+    title: Interests
+  - id: beneficenza
+    title: Charity
+  - id: contatti
+    title: Contact

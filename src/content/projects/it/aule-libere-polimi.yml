@@ -1,0 +1,9 @@
+name: AuleLiberePoliMi
+repo: https://github.com/gorlix/AuleLiberePoliMi
+language:
+  todo: Linguaggio principale
+method: ai-copilot
+status:
+  todo: active / wip / archived
+featured: false
+description: Progetto adottato quando l'autore originale l'ha lasciato; gira sull'homelab.

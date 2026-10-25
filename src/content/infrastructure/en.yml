@@ -1,0 +1,75 @@
+simulated: true
+regions:
+  - id: casa
+    name: Home
+    kind: home
+  - id: produzione
+    name: Production
+    kind: production
+nodes:
+  - id: nodo-1
+    name: node-1
+    region: casa
+  - id: nodo-2
+    name: node-2
+    region: casa
+  - id: nodo-3
+    name: node-3
+    region: produzione
+services:
+  - id: adguard-primario
+    name: AdGuard Home (primary)
+    node: nodo-1
+    status: running
+  - id: adguard-backup
+    name: AdGuard Home (backup)
+    node: nodo-3
+    status: running
+  - id: home-assistant
+    name: Home Assistant
+    node: nodo-2
+    status: running
+  - id: frigate
+    name: Frigate
+    node: nodo-1
+    status: running
+  - id: traefik-casa
+    name: Traefik
+    node: nodo-1
+    status: running
+  - id: traefik-produzione
+    name: Traefik
+    node: nodo-3
+    status: running
+  - id: tunnel-casa
+    name: Cloudflare Tunnel
+    node: nodo-1
+    status: running
+  - id: tunnel-produzione
+    name: Cloudflare Tunnel
+    node: nodo-3
+    status: running
+  - id: authentik
+    name: Authentik
+    node: nodo-3
+    status: running
+  - id: nextcloud
+    name: Nextcloud
+    node: nodo-3
+    status: running
+  - id: monitoring
+    name: Monitoring
+    node: nodo-2
+    status: running
+  - id: kubernetes-flux
+    name: Kubernetes + Flux
+    node: nodo-2
+    status: under-construction
+links:
+  - from: casa
+    to: produzione
+    kind: overlay
+  - from: adguard-primario
+    to: adguard-backup
+    kind: failover
+adrs: []
