@@ -11,9 +11,11 @@ interface Props {
   path: string;
   title: string;
   description: string;
+  /** Intestazione sempre visibile (menu a ancore del recruiter). */
+  stickyHeader?: boolean;
 }
 
-const { locale, path, title, description } = Astro.props;
+const { locale, path, title, description, stickyHeader = false } = Astro.props;
 const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
 const pageUrl = absoluteUrl(localizedPath(path, locale));
 const otherLocales = locales.filter((l) => l !== locale);
@@ -40,12 +42,33 @@ const ui = await getSingleton('ui', locale);
   </head>
   <body>
     <a class="skip" href="#main">{ui.skipToContent}</a>
-    <header><LanguageSwitcher locale={locale} path={path} /></header>
+    <header class:list={['site-header', { fixed: stickyHeader }]}>
+      <slot name="header" />
+      <LanguageSwitcher locale={locale} path={path} />
+    </header>
     <main id="main"><slot /></main>
+    <slot name="footer" />
   </body>
 </html>
 
 <style is:global>
+  .site-header.fixed {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  @media (min-width: 48rem) {
+    .site-header.fixed {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+  }
   .skip {
     position: absolute;
     left: -999px;

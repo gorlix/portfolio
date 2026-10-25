@@ -3,7 +3,7 @@
  * recruiter, agent, nelle due lingue. Aggiungere qui `/recruiter/` e `/agent/` (e le gemelle
  * `/en/...`) quando le pagine esistono.
  */
-export const lightRoutes = ['/', '/en/'];
+export const lightRoutes = ['/', '/en/', '/recruiter/', '/en/recruiter/'];
 
 /** Percorsi dove JS/3D sono ammessi: ancora nessuno, `/human/` arriva con la fase 3D. */
 export const heavyRoutes: string[] = [];

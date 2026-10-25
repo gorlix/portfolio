@@ -1,11 +1,13 @@
 import type { z } from 'astro/zod';
 import { automationSchema, automationTranslatable } from '../schemas/automations';
 import { certificationSchema, certificationTranslatable } from '../schemas/certifications';
+import { educationSchema, educationTranslatable } from '../schemas/education';
 import { entranceSchema, entranceTranslatable } from '../schemas/entrance';
 import { experienceSchema, experienceTranslatable } from '../schemas/experiences';
 import { infrastructureSchema, infrastructureTranslatable } from '../schemas/infrastructure';
 import { profileSchema, profileTranslatable } from '../schemas/profile';
 import { projectSchema, projectTranslatable } from '../schemas/projects';
+import { recruiterSchema, recruiterTranslatable } from '../schemas/recruiter';
 import { skillSchema, skillTranslatable } from '../schemas/skills';
 import { themeSchema, themeTranslatable } from '../schemas/theme';
 import { topicSchema, topicTranslatable } from '../schemas/topics';
@@ -28,6 +30,7 @@ export const collections = {
   theme: { kind: 'singleton', schema: themeSchema, translatable: themeTranslatable },
   ui: { kind: 'singleton', schema: uiSchema, translatable: uiTranslatable },
   entrance: { kind: 'singleton', schema: entranceSchema, translatable: entranceTranslatable },
+  recruiter: { kind: 'singleton', schema: recruiterSchema, translatable: recruiterTranslatable },
   infrastructure: {
     kind: 'singleton',
     schema: infrastructureSchema,
@@ -40,6 +43,7 @@ export const collections = {
     schema: certificationSchema,
     translatable: certificationTranslatable,
   },
+  education: { kind: 'folder', schema: educationSchema, translatable: educationTranslatable },
   projects: { kind: 'folder', schema: projectSchema, translatable: projectTranslatable },
   automations: { kind: 'folder', schema: automationSchema, translatable: automationTranslatable },
   topics: { kind: 'folder', schema: topicSchema, translatable: topicTranslatable },
