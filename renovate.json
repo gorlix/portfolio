@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Europe/Rome",
+  "dependencyDashboard": true,
+  "automerge": false,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Dipendenze principali: mai automatiche, devono passare i test e la revisione.",
+      "matchPackageNames": [
+        "astro",
+        "typescript",
+        "three",
+        "gsap",
+        "@catppuccin/palette",
+        "vitest",
+        "@playwright/test",
+        "@biomejs/biome"
+      ],
+      "automerge": false,
+      "labels": ["dependencies", "core"]
+    },
+    {
+      "description": "Font e tipi: raggruppati per ridurre il rumore.",
+      "matchPackageNames": ["/^@fontsource/", "/^@types//"],
+      "groupName": "fonts and types"
+    }
+  ]
+}
