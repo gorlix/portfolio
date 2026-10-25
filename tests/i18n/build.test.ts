@@ -150,3 +150,12 @@ describe('vetrina /agent', () => {
     });
   }
 });
+
+describe('peso immagini', () => {
+  it('nessuna immagine ottimizzata supera 100 KB (spec 3.5, prima vista leggera)', () => {
+    const images = walk(outDir).filter((f) => /\.(webp|avif|jpe?g|png|gif)$/i.test(f));
+    for (const f of images) {
+      expect(statSync(f).size, relative(outDir, f)).toBeLessThanOrEqual(100 * 1024);
+    }
+  });
+});

@@ -47,6 +47,7 @@ export const recruiterSchema = z
       language: text,
       email: text,
       profiles: text,
+      cv: text,
     }),
   })
   .superRefine((page, ctx) => {
@@ -86,4 +87,5 @@ export const recruiterTranslatable = [
   'labels.language',
   'labels.email',
   'labels.profiles',
+  'labels.cv',
 ];
