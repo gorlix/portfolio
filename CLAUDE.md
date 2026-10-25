@@ -17,5 +17,5 @@ Astro (SSG) · TypeScript strict · CSS puro + `@catppuccin/palette` · Three.js
 
 ## Workflow
 
-- Task tracciati su PACA, progetto **Portfolio** (prefisso `PORT`). Branch per task: `PORT-<n>-<slug>`.
+- Branch per task: `PORT-<n>-<slug>`.
 - Commit/PR solo su richiesta; mai su `main` direttamente.
