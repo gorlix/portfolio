@@ -1,0 +1,7 @@
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "@fontsource-variable/inter/wght.css";
+
+:root {
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+}

@@ -1,0 +1,131 @@
+/*
+ * Unico file di tema: tutti i colori del sito vivono qui come token.
+ * Fuori da questo file non ci sono valori colore (verificato da `pnpm check:theme`).
+ * Livello 1: palette Catppuccin (--ctp-*), allineata a @catppuccin/palette.
+ * Livello 2: token semantici (--bg, --text, --sec-*), gli unici usati da componenti e pagine.
+ * Mocha e il default; Latte si attiva con prefers-color-scheme: light e in stampa,
+ * tranne dove <html data-theme="mocha"> (percorso /human).
+ */
+
+:root {
+  --ctp-text: #cdd6f4;
+  --ctp-subtext1: #bac2de;
+  --ctp-subtext0: #a6adc8;
+  --ctp-surface2: #585b70;
+  --ctp-surface1: #45475a;
+  --ctp-surface0: #313244;
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+  --ctp-rosewater: #f5e0dc;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-pink: #f5c2e7;
+  --ctp-mauve: #cba6f7;
+  --ctp-red: #f38ba8;
+  --ctp-maroon: #eba0ac;
+  --ctp-peach: #fab387;
+  --ctp-yellow: #f9e2af;
+  --ctp-green: #a6e3a1;
+  --ctp-teal: #94e2d5;
+  --ctp-sky: #89dceb;
+  --ctp-sapphire: #74c7ec;
+  --ctp-blue: #89b4fa;
+  --ctp-lavender: #b4befe;
+}
+
+@media (prefers-color-scheme: light), print {
+  :root:not([data-theme="mocha"]) {
+    --ctp-text: #4c4f69;
+    --ctp-subtext1: #5c5f77;
+    --ctp-subtext0: #6c6f85;
+    --ctp-surface2: #acb0be;
+    --ctp-surface1: #bcc0cc;
+    --ctp-surface0: #ccd0da;
+    --ctp-base: #eff1f5;
+    --ctp-mantle: #e6e9ef;
+    --ctp-crust: #dce0e8;
+    --ctp-rosewater: #dc8a78;
+    --ctp-flamingo: #dd7878;
+    --ctp-pink: #ea76cb;
+    --ctp-mauve: #8839ef;
+    --ctp-red: #d20f39;
+    --ctp-maroon: #e64553;
+    --ctp-peach: #fe640b;
+    --ctp-yellow: #df8e1d;
+    --ctp-green: #40a02b;
+    --ctp-teal: #179299;
+    --ctp-sky: #04a5e5;
+    --ctp-sapphire: #209fb5;
+    --ctp-blue: #1e66f5;
+    --ctp-lavender: #7287fd;
+  }
+}
+
+/*
+ * Token semantici. Regole di contrasto (WCAG AA, controllate dallo script):
+ *  - testo normale >= 4.5:1 su --bg, --bg-alt e --surface;
+ *  - nessun overlay per testo di corpo (non sono nemmeno esposti);
+ *  - --sec-*: decorativi (bordi, glifi, riempimenti), sempre accompagnati da testo;
+ *  - --sec-*-ink: variante per testo, vale l'accento solo se passa AA, altrimenti --text.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: var(--ctp-base);
+  --bg-alt: var(--ctp-mantle);
+  --bg-deep: var(--ctp-crust);
+  --surface: var(--ctp-surface0);
+  --surface-hi: var(--ctp-surface1);
+  --border: var(--ctp-surface2);
+
+  --text: var(--ctp-text);
+  --text-muted: var(--ctp-subtext0);
+  --link: var(--ctp-blue);
+  --focus: var(--ctp-lavender);
+  --danger: var(--ctp-red);
+
+  --sec-lavori: var(--ctp-blue);
+  --sec-homelab: var(--ctp-green);
+  --sec-domotica: var(--ctp-yellow);
+  --sec-domotica-alt: var(--ctp-peach);
+  --sec-certificazioni: var(--ctp-mauve);
+  --sec-sport: var(--ctp-sky);
+  --sec-sport-alt: var(--ctp-peach);
+  --sec-interessi: var(--ctp-pink);
+  --sec-interessi-alt: var(--ctp-flamingo);
+  --sec-beneficenza: var(--ctp-teal);
+  --sec-contatti: var(--ctp-lavender);
+
+  --sec-lavori-ink: var(--sec-lavori);
+  --sec-homelab-ink: var(--sec-homelab);
+  --sec-domotica-ink: var(--sec-domotica);
+  --sec-certificazioni-ink: var(--sec-certificazioni);
+  --sec-sport-ink: var(--sec-sport);
+  --sec-interessi-ink: var(--sec-interessi);
+  --sec-beneficenza-ink: var(--sec-beneficenza);
+  --sec-contatti-ink: var(--sec-contatti);
+}
+
+@media (prefers-color-scheme: light), print {
+  :root:not([data-theme="mocha"]) {
+    color-scheme: light;
+
+    /* subtext0 di Latte sta a 4.4:1 su base: per il testo attenuato si usa subtext1 */
+    --text-muted: var(--ctp-subtext1);
+    /* i link restano riconoscibili dalla sottolineatura, non dal solo colore */
+    --link: var(--text);
+    --focus: var(--ctp-mauve);
+    /* surface0 di Latte e troppo scuro per il testo attenuato: si usa mantle */
+    --surface: var(--ctp-mantle);
+
+    /* Su Latte nessun accento passa AA come testo su tutti gli sfondi: restano decorativi. */
+    --sec-lavori-ink: var(--text);
+    --sec-homelab-ink: var(--text);
+    --sec-domotica-ink: var(--text);
+    --sec-certificazioni-ink: var(--text);
+    --sec-sport-ink: var(--text);
+    --sec-interessi-ink: var(--text);
+    --sec-beneficenza-ink: var(--text);
+    --sec-contatti-ink: var(--text);
+  }
+}
