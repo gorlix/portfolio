@@ -1,4 +1,5 @@
 import type { z } from 'astro/zod';
+import { agentSchema, agentTranslatable } from '../schemas/agent';
 import { automationSchema, automationTranslatable } from '../schemas/automations';
 import { certificationSchema, certificationTranslatable } from '../schemas/certifications';
 import { educationSchema, educationTranslatable } from '../schemas/education';
@@ -27,6 +28,7 @@ export interface CollectionDef {
 
 export const collections = {
   profile: { kind: 'singleton', schema: profileSchema, translatable: profileTranslatable },
+  agent: { kind: 'singleton', schema: agentSchema, translatable: agentTranslatable },
   theme: { kind: 'singleton', schema: themeSchema, translatable: themeTranslatable },
   ui: { kind: 'singleton', schema: uiSchema, translatable: uiTranslatable },
   entrance: { kind: 'singleton', schema: entranceSchema, translatable: entranceTranslatable },

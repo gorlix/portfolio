@@ -120,3 +120,33 @@ describe('build SEO', () => {
     expect(robots).toContain('Disallow: /admin');
   });
 });
+
+describe('vetrina /agent', () => {
+  const decodeHtml = (t: string) =>
+    t
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, '&');
+
+  /** Testo dentro `<pre data-file="nome"...><code>...</code></pre>`. */
+  const shownFile = (html: string, name: string) => {
+    const open = html.indexOf(`data-file="${name}"`);
+    if (open < 0) return undefined;
+    const start = html.indexOf('>', html.indexOf('<code', open)) + 1;
+    return decodeHtml(html.slice(start, html.indexOf('</code></pre>', start)));
+  };
+
+  for (const url of ['/agent/', '/en/agent/']) {
+    it(`${url} mostra i file della root byte per byte`, () => {
+      const html = pages.find((p) => p.url === url)?.html ?? '';
+      expect(html, url).not.toBe('');
+      for (const name of ['llms.txt', 'profile.json', 'agent.md']) {
+        expect(shownFile(html, name), `${url} ${name}`).toBe(
+          readFileSync(join(outDir, name), 'utf8'),
+        );
+      }
+    });
+  }
+});
