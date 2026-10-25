@@ -16,7 +16,10 @@ for (const route of lightRoutes) {
 
     await page.goto(route, { waitUntil: 'networkidle' });
 
-    expect(requested.filter((r) => r.type === 'script')).toEqual([]);
+    // Unico script ammesso: il file esterno dell'ingresso, dello stesso sito.
+    const scripts = requested.filter((r) => r.type === 'script');
+    expect(scripts.length).toBeLessThanOrEqual(1);
+    for (const s of scripts) expect(new URL(s.url).pathname).toMatch(/^\/_astro\/.+\.js$/);
     expect(requested.filter((r) => forbidden.some((re) => re.test(r.url)))).toEqual([]);
   });
 }

@@ -4,6 +4,10 @@ greeting:
   - Ciao umano 👋 Benvenuto nel portfolio di Alessandro Gorla.
   - "Tre nodi Proxmox, due siti, una casa che si accende da sola:"
   - diciamo che le cose le fa funzionare. Di solito al primo colpo.
+skip: salta
+hints:
+  keys: "Usa le frecce e Invio, oppure premi 1, 2 o 3."
+  lang: "Scrivi «lang» e premi Invio per cambiare lingua."
 question: Allora, chi sei?
 choices:
   - { id: human, label: Umano, path: /human }

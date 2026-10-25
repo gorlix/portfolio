@@ -9,6 +9,10 @@ export const entranceSchema = z.strictObject({
   command: text,
   /** Righe del saluto, nell'ordine in cui compaiono (la digitazione progressiva le scorre). */
   greeting: z.array(text).min(1),
+  /** Etichetta del pulsante "salta" (visibile solo con lo script, durante la digitazione). */
+  skip: text,
+  /** Suggerimenti tastiera (visibili solo con lo script). */
+  hints: z.strictObject({ keys: text, lang: text }),
   /** Domanda che introduce le scelte. */
   question: text,
   /** Ordine = ordine di visualizzazione e tasti 1/2/3. `path` e il percorso senza prefisso lingua. */
@@ -25,6 +29,9 @@ export const entranceSchema = z.strictObject({
 
 export const entranceTranslatable = [
   'metaDescription',
+  'skip',
+  'hints.keys',
+  'hints.lang',
   'command',
   'greeting.*',
   'question',

@@ -12,7 +12,8 @@ for (const route of lightRoutes) {
         route.startsWith('/en/') ? 'en' : 'it',
       );
       await expect(page.locator('main#main')).toBeAttached();
-      await expect(page.locator('script')).toHaveCount(0);
+      // Nessuno script inline (CSP); l'unico script ammesso e il file esterno dell'ingresso.
+      await expect(page.locator('script:not([src])')).toHaveCount(0);
 
       const switcher = page.getByRole('navigation').getByRole('link');
       await expect(switcher).toHaveCount(2);
