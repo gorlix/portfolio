@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
-import { loadMachineModel } from '../lib/machine/model';
-import { renderProfileJson } from '../lib/machine/render';
+import { renderMachineFiles } from '../lib/machine/files';
 
 export const GET: APIRoute = async () =>
-  new Response(renderProfileJson(await loadMachineModel()), {
+  new Response((await renderMachineFiles())['profile.json'], {
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });

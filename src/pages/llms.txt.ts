@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
-import { loadMachineModel } from '../lib/machine/model';
-import { renderLlmsTxt } from '../lib/machine/render';
+import { renderMachineFiles } from '../lib/machine/files';
 
 export const GET: APIRoute = async () =>
-  new Response(renderLlmsTxt(await loadMachineModel()), {
+  new Response((await renderMachineFiles())['llms.txt'], {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
