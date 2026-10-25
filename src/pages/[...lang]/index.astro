@@ -1,4 +1,5 @@
 ---
+import Terminal from '../../components/Terminal.astro';
 import Base from '../../layouts/Base.astro';
 import { getSingleton } from '../../lib/data';
 import { localeStaticPaths } from '../../lib/i18n';
@@ -10,4 +11,6 @@ const { locale } = Astro.props as { locale: Locale };
 const profile = await getSingleton('profile', locale);
 ---
 
-<Base locale={locale} path="/" title={profile.name} />
+<Base locale={locale} path="/" title={profile.name}>
+  <Terminal locale={locale} />
+</Base>
