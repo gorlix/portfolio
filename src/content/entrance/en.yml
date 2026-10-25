@@ -1,4 +1,4 @@
-command: $ ./introduce.sh
+command: $ ./whoami.sh
 greeting:
   - Hey human 👋 Welcome to Alessandro Gorla's portfolio.
   - "Three Proxmox nodes, two sites, a house that switches itself on:"
