@@ -404,4 +404,63 @@ const profiles = [
     padding: 1rem 1rem 2rem;
     border-top: 1px solid var(--border);
   }
+  /* Stampa / PDF: base Latte (theme.css), niente navigazione, URL dei link, pagine A4 compatte. */
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  @media print {
+    :global(.skip),
+    :global(header.site-header.fixed),
+    .foot,
+    .cta {
+      display: none;
+    }
+    :global(body) {
+      font-size: 10pt;
+    }
+    .page {
+      max-width: none;
+      padding: 0;
+      line-height: 1.4;
+    }
+    section[id] {
+      margin-top: 1.25rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+    }
+    h2 {
+      break-after: avoid;
+      margin-bottom: 0.5rem;
+    }
+    h3,
+    h4 {
+      break-after: avoid;
+    }
+    .item,
+    .skill-group {
+      break-inside: avoid;
+    }
+    .item {
+      margin-top: 0.75rem;
+    }
+    .tags li {
+      font-size: 0.8rem;
+    }
+    .page a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .page a[href^="http"]::after,
+    .page a[href^="mailto:"]::after {
+      content: " (" attr(href) ")";
+      font-size: 0.8em;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .page a[href^="mailto:"]::after {
+      content: " (" attr(href) ")";
+    }
+  }
 </style>
