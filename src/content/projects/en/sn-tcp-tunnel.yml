@@ -1,0 +1,9 @@
+name: sn-tcp-tunnel
+repo: https://github.com/gorlix/sn-tcp-tunnel
+language:
+  todo: Linguaggio principale
+method: vibecoded
+status:
+  todo: active / wip / archived
+featured: false
+description: Built around the Supernote Manta.

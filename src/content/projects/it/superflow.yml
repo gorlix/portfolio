@@ -1,0 +1,8 @@
+name: SuperFlow
+repo: https://github.com/gorlix/SuperFlow
+language:
+  todo: Linguaggio principale
+method: vibecoded
+status: wip
+featured: false
+description: Ruota attorno al Supernote Manta.

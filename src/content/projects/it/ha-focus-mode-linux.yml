@@ -1,0 +1,9 @@
+name: ha-focus-mode-linux
+repo: https://github.com/gorlix/ha-focus-mode-linux
+language:
+  todo: Linguaggio principale
+method: ai-copilot
+status:
+  todo: active / wip / archived
+featured: false
+description: Lato Home Assistant della sincronizzazione con il Non Disturbare di Android.
