@@ -72,9 +72,14 @@ describe('build i18n', () => {
     }
   });
 
-  it('il selettore lingua e fatto di link e non emette JavaScript', () => {
+  it('il selettore lingua e fatto di link; l unico script e quello esterno dell ingresso', () => {
     for (const { url, html } of pages) {
-      expect(html, url).not.toContain('<script');
+      const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)].map((m) => m[0]);
+      const isEntrance = url === '/' || url === '/en/';
+      expect(scripts.length, url).toBe(isEntrance ? 1 : 0);
+      for (const tag of scripts) {
+        expect(tag, url).toMatch(/^<script type="module" src="\/_astro\/[^"]+\.js"><\/script>$/);
+      }
       expect(html, url).toMatch(/<a href="[^"]*" hreflang="it"/);
       expect(html, url).toMatch(/<a href="[^"]*" hreflang="en"/);
     }

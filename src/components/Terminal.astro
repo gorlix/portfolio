@@ -1,6 +1,6 @@
 ---
 import { getSingleton } from '../lib/data';
-import { localizedPath } from '../lib/i18n';
+import { defaultLocale, localizedPath } from '../lib/i18n';
 import type { Locale } from '../lib/schemas/common';
 
 interface Props {
@@ -14,15 +14,16 @@ const [entrance, profile] = await Promise.all([
 ]);
 ---
 
-<section class="terminal" aria-labelledby="terminal-title">
+<section class="terminal" aria-labelledby="terminal-title" data-terminal data-default-locale={defaultLocale}>
   <header class="bar">
     <h1 id="terminal-title">{profile.name}</h1>
+    <button type="button" class="skip-typing" data-skip hidden>{entrance.skip}</button>
   </header>
   <div class="screen">
-    <p class="cmd">{entrance.command}</p>
-    {entrance.greeting.map((line) => <p>{line}</p>)}
-    <p id="who" class="question">{entrance.question}</p>
-    <ol class="choices" aria-labelledby="who">
+    <p class="cmd" data-line>{entrance.command}</p>
+    {entrance.greeting.map((line) => <p data-line>{line}</p>)}
+    <p id="who" class="question" data-line>{entrance.question}</p>
+    <ol class="choices" aria-labelledby="who" data-choices>
       {
         entrance.choices.map((c) => (
           <li>
@@ -31,6 +32,8 @@ const [entrance, profile] = await Promise.all([
         ))
       }
     </ol>
+    <p class="hint" data-hint hidden>{entrance.hints.keys}</p>
+    <p class="hint" data-hint hidden>{entrance.hints.lang}</p>
   </div>
 </section>
 
@@ -45,7 +48,13 @@ const [entrance, profile] = await Promise.all([
     overflow: hidden;
   }
   .bar {
-    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.5rem;
+    box-sizing: border-box;
+    padding: 0.25rem 1rem;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
@@ -54,6 +63,19 @@ const [entrance, profile] = await Promise.all([
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-muted);
+  }
+  .skip-typing {
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .skip-typing:hover {
+    background: var(--surface-hi);
   }
   .screen {
     padding: 1rem;
@@ -87,7 +109,32 @@ const [entrance, profile] = await Promise.all([
     color: var(--link);
     text-decoration: underline;
   }
+  .choices li:focus-within::before {
+    content: "> ";
+    color: var(--text);
+  }
+  .screen :global(.rest),
+  .screen :global(.pending) {
+    visibility: hidden;
+  }
+  .screen :global(.sr-only) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .screen .hint {
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
   .choices a:hover {
     background: var(--surface);
   }
 </style>
+
+<script>
+  import '../scripts/terminal.ts';
+</script>

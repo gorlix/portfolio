@@ -4,6 +4,10 @@ greeting:
   - Hey human 👋 Welcome to Alessandro Gorla's portfolio.
   - "Three Proxmox nodes, two sites, a house that switches itself on:"
   - let's say he makes things work. Usually on the first try.
+skip: skip
+hints:
+  keys: "Use the arrow keys and Enter, or press 1, 2 or 3."
+  lang: "Type “lang” and press Enter to switch language."
 question: So, who are you?
 choices:
   - { id: human, label: Human, path: /human }

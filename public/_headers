@@ -3,7 +3,7 @@
 # CSP: se piu regole corrispondono allo stesso percorso, Pages UNISCE i valori dello stesso header
 # e due CSP si intersecano. Per questo la CSP NON sta sotto /* ma e dichiarata per percorso:
 # ogni percorso ha esattamente una regola CSP (verificato da tests/headers).
-# Percorsi leggeri: nessuno script. /human e l'unico a poter caricare script, worker e analitica.
+# Percorsi leggeri: nessuno script, salvo `/` e `/en/` (solo lo script facoltativo del terminale, dello stesso sito). /human e l'unico a poter caricare script, worker e analitica.
 # HSTS volutamente assente: il dominio ospita anche sottodomini non gestiti da questo repo.
 
 /*
@@ -17,10 +17,10 @@
   Cache-Control: public, max-age=31536000, immutable
 
 /
-  Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /en/
-  Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /recruiter/*
   Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'

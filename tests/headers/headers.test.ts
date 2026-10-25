@@ -17,7 +17,9 @@ for (const line of raw.split('\n')) {
 }
 const csp = (path: string) =>
   rules.find((r) => r.path === path)?.headers['Content-Security-Policy'];
-const lightPaths = ['/', '/en/', '/recruiter/*', '/en/recruiter/*', '/agent/*', '/en/agent/*'];
+const lightPaths = ['/recruiter/*', '/en/recruiter/*', '/agent/*', '/en/agent/*'];
+// Ingresso: l'unico percorso leggero con uno script (facoltativo, solo dello stesso sito).
+const entrancePaths = ['/', '/en/'];
 const heavyPaths = ['/human/*', '/en/human/*'];
 
 describe('_headers', () => {
@@ -51,6 +53,17 @@ describe('_headers', () => {
     expect(value).toContain("frame-ancestors 'none'");
     expect(value).not.toMatch(/https?:|unsafe-inline|unsafe-eval|\*/);
   });
+
+  it.each(entrancePaths)(
+    'ingresso %s: solo lo script dello stesso sito, nulla di esterno',
+    (path) => {
+      const value = csp(path) ?? '';
+      expect(value).toContain("script-src 'self';");
+      expect(value).toContain("default-src 'none'");
+      expect(value).toContain("frame-ancestors 'none'");
+      expect(value).not.toMatch(/https?:|unsafe-inline|unsafe-eval|\*|connect-src/);
+    },
+  );
 
   it.each(heavyPaths)('percorso %s: script solo da se stesso e dal beacon di analitica', (path) => {
     const value = csp(path) ?? '';
