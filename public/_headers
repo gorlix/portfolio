@@ -48,6 +48,14 @@
   Content-Type: application/json; charset=utf-8
   Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
+  Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+
 # Percorso immersivo: unico con script e beacon Cloudflare Web Analytics (iniezione automatica spenta).
 
 /human/*

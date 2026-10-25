@@ -3,16 +3,20 @@ import '../styles/global.css';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import { getSingleton } from '../lib/data';
 import { absoluteUrl, alternates, localizedPath } from '../lib/i18n';
-import type { Locale } from '../lib/schemas/common';
+import { type Locale, locales } from '../lib/schemas/common';
 
 interface Props {
   locale: Locale;
   /** Percorso della pagina senza prefisso lingua (es. `/` o `/recruiter`). */
   path: string;
   title: string;
+  description: string;
 }
 
-const { locale, path, title } = Astro.props;
+const { locale, path, title, description } = Astro.props;
+const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
+const pageUrl = absoluteUrl(localizedPath(path, locale));
+const otherLocales = locales.filter((l) => l !== locale);
 const ui = await getSingleton('ui', locale);
 ---
 
@@ -22,7 +26,16 @@ const ui = await getSingleton('ui', locale);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <link rel="canonical" href={absoluteUrl(localizedPath(path, locale))} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={title} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:locale" content={ogLocale[locale]} />
+    {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
+    <meta name="twitter:card" content="summary" />
     {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
   </head>
   <body>
