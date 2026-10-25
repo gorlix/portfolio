@@ -3,6 +3,8 @@ import { text } from './common';
 
 /** Terminale d'ingresso (`/`): tutto il copy vive qui, i componenti non contengono testo. */
 export const entranceSchema = z.strictObject({
+  /** Meta description della pagina (SEO e Open Graph). */
+  metaDescription: text,
   /** Riga di comando che "lancia" il saluto. */
   command: text,
   /** Righe del saluto, nell'ordine in cui compaiono (la digitazione progressiva le scorre). */
@@ -21,4 +23,10 @@ export const entranceSchema = z.strictObject({
     .length(3),
 });
 
-export const entranceTranslatable = ['command', 'greeting.*', 'question', 'choices.*.label'];
+export const entranceTranslatable = [
+  'metaDescription',
+  'command',
+  'greeting.*',
+  'question',
+  'choices.*.label',
+];

@@ -35,3 +35,10 @@ export function localeStaticPaths() {
     props: { locale },
   }));
 }
+
+/**
+ * Pagine HTML pubblicate (percorsi senza prefisso lingua). Da estendere quando nascono
+ * `/recruiter`, `/agent`, `/human`: alimenta la sitemap, e il test sulla build verifica che
+ * coincida con le pagine realmente generate.
+ */
+export const sitePages = ['/'] as const;
