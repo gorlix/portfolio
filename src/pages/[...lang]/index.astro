@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getSingleton } from '../../lib/data';
+import { localeStaticPaths } from '../../lib/i18n';
+import type { Locale } from '../../lib/schemas/common';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { locale } = Astro.props as { locale: Locale };
+const profile = await getSingleton('profile', locale);
+---
+
+<Base locale={locale} path="/" title={profile.name} />

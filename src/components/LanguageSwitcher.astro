@@ -1,0 +1,52 @@
+---
+import { getSingleton } from '../lib/data';
+import { localizedPath } from '../lib/i18n';
+import { type Locale, locales } from '../lib/schemas/common';
+
+interface Props {
+  locale: Locale;
+  /** Percorso della pagina corrente senza prefisso lingua (es. `/recruiter`). */
+  path: string;
+}
+
+const { locale, path } = Astro.props;
+const ui = await getSingleton('ui', locale);
+---
+
+<nav aria-label={ui.languageSwitcher.label}>
+  <ul>
+    {
+      locales.map((l) => (
+        <li>
+          <a
+            href={localizedPath(path, l)}
+            hreflang={l}
+            lang={l}
+            aria-current={l === locale ? 'true' : undefined}
+          >
+            {ui.languageSwitcher[l]}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  ul {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+  }
+  a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  a[aria-current] {
+    color: var(--text);
+    font-weight: 700;
+  }
+</style>

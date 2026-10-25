@@ -1,0 +1,47 @@
+---
+import '../styles/global.css';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import { getSingleton } from '../lib/data';
+import { absoluteUrl, alternates, localizedPath } from '../lib/i18n';
+import type { Locale } from '../lib/schemas/common';
+
+interface Props {
+  locale: Locale;
+  /** Percorso della pagina senza prefisso lingua (es. `/` o `/recruiter`). */
+  path: string;
+  title: string;
+}
+
+const { locale, path, title } = Astro.props;
+const ui = await getSingleton('ui', locale);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="canonical" href={absoluteUrl(localizedPath(path, locale))} />
+    {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">{ui.skipToContent}</a>
+    <header><LanguageSwitcher locale={locale} path={path} /></header>
+    <main id="main"><slot /></main>
+  </body>
+</html>
+
+<style is:global>
+  .skip {
+    position: absolute;
+    left: -999px;
+  }
+  .skip:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    color: var(--text);
+  }
+</style>

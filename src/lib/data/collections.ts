@@ -8,6 +8,7 @@ import { projectSchema, projectTranslatable } from '../schemas/projects';
 import { skillSchema, skillTranslatable } from '../schemas/skills';
 import { themeSchema, themeTranslatable } from '../schemas/theme';
 import { topicSchema, topicTranslatable } from '../schemas/topics';
+import { uiSchema, uiTranslatable } from '../schemas/ui';
 
 export interface CollectionDef {
   /**
@@ -24,6 +25,7 @@ export interface CollectionDef {
 export const collections = {
   profile: { kind: 'singleton', schema: profileSchema, translatable: profileTranslatable },
   theme: { kind: 'singleton', schema: themeSchema, translatable: themeTranslatable },
+  ui: { kind: 'singleton', schema: uiSchema, translatable: uiTranslatable },
   infrastructure: {
     kind: 'singleton',
     schema: infrastructureSchema,
