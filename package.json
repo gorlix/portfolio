@@ -17,7 +17,8 @@
     "format:check": "biome format .",
     "check:theme": "node scripts/check-theme.mjs",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@catppuccin/palette": "^1.8.0",

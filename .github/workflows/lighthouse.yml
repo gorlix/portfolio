@@ -1,0 +1,23 @@
+name: Lighthouse
+
+# Predisposto, non bloccante: si lancia a mano. Diventa un controllo obbligatorio
+# quando esistono le pagine vere e i budget di peso (spec §3.5) sono stati misurati.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm dlx @lhci/cli@0.15.1 autorun
