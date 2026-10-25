@@ -1,0 +1,30 @@
+titleSuffix: Professional profile
+metaDescription: "Professional profile of Alessandro Gorla: skills, experience, certifications and projects in DevOps and home automation."
+menuLabel: Page sections
+backToChoice: "~/ ← change path"
+sections:
+  - { id: profilo, title: Profile }
+  - { id: competenze, title: Skills }
+  - { id: esperienze, title: Experience }
+  - { id: certificazioni, title: Certifications }
+  - { id: progetti, title: Projects }
+  - { id: formazione, title: Education }
+  - { id: contatti, title: Contact }
+links:
+  human: Get to know me
+  agent: Machine view
+todoLabel: "TODO(Alessandro)"
+labels:
+  location: Location
+  availability: Availability
+  ongoing: present
+  results: Results
+  stack: Stack
+  issuer: Issuer
+  verify: Verify
+  technicalCertifications: Technical certifications
+  supplementaryCertifications: Other certifications
+  repository: Repository
+  language: Language
+  email: Email
+  profiles: Profiles

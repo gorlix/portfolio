@@ -1,0 +1,25 @@
+---
+interface Props {
+  /** Etichetta del segnaposto (`recruiter.todoLabel`). */
+  label: string;
+  /** Cosa serve e da dove, dal dato `{ todo }`. */
+  hint: string;
+}
+
+const { label, hint } = Astro.props;
+---
+
+<span class="todo"><strong>{label}</strong> {hint}</span>
+
+<style>
+  .todo {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border: 1px dashed var(--border);
+    border-radius: 0.25rem;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+</style>

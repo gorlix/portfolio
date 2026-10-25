@@ -1,0 +1,400 @@
+---
+import Todo from '../../components/Todo.astro';
+import Base from '../../layouts/Base.astro';
+import { getEntries, getSingleton } from '../../lib/data';
+import { formatDate } from '../../lib/format';
+import { localeStaticPaths, localizedPath } from '../../lib/i18n';
+import { isTodo, type Locale } from '../../lib/schemas/common';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { locale } = Astro.props as { locale: Locale };
+const [page, profile, skills, experiences, certifications, projects, education] = await Promise.all(
+  [
+    getSingleton('recruiter', locale),
+    getSingleton('profile', locale),
+    getEntries('skills', locale),
+    getEntries('experiences', locale),
+    getEntries('certifications', locale),
+    getEntries('projects', locale),
+    getEntries('education', locale),
+  ],
+);
+
+const L = page.labels;
+const sectionTitle = (id: string) => page.sections.find((s) => s.id === id)?.title ?? id;
+const here = (path: string) => localizedPath(path, locale);
+
+/** Competenze tecniche raggruppate, nell'ordine in cui compaiono i gruppi. */
+const skillGroups = [
+  ...Map.groupBy(
+    skills.filter((s) => s.data.kind === 'technical'),
+    (s) => s.data.group,
+  ),
+];
+
+/** Esperienze dalla piu recente; le date ancora segnaposto restano in fondo. */
+const sortedExperiences = [...experiences].sort((a, b) => {
+  const start = (e: typeof a) => (isTodo(e.data.start) ? '' : e.data.start);
+  return start(b).localeCompare(start(a));
+});
+
+const isTechnical = (c: (typeof certifications)[number]) => c.data.kind !== 'supplementary';
+const technicalCerts = certifications.filter(isTechnical);
+const supplementaryCerts = certifications.filter((c) => !isTechnical(c));
+const featuredProjects = projects.filter((p) => p.data.featured);
+
+const period = (start: unknown, end: unknown) => {
+  if (isTodo(start) || isTodo(end)) return null;
+  return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
+};
+
+const profiles = [
+  { name: 'GitHub', url: profile.links.github },
+  { name: 'LinkedIn', url: profile.links.linkedin },
+  ...(isTodo(profile.links.devto) ? [] : [{ name: 'dev.to', url: profile.links.devto }]),
+];
+---
+
+<Base
+  locale={locale}
+  path="/recruiter"
+  title={`${profile.name} · ${page.titleSuffix}`}
+  description={page.metaDescription}
+  stickyHeader
+>
+  <Fragment slot="header">
+    <a class="back" href={here('/')}>{page.backToChoice}</a>
+    <nav class="menu" aria-label={page.menuLabel}>
+      <ul>
+        {page.sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+        <li><a href={here('/human')}>{page.links.human}</a></li>
+        <li><a href={here('/agent')}>{page.links.agent}</a></li>
+      </ul>
+    </nav>
+  </Fragment>
+
+  <article class="page">
+    <section id="profilo" aria-labelledby="h-profilo" class="opening">
+      <h1 id="h-profilo">{profile.name}</h1>
+      <p class="role">
+        {isTodo(profile.role) ? <Todo label={page.todoLabel} hint={profile.role.todo} /> : profile.role}
+      </p>
+      <dl class="facts">
+        <div>
+          <dt>{L.location}</dt>
+          <dd>{profile.location}</dd>
+        </div>
+        <div>
+          <dt>{L.availability}</dt>
+          <dd>
+            {
+              isTodo(profile.availability) ? (
+                <Todo label={page.todoLabel} hint={profile.availability.todo} />
+              ) : (
+                profile.availability
+              )
+            }
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="competenze" aria-labelledby="h-competenze">
+      <h2 id="h-competenze">{sectionTitle('competenze')}</h2>
+      {
+        skillGroups.map(([group, items]) => (
+          <div class="skill-group">
+            <h3>{group}</h3>
+            <ul class="tags">
+              {items.map((s) => <li>{s.data.name}</li>)}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+
+    <section id="esperienze" aria-labelledby="h-esperienze">
+      <h2 id="h-esperienze">{sectionTitle('esperienze')}</h2>
+      {
+        sortedExperiences.map(({ data: e }) => {
+          const when = period(e.start, e.end);
+          return (
+            <article class="item">
+              <h3>
+                {isTodo(e.role) ? <Todo label={page.todoLabel} hint={e.role.todo} /> : e.role}
+                {' · '}
+                {isTodo(e.company) ? <Todo label={page.todoLabel} hint={e.company.todo} /> : e.company}
+              </h3>
+              <p class="meta">
+                {
+                  when ?? (
+                    <Todo
+                      label={page.todoLabel}
+                      hint={isTodo(e.start) ? e.start.todo : isTodo(e.end) ? e.end.todo : ''}
+                    />
+                  )
+                }
+              </p>
+              <h4>{L.results}</h4>
+              {
+                isTodo(e.results) ? (
+                  <p><Todo label={page.todoLabel} hint={e.results.todo} /></p>
+                ) : (
+                  <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
+                )
+              }
+              <h4>{L.stack}</h4>
+              {
+                isTodo(e.stack) ? (
+                  <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
+                ) : (
+                  <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
+                )
+              }
+            </article>
+          );
+        })
+      }
+    </section>
+
+    <section id="certificazioni" aria-labelledby="h-certificazioni">
+      <h2 id="h-certificazioni">{sectionTitle('certificazioni')}</h2>
+      <h3>{L.technicalCertifications}</h3>
+      <ul class="plain">
+        {
+          technicalCerts.map(({ data: c }) => (
+            <li>
+              <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
+              <span class="meta">
+                {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                {' · '}
+                {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+              </span>
+              {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
+            </li>
+          ))
+        }
+      </ul>
+      {
+        supplementaryCerts.length > 0 && (
+          <>
+            <h3 class="small">{L.supplementaryCertifications}</h3>
+            <ul class="plain small">
+              {supplementaryCerts.map(({ data: c }) => (
+                <li>
+                  {isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}
+                  {!isTodo(c.issuer) && <span class="meta"> · {c.issuer}</span>}
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </section>
+
+    <section id="progetti" aria-labelledby="h-progetti">
+      <h2 id="h-progetti">{sectionTitle('progetti')}</h2>
+      {
+        featuredProjects.map(({ data: p }) => (
+          <article class="item">
+            <h3>{p.name}</h3>
+            <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+            <p class="meta">
+              {L.language}: {isTodo(p.language) ? <Todo label={page.todoLabel} hint={p.language.todo} /> : p.language}
+              {' · '}
+              <a href={p.repo}>{L.repository}</a>
+            </p>
+          </article>
+        ))
+      }
+    </section>
+
+    <section id="formazione" aria-labelledby="h-formazione">
+      <h2 id="h-formazione">{sectionTitle('formazione')}</h2>
+      {
+        education.map(({ data: ed }) => {
+          const when = period(ed.start, ed.end);
+          return (
+            <article class="item">
+              <h3>{isTodo(ed.degree) ? <Todo label={page.todoLabel} hint={ed.degree.todo} /> : ed.degree}</h3>
+              <p class="meta">
+                {isTodo(ed.institution) ? <Todo label={page.todoLabel} hint={ed.institution.todo} /> : ed.institution}
+                {' · '}
+                {
+                  when ?? (
+                    <Todo
+                      label={page.todoLabel}
+                      hint={isTodo(ed.start) ? ed.start.todo : isTodo(ed.end) ? ed.end.todo : ''}
+                    />
+                  )
+                }
+              </p>
+            </article>
+          );
+        })
+      }
+    </section>
+
+    <section id="contatti" aria-labelledby="h-contatti">
+      <h2 id="h-contatti">{sectionTitle('contatti')}</h2>
+      <dl class="facts">
+        <div>
+          <dt>{L.email}</dt>
+          <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+        </div>
+        <div>
+          <dt>{L.profiles}</dt>
+          <dd>
+            <ul class="plain inline">
+              {profiles.map((p) => <li><a href={p.url}>{p.name}</a></li>)}
+            </ul>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  </article>
+
+  <footer slot="footer" class="foot">
+    <ul>
+      <li><a href={here('/human')}>{page.links.human}</a></li>
+      <li><a href={here('/agent')}>{page.links.agent}</a></li>
+      <li><a href={here('/')}>{page.backToChoice}</a></li>
+    </ul>
+  </footer>
+</Base>
+
+<style>
+  .back,
+  .menu a,
+  .foot a,
+  .page a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .menu ul,
+  .foot ul,
+  .plain,
+  .tags {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .menu ul,
+  .foot ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .page {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 1rem 1rem 3rem;
+    line-height: 1.6;
+  }
+  section[id] {
+    margin-top: 3rem;
+    scroll-margin-top: 1rem;
+  }
+  @media (min-width: 48rem) {
+    section[id] {
+      scroll-margin-top: 4rem;
+    }
+  }
+  h1 {
+    margin: 2rem 0 0.25rem;
+    font-size: 2rem;
+  }
+  h2 {
+    margin: 0 0 1rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.25rem;
+  }
+  h2::before {
+    content: "~/" / "";
+    color: var(--text-muted);
+  }
+  h3 {
+    margin: 1rem 0 0.25rem;
+    font-size: 1rem;
+  }
+  h4 {
+    margin: 0.75rem 0 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .role {
+    margin: 0;
+    font-size: 1.125rem;
+  }
+  .facts {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+  }
+  .facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .facts dd {
+    margin: 0;
+  }
+  .meta {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .item {
+    margin-top: 1.5rem;
+  }
+  .item ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .item .tags {
+    padding-left: 0;
+  }
+  .tags li {
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .plain li {
+    margin-top: 0.75rem;
+  }
+  .plain .meta {
+    display: block;
+  }
+  .plain.inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .plain.inline li {
+    margin-top: 0;
+  }
+  .small {
+    font-size: 0.875rem;
+  }
+  .foot {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 1rem 1rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+</style>

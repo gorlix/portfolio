@@ -15,7 +15,9 @@ for (const route of lightRoutes) {
       // Nessuno script inline (CSP); l'unico script ammesso e il file esterno dell'ingresso.
       await expect(page.locator('script:not([src])')).toHaveCount(0);
 
-      const switcher = page.getByRole('navigation').getByRole('link');
+      const switcher = page
+        .getByRole('navigation', { name: route.startsWith('/en/') ? 'Language' : 'Lingua' })
+        .getByRole('link');
       await expect(switcher).toHaveCount(2);
     });
 
