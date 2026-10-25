@@ -21,6 +21,13 @@ export interface MachineModel {
   links: { github: string; linkedin: string; x: string; devto?: string | undefined };
   pages: MachinePage[];
   skills: { name: string; group: Bilingual; kind: 'technical' | 'supplementary' }[];
+  /** Solo certificazioni con nome noto; ente, data e link di verifica solo se noti. */
+  certifications: {
+    name: string;
+    issuer?: string | undefined;
+    date?: string | undefined;
+    verifyUrl?: string | undefined;
+  }[];
   projects: {
     slug: string;
     name: string;
@@ -50,13 +57,14 @@ const pageDefs: [MachinePage['id'], string][] = [
 
 /** Costruisce il modello unico da cui derivano llms.txt, agent.md e profile.json. */
 export async function loadMachineModel(): Promise<MachineModel> {
-  const [pIt, pEn, skillsIt, skillsEn, projIt, projEn] = await Promise.all([
+  const [pIt, pEn, skillsIt, skillsEn, projIt, projEn, certsEn] = await Promise.all([
     getSingleton('profile', 'it'),
     getSingleton('profile', 'en'),
     getEntries('skills', 'it'),
     getEntries('skills', 'en'),
     getEntries('projects', 'it'),
     getEntries('projects', 'en'),
+    getEntries('certifications', 'en'),
   ]);
   const profile: Bilingual<typeof pIt> = { it: pIt, en: pEn };
   const of = <T>(pick: (p: typeof pIt) => T | Todo) => bilingual((l) => pick(profile[l]));
@@ -86,6 +94,13 @@ export async function loadMachineModel(): Promise<MachineModel> {
       group: { it: skillsIt[i]?.data.group ?? s.data.group, en: s.data.group },
       kind: s.data.kind,
     })),
+    certifications: certsEn.flatMap(({ data: c }) => {
+      const name = known(c.name);
+      if (!name) return [];
+      return [
+        { name, issuer: known(c.issuer), date: known(c.date), verifyUrl: known(c.verifyUrl) },
+      ];
+    }),
     projects: projEn.map((p, i) => ({
       slug: p.slug,
       name: p.data.name,

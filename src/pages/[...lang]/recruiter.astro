@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
 import { formatDate } from '../../lib/format';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
+import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import { isTodo, type Locale } from '../../lib/schemas/common';
 
 export const getStaticPaths = localeStaticPaths;
@@ -57,12 +58,20 @@ const profiles = [
   { name: 'LinkedIn', url: profile.links.linkedin },
   ...(isTodo(profile.links.devto) ? [] : [{ name: 'dev.to', url: profile.links.devto }]),
 ];
+const pageTitle = `${profile.name} · ${page.titleSuffix}`;
+const jsonLd = await loadJsonLd({
+  locale,
+  path: '/recruiter',
+  name: pageTitle,
+  type: 'ProfilePage',
+});
 ---
 
 <Base
   locale={locale}
   path="/recruiter"
-  title={`${profile.name} · ${page.titleSuffix}`}
+  title={pageTitle}
+  jsonLd={jsonLd}
   description={page.metaDescription}
   stickyHeader
 >

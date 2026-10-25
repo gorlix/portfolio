@@ -12,8 +12,10 @@ for (const route of lightRoutes) {
         route.startsWith('/en/') ? 'en' : 'it',
       );
       await expect(page.locator('main#main')).toBeAttached();
-      // Nessuno script inline (CSP); l'unico script ammesso e il file esterno dell'ingresso.
-      await expect(page.locator('script:not([src])')).toHaveCount(0);
+      // Nessuno script inline eseguibile (CSP; il JSON-LD e solo dati); l'unico script ammesso e il file esterno dell'ingresso.
+      await expect(page.locator('script:not([src]):not([type="application/ld+json"])')).toHaveCount(
+        0,
+      );
 
       const switcher = page
         .getByRole('navigation', { name: route.startsWith('/en/') ? 'Language' : 'Lingua' })

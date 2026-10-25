@@ -4,6 +4,7 @@ import { extname, join, relative } from 'node:path';
 import {
   scanText,
   validateAgentMd,
+  validateJsonLd,
   validateLlmsTxt,
   validateProfileJson,
   validateRobotsTxt,
@@ -37,6 +38,10 @@ for (const [file, validate] of Object.entries(validators)) {
   }
   for (const p of validate(text)) errors.push(`${file}: ${p}`);
 }
+// Ogni pagina HTML porta il suo JSON-LD valido.
+for (const path of walk(dist).filter((f) => f.endsWith('.html')))
+  for (const p of validateJsonLd(readFileSync(path, 'utf8')))
+    errors.push(`${relative(dist, path)}: JSON-LD: ${p}`);
 for (const path of walk(dist).filter((f) => textExt.has(extname(f)))) {
   for (const f of scanText(readFileSync(path, 'utf8')))
     errors.push(`${relative(dist, path)}: ${f.rule} "${f.match}"`);
