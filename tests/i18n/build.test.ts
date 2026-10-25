@@ -64,6 +64,14 @@ describe('build i18n', () => {
     }
   });
 
+  it('e compatibile con la CSP dei percorsi leggeri: niente script, stili o attributi style inline', () => {
+    for (const { url, html } of pages) {
+      expect(html, url).not.toMatch(/<style[\s>]/);
+      expect(html, url).not.toMatch(/\sstyle="/);
+      expect(html, url).not.toMatch(/\son[a-z]+="/);
+    }
+  });
+
   it('il selettore lingua e fatto di link e non emette JavaScript', () => {
     for (const { url, html } of pages) {
       expect(html, url).not.toContain('<script');
