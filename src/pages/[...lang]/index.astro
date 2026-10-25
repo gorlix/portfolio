@@ -8,9 +8,12 @@ import type { Locale } from '../../lib/schemas/common';
 export const getStaticPaths = localeStaticPaths;
 
 const { locale } = Astro.props as { locale: Locale };
-const profile = await getSingleton('profile', locale);
+const [profile, entrance] = await Promise.all([
+  getSingleton('profile', locale),
+  getSingleton('entrance', locale),
+]);
 ---
 
-<Base locale={locale} path="/" title={profile.name}>
+<Base locale={locale} path="/" title={profile.name} description={entrance.metaDescription}>
   <Terminal locale={locale} />
 </Base>

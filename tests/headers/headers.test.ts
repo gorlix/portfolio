@@ -65,7 +65,7 @@ describe('_headers', () => {
     }
   });
 
-  it.each(['/llms.txt', '/agent.md', '/profile.json'])(
+  it.each(['/llms.txt', '/agent.md', '/profile.json', '/robots.txt', '/sitemap.xml'])(
     'file per macchine %s: Content-Type esplicito e CSP chiusa',
     (path) => {
       const h = rules.find((r) => r.path === path)?.headers ?? {};

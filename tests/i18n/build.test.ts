@@ -80,3 +80,38 @@ describe('build i18n', () => {
     }
   });
 });
+
+describe('build SEO', () => {
+  const meta = (html: string, key: 'name' | 'property', value: string) =>
+    [...html.matchAll(/<meta [^>]*>/g)]
+      .map((m) => m[0])
+      .find((t) => attr(t, key) === value && attr(t, 'content'))
+      ?.match(/content="([^"]*)"/)?.[1];
+
+  it('ogni pagina ha title, description e Open Graph coerenti', () => {
+    for (const { url, html } of pages) {
+      const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
+      const description = meta(html, 'name', 'description');
+      expect(title, url).toBeTruthy();
+      expect(description, url).toBeTruthy();
+      expect(meta(html, 'property', 'og:title'), url).toBe(title);
+      expect(meta(html, 'property', 'og:description'), url).toBe(description);
+      expect(meta(html, 'property', 'og:url'), url).toBe(`${site}${url}`);
+      expect(meta(html, 'property', 'og:locale'), url).toBe(
+        url.startsWith('/en/') ? 'en_US' : 'it_IT',
+      );
+    }
+  });
+
+  it('la sitemap elenca esattamente le pagine generate', () => {
+    const xml = readFileSync(join(outDir, 'sitemap.xml'), 'utf8');
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).sort();
+    expect(locs).toEqual(pages.map((p) => `${site}${p.url}`).sort());
+  });
+
+  it('robots.txt dichiara la sitemap e chiude /admin', () => {
+    const robots = readFileSync(join(outDir, 'robots.txt'), 'utf8');
+    expect(robots).toContain(`Sitemap: ${site}/sitemap.xml`);
+    expect(robots).toContain('Disallow: /admin');
+  });
+});
