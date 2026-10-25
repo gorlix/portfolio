@@ -13,6 +13,13 @@ sections:
 links:
   human: Conoscimi meglio
   agent: Vista macchina
+projects:
+  intro: "Per ogni progetto indico come è stato realizzato: a mano, con un assistente AI o in vibe coding. È un'informazione sul metodo di lavoro, non un giudizio."
+  methodLabel: Metodo
+  methods:
+    by-hand: Scritto a mano.
+    ai-copilot: Sviluppato con un assistente AI come copilota.
+    vibecoded: Generato in gran parte con AI (vibe coding).
 todoLabel: "TODO(Alessandro)"
 labels:
   location: Sede

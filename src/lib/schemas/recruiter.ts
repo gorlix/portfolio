@@ -25,6 +25,12 @@ export const recruiterSchema = z
     /** Ordine = ordine di pagina e del menu. */
     sections: z.array(z.strictObject({ id: recruiterSectionId, title: text })),
     links: z.strictObject({ human: text, agent: text }),
+    /** Progetti: nota introduttiva sul metodo di lavoro e dicitura neutra per ciascun metodo. */
+    projects: z.strictObject({
+      intro: text,
+      methodLabel: text,
+      methods: z.strictObject({ 'by-hand': text, 'ai-copilot': text, vibecoded: text }),
+    }),
     /** Etichetta del segnaposto per i dati non ancora forniti. */
     todoLabel: text,
     labels: z.strictObject({
@@ -62,6 +68,11 @@ export const recruiterTranslatable = [
   'sections.*.title',
   'links.human',
   'links.agent',
+  'projects.intro',
+  'projects.methodLabel',
+  'projects.methods.by-hand',
+  'projects.methods.ai-copilot',
+  'projects.methods.vibecoded',
   'labels.location',
   'labels.availability',
   'labels.ongoing',

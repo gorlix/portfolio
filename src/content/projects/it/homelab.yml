@@ -7,4 +7,5 @@ method:
 status:
   todo: active / wip / archived
 featured: true
+rank: 1
 description: Homelab su due siti con Proxmox VE, Tailscale, OpenTofu e Ansible, documentato con ADR.

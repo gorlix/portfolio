@@ -42,7 +42,9 @@ const sortedExperiences = [...experiences].sort((a, b) => {
 const isTechnical = (c: (typeof certifications)[number]) => c.data.kind !== 'supplementary';
 const technicalCerts = certifications.filter(isTechnical);
 const supplementaryCerts = certifications.filter((c) => !isTechnical(c));
-const featuredProjects = projects.filter((p) => p.data.featured);
+const featuredProjects = projects
+  .filter((p) => p.data.featured)
+  .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
 
 const period = (start: unknown, end: unknown) => {
   if (isTodo(start) || isTodo(end)) return null;
@@ -195,6 +197,7 @@ const profiles = [
 
     <section id="progetti" aria-labelledby="h-progetti">
       <h2 id="h-progetti">{sectionTitle('progetti')}</h2>
+      <p class="meta">{page.projects.intro}</p>
       {
         featuredProjects.map(({ data: p }) => (
           <article class="item">
@@ -204,6 +207,10 @@ const profiles = [
               {L.language}: {isTodo(p.language) ? <Todo label={page.todoLabel} hint={p.language.todo} /> : p.language}
               {' · '}
               <a href={p.repo}>{L.repository}</a>
+            </p>
+            <p class="meta">
+              {page.projects.methodLabel}:{' '}
+              {isTodo(p.method) ? <Todo label={page.todoLabel} hint={p.method.todo} /> : page.projects.methods[p.method]}
             </p>
           </article>
         ))
