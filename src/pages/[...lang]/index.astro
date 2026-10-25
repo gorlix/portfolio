@@ -3,6 +3,7 @@ import Terminal from '../../components/Terminal.astro';
 import Base from '../../layouts/Base.astro';
 import { getSingleton } from '../../lib/data';
 import { localeStaticPaths } from '../../lib/i18n';
+import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import type { Locale } from '../../lib/schemas/common';
 
 export const getStaticPaths = localeStaticPaths;
@@ -12,8 +13,15 @@ const [profile, entrance] = await Promise.all([
   getSingleton('profile', locale),
   getSingleton('entrance', locale),
 ]);
+const jsonLd = await loadJsonLd({ locale, path: '/', name: profile.name, type: 'WebPage' });
 ---
 
-<Base locale={locale} path="/" title={profile.name} description={entrance.metaDescription}>
+<Base
+  locale={locale}
+  path="/"
+  title={profile.name}
+  description={entrance.metaDescription}
+  jsonLd={jsonLd}
+>
   <Terminal locale={locale} />
 </Base>

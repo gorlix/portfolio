@@ -3,6 +3,7 @@ import '../styles/global.css';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import { getSingleton } from '../lib/data';
 import { absoluteUrl, alternates, localizedPath } from '../lib/i18n';
+import { serializeJsonLd } from '../lib/machine/jsonld';
 import { type Locale, locales } from '../lib/schemas/common';
 
 interface Props {
@@ -13,9 +14,11 @@ interface Props {
   description: string;
   /** Intestazione sempre visibile (menu a ancore del recruiter). */
   stickyHeader?: boolean;
+  /** Dati strutturati schema.org incorporati come `application/ld+json` (non eseguibile). */
+  jsonLd?: Record<string, unknown>;
 }
 
-const { locale, path, title, description, stickyHeader = false } = Astro.props;
+const { locale, path, title, description, stickyHeader = false, jsonLd } = Astro.props;
 const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
 const pageUrl = absoluteUrl(localizedPath(path, locale));
 const otherLocales = locales.filter((l) => l !== locale);
@@ -39,6 +42,7 @@ const ui = await getSingleton('ui', locale);
     {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
     <meta name="twitter:card" content="summary" />
     {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
   </head>
   <body>
     <a class="skip" href="#main">{ui.skipToContent}</a>

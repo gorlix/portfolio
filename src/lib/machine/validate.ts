@@ -38,6 +38,58 @@ const profileJsonSchema = z.strictObject({
   primaryLanguage: z.literal('en'),
 });
 
+const str = z.string().min(1);
+const ref = z.strictObject({ '@id': https });
+const jsonLdNode = z.discriminatedUnion('@type', [
+  z.strictObject({
+    '@type': z.enum(['WebPage', 'ProfilePage']),
+    '@id': https,
+    url: https,
+    name: str,
+    inLanguage: z.enum(['it', 'en']),
+    mainEntity: ref,
+  }),
+  z.strictObject({
+    '@type': z.literal('Person'),
+    '@id': https,
+    name: str,
+    url: https,
+    email: z.email(),
+    jobTitle: str.optional(),
+    homeLocation: z.strictObject({ '@type': z.literal('Place'), name: str }),
+    description: str.optional(),
+    sameAs: z.array(https).min(1),
+    knowsAbout: z.array(str),
+    knowsLanguage: z.array(str).min(1),
+    hasCredential: z
+      .array(
+        z.strictObject({
+          '@type': z.literal('EducationalOccupationalCredential'),
+          name: str,
+          recognizedBy: z
+            .strictObject({ '@type': z.literal('Organization'), name: str })
+            .optional(),
+          dateCreated: str.optional(),
+          url: https.optional(),
+        }),
+      )
+      .min(1)
+      .optional(),
+  }),
+  z.strictObject({
+    '@type': z.literal('SoftwareSourceCode'),
+    name: str,
+    codeRepository: https,
+    description: str.optional(),
+    programmingLanguage: str.optional(),
+    author: ref,
+  }),
+]);
+const jsonLdSchema = z.strictObject({
+  '@context': z.literal('https://schema.org'),
+  '@graph': z.array(jsonLdNode).min(2),
+});
+
 const issues = (error: z.ZodError) =>
   error.issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`);
 
@@ -148,4 +200,38 @@ export function scanText(text: string): Finding[] {
     if (!allowedHosts.has(m[0].toLowerCase()))
       found.push({ rule: 'host-non-ammesso', match: m[0] });
   return found;
+}
+
+/**
+ * JSON-LD di una pagina HTML: un solo blocco `application/ld+json`, conforme al sottoinsieme
+ * schema.org che emettiamo (`Person`, pagina, `SoftwareSourceCode`), con riferimenti `@id` risolti,
+ * una sola pagina e una sola persona, e nessun segnaposto.
+ */
+export function validateJsonLd(html: string): string[] {
+  const blocks = [
+    ...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+  ].map((m) => m[1] ?? '');
+  if (blocks.length !== 1)
+    return [`serve esattamente un blocco JSON-LD (trovati ${blocks.length})`];
+  let data: unknown;
+  try {
+    data = JSON.parse(blocks[0] ?? '');
+  } catch (e) {
+    return [`JSON-LD non valido: ${(e as Error).message}`];
+  }
+  const parsed = jsonLdSchema.safeParse(data);
+  if (!parsed.success) return issues(parsed.error);
+
+  const problems: string[] = [];
+  const graph = parsed.data['@graph'];
+  const ids = new Set(graph.flatMap((n) => ('@id' in n ? [n['@id']] : [])));
+  for (const n of graph) {
+    const target = 'mainEntity' in n ? n.mainEntity['@id'] : 'author' in n ? n.author['@id'] : null;
+    if (target && !ids.has(target)) problems.push(`riferimento @id non risolto: ${target}`);
+  }
+  const count = (types: string[]) => graph.filter((n) => types.includes(n['@type'])).length;
+  if (count(['WebPage', 'ProfilePage']) !== 1) problems.push('serve esattamente una pagina');
+  if (count(['Person']) !== 1) problems.push('serve esattamente una Person');
+  if (/todo/i.test(blocks[0] ?? '')) problems.push('il JSON-LD contiene un segnaposto todo');
+  return problems;
 }

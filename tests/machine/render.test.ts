@@ -13,6 +13,7 @@ const base: MachineModel = {
       urls: { it: 'https://site.test/', en: 'https://site.test/en/' },
     },
   ],
+  certifications: [],
   skills: [
     { name: 'Rust', group: { it: 'Linguaggi', en: 'Languages' }, kind: 'technical' },
     { name: 'Go', group: { it: 'Linguaggi', en: 'Languages' }, kind: 'supplementary' },

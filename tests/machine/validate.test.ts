@@ -28,6 +28,7 @@ const model: MachineModel = {
       urls: { it: 'https://alessandrogorla.it/', en: 'https://alessandrogorla.it/en/' },
     },
   ],
+  certifications: [],
   skills: [{ name: 'Rust', group: { it: 'Linguaggi', en: 'Languages' }, kind: 'technical' }],
   projects: [
     {

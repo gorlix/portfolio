@@ -2,6 +2,7 @@ import { mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path';
 import { build } from 'astro';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { validateJsonLd } from '../../src/lib/machine/validate';
 
 const root = join(import.meta.dirname, '../..');
 // Dentro il repo (non in /tmp): Astro sposta gli asset con rename, che non attraversa i filesystem.
@@ -74,7 +75,10 @@ describe('build i18n', () => {
 
   it('il selettore lingua e fatto di link; l unico script e quello esterno dell ingresso', () => {
     for (const { url, html } of pages) {
-      const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)].map((m) => m[0]);
+      // Il JSON-LD e un blocco di dati, non codice: non conta tra gli script.
+      const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)]
+        .map((m) => m[0])
+        .filter((tag) => !tag.startsWith('<script type="application/ld+json">'));
       const isEntrance = url === '/' || url === '/en/';
       expect(scripts.length, url).toBe(isEntrance ? 1 : 0);
       for (const tag of scripts) {
@@ -156,6 +160,16 @@ describe('peso immagini', () => {
     const images = walk(outDir).filter((f) => /\.(webp|avif|jpe?g|png|gif)$/i.test(f));
     for (const f of images) {
       expect(statSync(f).size, relative(outDir, f)).toBeLessThanOrEqual(100 * 1024);
+    }
+  });
+});
+
+describe('JSON-LD', () => {
+  it('ogni pagina HTML ha un JSON-LD valido, nella lingua della pagina', () => {
+    for (const { url, html } of pages) {
+      expect(validateJsonLd(html), url).toEqual([]);
+      const lang = url.startsWith('/en/') ? 'en' : 'it';
+      expect(html, url).toContain(`"inLanguage":"${lang}"`);
     }
   });
 });
