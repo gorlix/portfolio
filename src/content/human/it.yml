@@ -32,6 +32,8 @@ labels:
   email: Email
   profiles: Profili
   cv: CV (PDF)
+scenes:
+  placeholder: Cubo low-poly segnaposto in attesa della scena 3D
 homelab:
   caption: Nodi e servizi dell'homelab (simulati)
   simulatedNote: Nomi e disposizione sono generici o inventati e non corrispondono all'infrastruttura reale.

@@ -44,6 +44,8 @@ export const humanSchema = z.strictObject({
     profiles: text,
     cv: text,
   }),
+  /** Testo alternativo delle scene 3D (oggi solo il segnaposto). */
+  scenes: z.strictObject({ placeholder: text }),
   homelab: z.strictObject({
     caption: text,
     simulatedNote: text,
@@ -85,6 +87,7 @@ export const humanTranslatable = [
   'labels.email',
   'labels.profiles',
   'labels.cv',
+  'scenes.placeholder',
   'homelab.caption',
   'homelab.simulatedNote',
   'homelab.region',

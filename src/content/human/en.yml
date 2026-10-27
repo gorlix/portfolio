@@ -32,6 +32,8 @@ labels:
   email: Email
   profiles: Profiles
   cv: Résumé (PDF)
+scenes:
+  placeholder: Placeholder low-poly cube awaiting the 3D scene
 homelab:
   caption: Homelab nodes and services (simulated)
   simulatedNote: Names and layout are generic or invented and do not match the real infrastructure.

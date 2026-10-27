@@ -73,14 +73,15 @@ describe('build i18n', () => {
     }
   });
 
-  it('il selettore lingua e fatto di link; l unico script e quello esterno dell ingresso', () => {
+  it('il selettore lingua e fatto di link; script solo esterni: ingresso e /human ne hanno uno', () => {
     for (const { url, html } of pages) {
       // Il JSON-LD e un blocco di dati, non codice: non conta tra gli script.
       const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)]
         .map((m) => m[0])
         .filter((tag) => !tag.startsWith('<script type="application/ld+json">'));
-      const isEntrance = url === '/' || url === '/en/';
-      expect(scripts.length, url).toBe(isEntrance ? 1 : 0);
+      // Ingresso (terminale) e percorso Umano (bootstrap 3D): un solo script esterno ciascuno.
+      const hasScript = ['/', '/en/', '/human/', '/en/human/'].includes(url);
+      expect(scripts.length, url).toBe(hasScript ? 1 : 0);
       for (const tag of scripts) {
         expect(tag, url).toMatch(/^<script type="module" src="\/_astro\/[^"]+\.js"><\/script>$/);
       }
