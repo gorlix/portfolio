@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { getSingleton } from '../../lib/data';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { machineFileNames, renderMachineFiles } from '../../lib/machine/files';
+import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import type { Locale } from '../../lib/schemas/common';
 
 export const getStaticPaths = localeStaticPaths;
@@ -14,12 +15,20 @@ const [page, profile, files] = await Promise.all([
   renderMachineFiles(),
 ]);
 const here = (path: string) => localizedPath(path, locale);
+const pageTitle = `${profile.name} · ${page.titleSuffix}`;
+const jsonLd = await loadJsonLd({
+  locale,
+  path: '/agent',
+  name: pageTitle,
+  type: 'WebPage',
+});
 ---
 
 <Base
   locale={locale}
   path="/agent"
-  title={`${profile.name} · ${page.titleSuffix}`}
+  title={pageTitle}
+  jsonLd={jsonLd}
   description={page.metaDescription}
   stickyHeader
 >
