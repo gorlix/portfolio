@@ -75,10 +75,10 @@ describe('build i18n', () => {
 
   it('il selettore lingua e fatto di link; script solo esterni: uno in ingresso, due su /human', () => {
     for (const { url, html } of pages) {
-      // Il JSON-LD e un blocco di dati, non codice: non conta tra gli script.
+      // JSON-LD e dati delle scene sono blocchi di dati, non codice: non contano tra gli script.
       const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)]
         .map((m) => m[0])
-        .filter((tag) => !tag.startsWith('<script type="application/ld+json">'));
+        .filter((tag) => !/^<script type="application\/(ld\+)?json"/.test(tag));
       // Ingresso: terminale. Percorso Umano: bootstrap 3D e barra del tempo. Altrove nessuno.
       const expected: Record<string, number> = { '/': 1, '/en/': 1, '/human/': 2, '/en/human/': 2 };
       expect(scripts.length, url).toBe(expected[url] ?? 0);
@@ -88,6 +88,35 @@ describe('build i18n', () => {
       expect(html, url).toMatch(/<a href="[^"]*" hreflang="it"/);
       expect(html, url).toMatch(/<a href="[^"]*" hreflang="en"/);
     }
+  });
+});
+
+describe('build Homelab', () => {
+  // Tabella testuale e scena leggono lo stesso modello: il blocco JSON della scena deve elencare
+  // esattamente i nodi e i servizi della tabella, nello stesso ordine.
+  it.each(['/human/', '/en/human/'])('%s: scena e tabella mostrano gli stessi dati', (url) => {
+    const html = pages.find((p) => p.url === url)?.html ?? '';
+    const block = html.match(
+      /<div[^>]*data-scene="[^"]+"[^>]*data-accent="homelab"[^>]*>\s*<script type="application\/json" data-scene-data>([\s\S]*?)<\/script>/,
+    );
+    expect(block, url).toBeTruthy();
+    const model = JSON.parse(block?.[1] ?? '{}') as {
+      regions: { nodes: { id: string; services: { id: string }[] }[] }[];
+      adrs: { id: string }[];
+    };
+    const fromScene = model.regions.flatMap((r) =>
+      r.nodes.map((n) => [n.id, n.services.map((s) => s.id)]),
+    );
+    const fromTable = [...html.matchAll(/<tr data-node="([^"]+)"[^>]*>([\s\S]*?)<\/tr>/g)].map(
+      (m) => [m[1], [...(m[2] ?? '').matchAll(/data-service="([^"]+)"/g)].map((s) => s[1])],
+    );
+    expect(fromTable.length, url).toBeGreaterThan(0);
+    expect(fromScene, url).toEqual(fromTable);
+    const adrs = [...html.matchAll(/data-adr="([^"]+)"/g)].map((m) => m[1]);
+    expect(
+      model.adrs.map((a) => a.id),
+      url,
+    ).toEqual(adrs);
   });
 });
 

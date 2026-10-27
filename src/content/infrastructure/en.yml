@@ -1,3 +1,4 @@
+# SIMULATED infrastructure (spec §12.1, §11): generic or made-up names, no real data.
 simulated: true
 regions:
   - id: casa
@@ -20,51 +21,36 @@ services:
   - id: adguard-primario
     name: AdGuard Home (primary)
     node: nodo-1
-    status: running
   - id: adguard-backup
     name: AdGuard Home (backup)
     node: nodo-3
-    status: running
   - id: home-assistant
     name: Home Assistant
     node: nodo-2
-    status: running
   - id: frigate
     name: Frigate
     node: nodo-1
-    status: running
   - id: traefik-casa
     name: Traefik
     node: nodo-1
-    status: running
   - id: traefik-produzione
     name: Traefik
     node: nodo-3
-    status: running
   - id: tunnel-casa
     name: Cloudflare Tunnel
     node: nodo-1
-    status: running
   - id: tunnel-produzione
     name: Cloudflare Tunnel
     node: nodo-3
-    status: running
   - id: authentik
-    name: Authentik
+    name: Authentik (SSO)
     node: nodo-3
-    status: running
   - id: nextcloud
     name: Nextcloud
     node: nodo-3
-    status: running
   - id: monitoring
     name: Monitoring
     node: nodo-2
-    status: running
-  - id: kubernetes-flux
-    name: Kubernetes + Flux
-    node: nodo-2
-    status: under-construction
 links:
   - from: casa
     to: produzione
@@ -72,4 +58,58 @@ links:
   - from: adguard-primario
     to: adguard-backup
     kind: failover
-adrs: []
+adrs:
+  - id: dns-failover
+    title: DNS that never takes a day off
+    summary: Two AdGuard Home instances behind a virtual IP managed by Keepalived. If the primary goes down the backup answers, and nobody at home notices.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/001-adguard-ha-failover.md
+    nodes: [nodo-1, nodo-3]
+  - id: tunnel
+    title: Tunnels instead of open ports
+    summary: Services reach the Internet through an outbound tunnel, with Traefik in front. The router stays closed and I sleep better.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/002-cloudflare-tunnel.md
+    nodes: [nodo-1, nodo-3]
+  - id: multi-sito
+    title: Two sites, one network
+    summary: Home and Production are joined by an encrypted overlay network. Each site can stand on its own; together they just work less hard.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/005-topologia-multi-sito.md
+    nodes: [nodo-1, nodo-2, nodo-3]
+  - id: segreti
+    title: Secrets live outside the repository
+    summary: Passwords and tokens come from a secrets manager at deploy time. The repository only knows what is needed, never the value.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/007-infisical-env-management.md
+    nodes: [nodo-2, nodo-3]
+  - id: compose
+    title: Docker Compose under version control
+    summary: Every service is a versioned Compose file; Renovate proposes updates and deploys run on their own. No hand edits on the server.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/008-docker-compose-management.md
+    nodes: [nodo-1, nodo-2, nodo-3]
+  - id: persistenza
+    title: Data lives outside the containers
+    summary: Volumes are kept apart from the containers that use them. A container can be thrown away and rebuilt; the data stays put.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/010-persistenza-dati-fuori-dalla-lxc.md
+    nodes: [nodo-2]
+backup:
+  source: home-assistant
+  targets:
+    - id: object-storage
+      name: Cloudflare R2
+      medium: cloud
+      offsite: true
+    - id: cloud-drive
+      name: Google Drive
+      medium: cloud
+      offsite: true
+    - id: copia-locale
+      name: Local copy
+      medium: local
+      offsite: false
+wip:
+  - id: kubernetes-flux
+    name: Kubernetes + Flux
+    summary: Moving from Compose to a GitOps-managed cluster. Getting there, slowly and with plenty of coffee.
+    region: casa
+  - id: ci
+    name: Infrastructure CI
+    summary: Automatic checks on every change before it ships. Some of them I still do by eye.
+    region: produzione

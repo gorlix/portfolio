@@ -1,3 +1,4 @@
+# Infrastruttura SIMULATA (spec §12.1, §11): nomi generici o inventati, nessun dato reale.
 simulated: true
 regions:
   - id: casa
@@ -18,53 +19,38 @@ nodes:
     region: produzione
 services:
   - id: adguard-primario
-    name: AdGuard Home (primary)
+    name: AdGuard Home (primario)
     node: nodo-1
-    status: running
   - id: adguard-backup
     name: AdGuard Home (backup)
     node: nodo-3
-    status: running
   - id: home-assistant
     name: Home Assistant
     node: nodo-2
-    status: running
   - id: frigate
     name: Frigate
     node: nodo-1
-    status: running
   - id: traefik-casa
     name: Traefik
     node: nodo-1
-    status: running
   - id: traefik-produzione
     name: Traefik
     node: nodo-3
-    status: running
   - id: tunnel-casa
     name: Cloudflare Tunnel
     node: nodo-1
-    status: running
   - id: tunnel-produzione
     name: Cloudflare Tunnel
     node: nodo-3
-    status: running
   - id: authentik
-    name: Authentik
+    name: Authentik (SSO)
     node: nodo-3
-    status: running
   - id: nextcloud
     name: Nextcloud
     node: nodo-3
-    status: running
   - id: monitoring
-    name: Monitoring
+    name: Monitoraggio
     node: nodo-2
-    status: running
-  - id: kubernetes-flux
-    name: Kubernetes + Flux
-    node: nodo-2
-    status: under-construction
 links:
   - from: casa
     to: produzione
@@ -72,4 +58,58 @@ links:
   - from: adguard-primario
     to: adguard-backup
     kind: failover
-adrs: []
+adrs:
+  - id: dns-failover
+    title: DNS che non va in ferie
+    summary: Due AdGuard Home dietro un IP virtuale gestito da Keepalived. Se il primario cade risponde il backup, e in casa nessuno se ne accorge.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/001-adguard-ha-failover.md
+    nodes: [nodo-1, nodo-3]
+  - id: tunnel
+    title: Tunnel al posto delle porte aperte
+    summary: I servizi escono su Internet tramite un tunnel in uscita, con Traefik davanti. Il router resta chiuso e io dormo meglio.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/002-cloudflare-tunnel.md
+    nodes: [nodo-1, nodo-3]
+  - id: multi-sito
+    title: Due siti, una rete sola
+    summary: Casa e Produzione sono collegate da una rete overlay cifrata. Ogni sito sa stare in piedi da solo, insieme fanno meno fatica.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/005-topologia-multi-sito.md
+    nodes: [nodo-1, nodo-2, nodo-3]
+  - id: segreti
+    title: I segreti stanno fuori dal repository
+    summary: Password e token arrivano da un gestore di segreti al momento del deploy. Nel repository c'è solo il nome di cosa serve, mai il valore.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/007-infisical-env-management.md
+    nodes: [nodo-2, nodo-3]
+  - id: compose
+    title: Docker Compose sotto controllo di versione
+    summary: Ogni servizio è un file Compose versionato; Renovate propone gli aggiornamenti e il deploy parte da solo. Niente modifiche a mano sul server.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/008-docker-compose-management.md
+    nodes: [nodo-1, nodo-2, nodo-3]
+  - id: persistenza
+    title: I dati vivono fuori dai container
+    summary: I volumi stanno separati dai container che li usano. Un container si butta e si ricrea, i dati restano dove sono.
+    url: https://github.com/gorlix/homelab/blob/main/docs/adr/010-persistenza-dati-fuori-dalla-lxc.md
+    nodes: [nodo-2]
+backup:
+  source: home-assistant
+  targets:
+    - id: object-storage
+      name: Cloudflare R2
+      medium: cloud
+      offsite: true
+    - id: cloud-drive
+      name: Google Drive
+      medium: cloud
+      offsite: true
+    - id: copia-locale
+      name: Copia locale
+      medium: local
+      offsite: false
+wip:
+  - id: kubernetes-flux
+    name: Kubernetes + Flux
+    summary: Il passaggio da Compose a un cluster gestito in GitOps. Procede, con calma e molti caffè.
+    region: casa
+  - id: ci
+    name: CI per l'infrastruttura
+    summary: Controlli automatici su ogni modifica prima del deploy. Oggi alcuni li faccio ancora a occhio.
+    region: produzione
