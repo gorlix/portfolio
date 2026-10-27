@@ -1,0 +1,45 @@
+titleSuffix: Il percorso umano
+metaDescription: "Alessandro Gorla raccontato in prima persona: lavori, homelab, domotica, certificazioni, sport, interessi e beneficenza."
+menuLabel: Tappe del percorso
+backToChoice: "~/ ← cambia percorso"
+homeTitle: Inizio
+home:
+  greeting: Ciao, sono Alessandro. Smanetto, rompo cose e poi le rimetto insieme meglio di prima. Qui trovi il resto.
+  scrollHint: Scorri, oppure salta direttamente a una tappa dal menu.
+intros:
+  home: Benvenuto nel percorso umano.
+  lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.
+  homelab: Tre nodi, due siti e la tentazione costante di "ottimizzare ancora un po'". Quello che vedi qui è una versione inventata, non l'infrastruttura vera.
+  domotica: Una casa che si accende da sola, più o meno quando voglio io. Home Assistant è il mio compagno di giochi.
+  certificazioni: Pezzi di carta che dimostrano che qualcosa l'ho studiato davvero.
+  sport: Quando non sono davanti a uno schermo, di solito sono in movimento.
+  interessi: Il lato meno ordinato di me, che poi è quello più divertente.
+  beneficenza: Una parte di tempo che dedico agli altri, senza troppe battute.
+  contatti: Se sei arrivato fin qui, scrivimi. Rispondo, giuro.
+todoLabel: "TODO(Alessandro)"
+labels:
+  ongoing: in corso
+  results: Risultati
+  stack: Stack
+  issuer: Ente
+  verify: Verifica
+  technicalCertifications: Certificazioni tecniche
+  supplementaryCertifications: Altro che ho imparato
+  repository: Repository
+  language: Linguaggio
+  email: Email
+  profiles: Profili
+  cv: CV (PDF)
+homelab:
+  caption: Nodi e servizi dell'homelab (simulati)
+  simulatedNote: Nomi e disposizione sono generici o inventati e non corrispondono all'infrastruttura reale.
+  region: Sito
+  node: Nodo
+  services: Servizi
+  underConstruction: in costruzione
+domotica:
+  projects: Progetti pubblici
+  automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)
+  trigger: Trigger
+  conditions: Condizioni
+  actions: Azioni

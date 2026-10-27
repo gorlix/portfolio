@@ -45,6 +45,7 @@ for (const [flavor, vars] of [
 
 // 2. Contrasti. [primo piano, sfondo, minimo]
 const sections = [
+  'home',
   'lavori',
   'homelab',
   'domotica',

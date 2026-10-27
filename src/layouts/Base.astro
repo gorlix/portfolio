@@ -16,9 +16,11 @@ interface Props {
   stickyHeader?: boolean;
   /** Dati strutturati schema.org incorporati come `application/ld+json` (non eseguibile). */
   jsonLd?: Record<string, unknown>;
+  /** Forza la variante Mocha (percorso /human) ignorando prefers-color-scheme. */
+  theme?: 'mocha';
 }
 
-const { locale, path, title, description, stickyHeader = false, jsonLd } = Astro.props;
+const { locale, path, title, description, stickyHeader = false, jsonLd, theme } = Astro.props;
 const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
 const pageUrl = absoluteUrl(localizedPath(path, locale));
 const otherLocales = locales.filter((l) => l !== locale);
@@ -26,7 +28,7 @@ const ui = await getSingleton('ui', locale);
 ---
 
 <!doctype html>
-<html lang={locale}>
+<html lang={locale} data-theme={theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

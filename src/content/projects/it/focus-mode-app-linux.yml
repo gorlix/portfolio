@@ -8,3 +8,4 @@ status:
 featured: false
 description: Sincronizza il Non Disturbare di Android con Home Assistant; migrazione da Python a
   Rust/Tauri in corso.
+section: domotica

@@ -9,3 +9,4 @@ status:
 featured: true
 rank: 1
 description: Two-site homelab built on Proxmox VE, Tailscale, OpenTofu and Ansible, documented with ADRs.
+section: homelab

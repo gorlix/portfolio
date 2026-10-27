@@ -1,0 +1,45 @@
+titleSuffix: The human path
+metaDescription: "Alessandro Gorla in his own words: work, homelab, home automation, certifications, sport, interests and charity."
+menuLabel: Stops on the path
+backToChoice: "~/ ← change path"
+homeTitle: Start
+home:
+  greeting: Hi, I'm Alessandro. I tinker, I break things, and then I put them back together better than before. The rest is below.
+  scrollHint: Scroll, or jump straight to any stop from the menu.
+intros:
+  home: Welcome to the human path.
+  lavori: Where I have worked and what I got up to, in order of appearance.
+  homelab: Three nodes, two sites and a constant urge to "optimise just a bit more". What you see here is an invented version, not the real infrastructure.
+  domotica: A house that switches things on by itself, more or less when I want it to. Home Assistant is my playmate.
+  certificazioni: Pieces of paper proving I really did study something.
+  sport: When I am not in front of a screen, I am usually on the move.
+  interessi: The messier side of me, which is also the more fun one.
+  beneficenza: Some of my time goes to other people, with fewer jokes.
+  contatti: If you made it this far, write to me. I do reply, promise.
+todoLabel: "TODO(Alessandro)"
+labels:
+  ongoing: ongoing
+  results: Results
+  stack: Stack
+  issuer: Issuer
+  verify: Verify
+  technicalCertifications: Technical certifications
+  supplementaryCertifications: Other things I learned
+  repository: Repository
+  language: Language
+  email: Email
+  profiles: Profiles
+  cv: Résumé (PDF)
+homelab:
+  caption: Homelab nodes and services (simulated)
+  simulatedNote: Names and layout are generic or invented and do not match the real infrastructure.
+  region: Site
+  node: Node
+  services: Services
+  underConstruction: under construction
+domotica:
+  projects: Public projects
+  automationsTodo: List of automations to show (even a rough one)
+  trigger: Trigger
+  conditions: Conditions
+  actions: Actions

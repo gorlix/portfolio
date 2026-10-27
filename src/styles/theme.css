@@ -84,6 +84,7 @@
   --focus: var(--ctp-lavender);
   --danger: var(--ctp-red);
 
+  --sec-home: var(--ctp-rosewater);
   --sec-lavori: var(--ctp-blue);
   --sec-homelab: var(--ctp-green);
   --sec-domotica: var(--ctp-yellow);
@@ -96,6 +97,7 @@
   --sec-beneficenza: var(--ctp-teal);
   --sec-contatti: var(--ctp-lavender);
 
+  --sec-home-ink: var(--sec-home);
   --sec-lavori-ink: var(--sec-lavori);
   --sec-homelab-ink: var(--sec-homelab);
   --sec-domotica-ink: var(--sec-domotica);
@@ -119,6 +121,7 @@
     --surface: var(--ctp-mantle);
 
     /* Su Latte nessun accento passa AA come testo su tutti gli sfondi: restano decorativi. */
+    --sec-home-ink: var(--text);
     --sec-lavori-ink: var(--text);
     --sec-homelab-ink: var(--text);
     --sec-domotica-ink: var(--text);
