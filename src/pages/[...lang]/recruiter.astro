@@ -325,6 +325,14 @@ const jsonLd = await loadJsonLd({
     padding: 0;
     list-style: none;
   }
+  /* Bersagli tattili di almeno 24px (WCAG 2.2, 2.5.8). */
+  .menu a,
+  .foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+  }
   .menu ul,
   .foot ul {
     display: flex;
