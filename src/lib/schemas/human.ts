@@ -18,7 +18,14 @@ export const humanSchema = z.strictObject({
   /** Link discreto e persistente verso la scelta del percorso (`/`). */
   backToChoice: text,
   homeTitle: text,
-  home: z.strictObject({ greeting: text, scrollHint: text }),
+  home: z.strictObject({
+    greeting: text,
+    scrollHint: text,
+    /** Spazio riservato all'avatar low-poly (il modello arriva nelle fasi 3D). */
+    avatarLabel: text,
+    /** Nome accessibile dell'elenco di badge: ciascuno porta alla sezione dove la competenza si vede. */
+    badgesLabel: text,
+  }),
   /** Frase d'apertura di ogni sezione, in prima persona. */
   intros: sectionTexts,
   /** Etichetta del segnaposto per i dati non ancora forniti. */
@@ -63,6 +70,8 @@ export const humanTranslatable = [
   'homeTitle',
   'home.greeting',
   'home.scrollHint',
+  'home.avatarLabel',
+  'home.badgesLabel',
   ...humanSectionIds.map((id) => `intros.${id}`),
   'labels.ongoing',
   'labels.results',

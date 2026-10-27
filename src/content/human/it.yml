@@ -6,6 +6,8 @@ homeTitle: Inizio
 home:
   greeting: Ciao, sono Alessandro. Smanetto, rompo cose e poi le rimetto insieme meglio di prima. Qui trovi il resto.
   scrollHint: Scorri, oppure salta direttamente a una tappa dal menu.
+  avatarLabel: Avatar low-poly in arrivo
+  badgesLabel: "Competenze tecniche: scegline una per vedere dove la uso"
 intros:
   home: Benvenuto nel percorso umano.
   lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.
