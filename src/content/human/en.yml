@@ -1,6 +1,7 @@
 titleSuffix: The human path
 metaDescription: "Alessandro Gorla in his own words: work, homelab, home automation, certifications, sport, interests and charity."
 menuLabel: Stops on the path
+menuToggle: Stops
 backToChoice: "~/ ← change path"
 homeTitle: Start
 home:

@@ -1,0 +1,217 @@
+---
+import type { humanSectionIds } from '../lib/schemas/common';
+
+type SectionId = (typeof humanSectionIds)[number];
+
+/*
+ * Barra del tempo di /human (PORT-44). Base: elenco di link HTML, valido senza JS e per gli
+ * screen reader. Miglioramento (src/scripts/timeline.ts): tappa attiva, `#sezione` nell'URL,
+ * pulsante del menu su mobile. I testi arrivano dai YAML, mai da qui.
+ */
+interface Props {
+  /** Nome accessibile della navigazione. */
+  label: string;
+  /** Testo del pulsante che apre l'elenco su mobile. */
+  toggleLabel: string;
+  /** Tappe nell'ordine di pagina; `subs` = sotto-segmenti (es. Sport: sci, tennis, pallavolo). */
+  items: { id: SectionId; title: string; subs?: { id: string; title: string }[] }[];
+}
+
+const { label, toggleLabel, items } = Astro.props;
+---
+
+<nav class="timeline" aria-label={label} data-timeline>
+  <button
+    type="button"
+    class="toggle"
+    hidden
+    aria-expanded="false"
+    aria-controls="timeline-list">{toggleLabel}</button
+  >
+  <ul id="timeline-list">
+    {
+      items.map((item) => (
+        <li>
+          <a href={`#${item.id}`} data-to={item.id}>
+            <span class="label">{item.title}</span>
+          </a>
+          {item.subs && item.subs.length > 0 && (
+            <ul class="subs">
+              {item.subs.map((sub) => (
+                <li>
+                  <a href={`#${sub.id}`} data-to={item.id} class="sub">
+                    <span class="label">{sub.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .timeline ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .timeline a {
+    --dot: var(--border);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+  .timeline a[data-to="home"] { --dot: var(--sec-home); }
+  .timeline a[data-to="lavori"] { --dot: var(--sec-lavori); }
+  .timeline a[data-to="homelab"] { --dot: var(--sec-homelab); }
+  .timeline a[data-to="domotica"] { --dot: var(--sec-domotica); }
+  .timeline a[data-to="certificazioni"] { --dot: var(--sec-certificazioni); }
+  .timeline a[data-to="sport"] { --dot: var(--sec-sport); }
+  .timeline a[data-to="interessi"] { --dot: var(--sec-interessi); }
+  .timeline a[data-to="beneficenza"] { --dot: var(--sec-beneficenza); }
+  .timeline a[data-to="contatti"] { --dot: var(--sec-contatti); }
+
+  /* Punto: vuoto = tappa, pieno e piu grande = tappa corrente (non solo il colore la distingue). */
+  .timeline a::before {
+    content: "";
+    flex: none;
+    box-sizing: border-box;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 2px solid var(--dot);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .timeline a.sub::before {
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-inline: 0.125rem;
+  }
+  .timeline a[aria-current="location"]::before {
+    background: var(--dot);
+    transform: scale(1.4);
+  }
+  .timeline .label::before {
+    content: "~/" / "";
+    color: var(--text-muted);
+  }
+  .timeline .label {
+    text-transform: lowercase;
+  }
+
+  /* Mobile senza JS: elenco di link in riga, come l'intestazione del recruiter. */
+  .timeline > ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .timeline .subs {
+    display: none;
+  }
+
+  /* Desktop: barra verticale fissa a sinistra, con linea sottile e un punto per tappa. */
+  @media (min-width: 48rem) {
+    .timeline {
+      position: fixed;
+      top: 50%;
+      left: 0.75rem;
+      z-index: 2;
+      transform: translateY(-50%);
+    }
+    .timeline > ul {
+      position: relative;
+      display: grid;
+      gap: 0.75rem;
+    }
+    .timeline > ul::before {
+      content: "";
+      position: absolute;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      left: 0.6875rem;
+      width: 1px;
+      background: var(--border);
+    }
+    .timeline .subs {
+      display: grid;
+      gap: 0.25rem;
+      margin-top: 0.25rem;
+    }
+    /* L'etichetta compare su hover e focus; per gli screen reader c'e sempre. */
+    .timeline .label {
+      position: absolute;
+      left: 1.75rem;
+      padding: 0.125rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      background: var(--surface);
+      white-space: nowrap;
+      clip-path: inset(50%);
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .timeline a:hover .label,
+    .timeline a:focus-visible .label {
+      clip-path: none;
+      width: auto;
+      height: auto;
+      overflow: visible;
+    }
+    .timeline .toggle {
+      display: none;
+    }
+  }
+
+  /* Mobile con JS: linea sottile a sinistra e pulsante che apre l'elenco completo. */
+  @media (max-width: 47.99rem) {
+    .timeline[data-enhanced] {
+      position: fixed;
+      top: 50%;
+      left: 0.25rem;
+      z-index: 2;
+      transform: translateY(-50%);
+    }
+    .timeline[data-enhanced] .toggle {
+      display: block;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+    }
+    .timeline[data-enhanced] > ul {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      background: var(--bg-alt);
+    }
+    .timeline[data-enhanced][data-open] > ul {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .timeline[data-enhanced][data-open] .subs {
+      display: grid;
+      gap: 0.25rem;
+      margin: 0.25rem 0 0 1rem;
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/timeline.ts';
+</script>

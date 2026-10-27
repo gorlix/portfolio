@@ -34,7 +34,7 @@ for (const [route, lang] of [
     }) => {
       await page.goto(route);
       const hrefs = await page
-        .locator('header nav[aria-label] a[href^="#"]')
+        .locator('header nav[aria-label] > ul > li > a[href^="#"]')
         .evaluateAll((as) => as.map((a) => a.getAttribute('href')));
       expect(hrefs).toEqual(sectionIds.map((id) => `#${id}`));
       await page.goto(`${route}#homelab`);

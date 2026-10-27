@@ -1,6 +1,7 @@
 ---
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
+import Timeline from '../../components/Timeline.astro';
 import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
@@ -58,6 +59,15 @@ const projectsIn = (section: string) =>
     .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
 const topicsIn = (section: string) => topics.filter((t) => t.data.section === section);
 
+/** Barra del tempo: una tappa per sezione, Sport con un sotto-segmento per ogni attivita. */
+const timelineItems = sections.map((s) => ({
+  id: s.id,
+  title: s.title,
+  ...(s.id === 'sport' && {
+    subs: topicsIn('sport').map((t) => ({ id: `sport-${t.slug}`, title: t.data.title })),
+  }),
+}));
+
 const period = (start: unknown, end: unknown) => {
   if (isTodo(start) || isTodo(end)) return null;
   return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
@@ -80,11 +90,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 >
   <Fragment slot="header">
     <a class="back" href={here('/')}>{page.backToChoice}</a>
-    <nav class="menu" aria-label={page.menuLabel}>
-      <ul>
-        {sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
-      </ul>
-    </nav>
+    <Timeline label={page.menuLabel} toggleLabel={page.menuToggle} items={timelineItems} />
   </Fragment>
 
   <article class="path">
@@ -248,8 +254,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
           )}
 
           {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
-            topicsIn(s.id).map(({ data: t }) => (
-              <article class="item">
+            topicsIn(s.id).map(({ slug, data: t }) => (
+              <article class="item" id={`${s.id}-${slug}`}>
                 <h3>{t.title}</h3>
                 <p>{isTodo(t.text) ? <Todo label={page.todoLabel} hint={t.text.todo} /> : t.text}</p>
                 {t.links.length > 0 && (
@@ -297,7 +303,6 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
 <style>
   .back,
-  .menu a,
   .path a {
     color: var(--link);
     text-decoration: underline;
@@ -306,25 +311,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     font-family: var(--font-mono);
     font-size: 0.875rem;
   }
-  .menu ul,
   .plain,
   .tags {
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-  .menu a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    min-width: 1.5rem;
-  }
-  .menu ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
   }
   .path {
     line-height: 1.6;
@@ -339,6 +330,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     border-left: 0.375rem solid var(--accent);
     background: linear-gradient(to bottom, var(--bg), var(--bg-alt));
     scroll-margin-top: 0;
+  }
+  /* Spazio per la barra del tempo fissa a sinistra. */
+  @media (min-width: 48rem) {
+    section[id] {
+      padding-left: 4rem;
+    }
   }
   section[data-section="lavori"] { --accent: var(--sec-lavori); --accent-ink: var(--sec-lavori-ink); }
   section[data-section="homelab"] { --accent: var(--sec-homelab); --accent-ink: var(--sec-homelab-ink); }
