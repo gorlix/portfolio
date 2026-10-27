@@ -51,6 +51,21 @@ for (const [route, lang] of [
       await expect(page.locator('#contatti a[href^="mailto:"]')).toHaveCount(1);
     });
 
+    test('prima schermata: saluto, ritratto, avatar riservato e badge verso la sezione collegata', async ({
+      page,
+    }) => {
+      await page.goto(route);
+      const home = page.locator('#home');
+      await expect(home.locator('.portrait')).toBeVisible();
+      await expect(home.locator('.avatar')).toBeVisible();
+      const badges = home.locator('nav[aria-label] a[href^="#"]');
+      await expect(badges).toHaveCount(8);
+      for (const href of await badges.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
+        await expect(page.locator(`section${href}`)).toBeAttached();
+      }
+      await expect(home.locator('a[href="#homelab"]').first()).toHaveText('Ansible');
+    });
+
     test('nessun IP o hostname reale nel testo', async ({ page }) => {
       await page.goto(route);
       const body = await page.locator('main').textContent();

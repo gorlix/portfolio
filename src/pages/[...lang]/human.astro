@@ -1,4 +1,5 @@
 ---
+import Portrait from '../../components/Portrait.astro';
 import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
@@ -10,24 +11,38 @@ import { isTodo, type Locale } from '../../lib/schemas/common';
 export const getStaticPaths = localeStaticPaths;
 
 const { locale } = Astro.props as { locale: Locale };
-const [page, profile, theme, experiences, certifications, projects, topics, infra, automations] =
-  await Promise.all([
-    getSingleton('human', locale),
-    getSingleton('profile', locale),
-    getSingleton('theme', locale),
-    getEntries('experiences', locale),
-    getEntries('certifications', locale),
-    getEntries('projects', locale),
-    getEntries('topics', locale),
-    getSingleton('infrastructure', locale),
-    getEntries('automations', locale),
-  ]);
+const [
+  page,
+  profile,
+  theme,
+  skills,
+  experiences,
+  certifications,
+  projects,
+  topics,
+  infra,
+  automations,
+] = await Promise.all([
+  getSingleton('human', locale),
+  getSingleton('profile', locale),
+  getSingleton('theme', locale),
+  getEntries('skills', locale),
+  getEntries('experiences', locale),
+  getEntries('certifications', locale),
+  getEntries('projects', locale),
+  getEntries('topics', locale),
+  getSingleton('infrastructure', locale),
+  getEntries('automations', locale),
+]);
 
 const L = page.labels;
 const here = (path: string) => localizedPath(path, locale);
 
 /** Home + le otto sezioni del tema, nell'ordine di pagina (e del menu). */
 const sections = [{ id: 'home' as const, title: page.homeTitle }, ...theme.sections];
+
+/** Badge: solo competenze tecniche, senza livello, ciascuna verso la sezione collegata. */
+const badges = skills.filter((k) => k.data.kind === 'technical');
 
 const sortedExperiences = [...experiences].sort((a, b) => {
   const start = (e: typeof a) => (isTodo(e.data.start) ? '' : e.data.start);
@@ -84,7 +99,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'home' && (
             <>
+              <div class="who">
+                <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
+                <div class="avatar">{page.home.avatarLabel}</div>
+              </div>
               <p class="greeting">{page.home.greeting}</p>
+              <nav aria-label={page.home.badgesLabel}>
+                <ul class="badges">
+                  {badges.map((k) => (
+                    <li>
+                      <a href={`#${k.data.linkedSection}`} data-to={k.data.linkedSection}>
+                        {k.data.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
               <p class="hint">{page.home.scrollHint}</p>
             </>
           )}
@@ -342,6 +372,60 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   .intro {
     font-size: 1.125rem;
   }
+  .who {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  /* Spazio riservato (stesse dimensioni del ritratto): nessun layout shift quando arrivera l'avatar. */
+  .avatar {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 160px;
+    height: 160px;
+    padding: 0.5rem;
+    border: 1px dashed var(--border);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+  .badges a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0.125rem 0.75rem;
+    border: 1px solid var(--accent-badge, var(--border));
+    border-radius: 0.25rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+  .badges a:hover {
+    background: var(--surface-hi);
+  }
+  .badges a[data-to="homelab"] { --accent-badge: var(--sec-homelab); }
+  .badges a[data-to="domotica"] { --accent-badge: var(--sec-domotica); }
+  .badges a[data-to="interessi"] { --accent-badge: var(--sec-interessi); }
+  .badges a[data-to="lavori"] { --accent-badge: var(--sec-lavori); }
+  .badges a[data-to="certificazioni"] { --accent-badge: var(--sec-certificazioni); }
+  .badges a[data-to="sport"] { --accent-badge: var(--sec-sport); }
+  .badges a[data-to="beneficenza"] { --accent-badge: var(--sec-beneficenza); }
+  .badges a[data-to="contatti"] { --accent-badge: var(--sec-contatti); }
   .greeting {
     font-size: 1.25rem;
   }
