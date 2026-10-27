@@ -35,6 +35,9 @@ labels:
   cv: CV (PDF)
 scenes:
   placeholder: Cubo low-poly segnaposto in attesa della scena 3D
+farewell:
+  command: "$ logout"
+  message: "Grazie di essere passato. Se vuoi rifare il giro, la porta è qui:"
 homelab:
   caption: Nodi e servizi dell'homelab (simulati)
   simulatedNote: Nomi e disposizione sono generici o inventati e non corrispondono all'infrastruttura reale.

@@ -64,6 +64,8 @@ export const humanSchema = z.strictObject({
     conditions: text,
     actions: text,
   }),
+  /** Chiusura del percorso: saluto in stile terminale e ritorno alla scelta. */
+  farewell: z.strictObject({ command: text, message: text }),
 });
 
 export const humanTranslatable = [
@@ -91,6 +93,7 @@ export const humanTranslatable = [
   'labels.profiles',
   'labels.cv',
   'scenes.placeholder',
+  'farewell.message',
   'homelab.caption',
   'homelab.simulatedNote',
   'homelab.region',

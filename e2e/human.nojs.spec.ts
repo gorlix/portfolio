@@ -66,6 +66,27 @@ for (const [route, lang] of [
       await expect(home.locator('a[href="#homelab"]').first()).toHaveText('Ansible');
     });
 
+    test('chiusura: link di ritorno alla scelta (intestazione e fine), contatti completi', async ({
+      page,
+    }) => {
+      await page.goto(route);
+      const home = lang === 'en' ? '/en/' : '/';
+      await expect(page.locator(`header a[href="${home}"]`)).toHaveCount(1);
+      await expect(page.locator(`#contatti .farewell a[href="${home}"]`)).toBeVisible();
+      await expect(page.locator('#contatti a[href^="https://github.com"]')).toHaveCount(1);
+      await expect(page.locator('#contatti a[href^="https://www.linkedin.com"]')).toHaveCount(1);
+      await expect(page.locator('#contatti a[href^="https://x.com"]')).toHaveCount(1);
+      await expect(
+        page
+          .locator('#contatti')
+          .getByText(/CV|Résumé/)
+          .first(),
+      ).toBeVisible();
+      // Raggiungibile da tastiera: il link finale prende il focus.
+      await page.locator(`#contatti .farewell a[href="${home}"]`).focus();
+      await expect(page.locator(`#contatti .farewell a[href="${home}"]`)).toBeFocused();
+    });
+
     test('nessun IP o hostname reale nel testo', async ({ page }) => {
       await page.goto(route);
       const body = await page.locator('main').textContent();
