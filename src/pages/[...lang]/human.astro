@@ -267,6 +267,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             ))}
 
           {s.id === 'contatti' && (
+            <>
             <dl class="facts">
               <div>
                 <dt>{L.email}</dt>
@@ -289,11 +290,18 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   {isTodo(profile.cv) ? (
                     <Todo label={page.todoLabel} hint={profile.cv.todo} />
                   ) : (
-                    <a href={profile.cv} download>{L.cv}</a>
+                    <a class="button" href={profile.cv} download>{L.cv}</a>
                   )}
                 </dd>
               </div>
             </dl>
+            <p class="farewell">
+              <code>{page.farewell.command}</code>
+              <br />
+              {page.farewell.message}
+              <a href={here('/')}>{page.backToChoice}</a>
+            </p>
+            </>
           )}
         </section>
       ))
@@ -425,6 +433,34 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   .badges a[data-to="sport"] { --accent-badge: var(--sec-sport); }
   .badges a[data-to="beneficenza"] { --accent-badge: var(--sec-beneficenza); }
   .badges a[data-to="contatti"] { --accent-badge: var(--sec-contatti); }
+  .path a.button {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    text-decoration: none;
+  }
+  .path a.button:hover {
+    background: var(--surface-hi);
+  }
+  .farewell {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .farewell code {
+    color: var(--accent-ink);
+  }
+  .farewell a {
+    display: inline-block;
+    min-height: 1.5rem;
+    margin-left: 0.5rem;
+    font-family: var(--font-mono);
+  }
   .greeting {
     font-size: 1.25rem;
   }

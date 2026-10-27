@@ -35,6 +35,9 @@ labels:
   cv: Résumé (PDF)
 scenes:
   placeholder: Placeholder low-poly cube awaiting the 3D scene
+farewell:
+  command: "$ logout"
+  message: "Thanks for stopping by. If you want another lap, the door is right here:"
 homelab:
   caption: Homelab nodes and services (simulated)
   simulatedNote: Names and layout are generic or invented and do not match the real infrastructure.
