@@ -13,7 +13,7 @@ links:
   devto:
     todo: URL del profilo dev.to
   x: https://x.com/Goorlix
-cv:
-  todo: PDF del CV in italiano
+cv: /cv/alessandro-gorla-it.pdf
 photo:
-  todo: Foto di Alessandro (file in src/assets e testo alternativo)
+  src: /src/assets/profile.jpg
+  alt: Ritratto di Alessandro Gorla, sorridente, con occhiali tondi
