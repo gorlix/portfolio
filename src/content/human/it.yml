@@ -45,6 +45,14 @@ homelab:
   node: Nodo
   services: Servizi
   underConstruction: in costruzione
+  decisions: "Decisioni (ADR)"
+  backup: "Backup 3-2-1"
+  backupIntro: "Tre copie, due supporti, una fuori casa. Cosa salvo:"
+  cloud: "cloud"
+  local: "disco locale"
+  offsite: "fuori sede"
+  onsite: "in sede"
+  wip: "Lavori in corso"
 domotica:
   projects: Progetti pubblici
   automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)

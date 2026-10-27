@@ -30,6 +30,12 @@ const toText = (el: HTMLElement): void => {
 
 const mounted = new Set<() => void>();
 
+/** Blocco JSON della scena: gli stessi dati dell'equivalente testuale. */
+const readData = (el: HTMLElement): unknown => {
+  const block = el.querySelector('script[data-scene-data]');
+  return block?.textContent ? JSON.parse(block.textContent) : undefined;
+};
+
 async function mountScene(el: HTMLElement): Promise<void> {
   const level = currentTier();
   const name = el.dataset.scene;
@@ -50,7 +56,7 @@ async function mountScene(el: HTMLElement): Promise<void> {
       return;
     }
     el.append(canvas);
-    instance = module.mount({ canvas, container: el, tier: level });
+    instance = module.mount({ canvas, container: el, tier: level, data: readData(el) });
   } catch {
     canvas.remove();
     setState(el, 'error');

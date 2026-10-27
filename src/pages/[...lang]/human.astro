@@ -6,6 +6,7 @@ import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
 import { formatDate } from '../../lib/format';
+import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import { isTodo, type Locale } from '../../lib/schemas/common';
@@ -72,8 +73,10 @@ const period = (start: unknown, end: unknown) => {
   if (isTodo(start) || isTodo(end)) return null;
   return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
 };
+const H = page.homelab;
+const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
-const servicesOf = (nodeId: string) => infra.services.filter((s) => s.node === nodeId);
+const nodeName = (id: string) => infra.nodes.find((n) => n.id === id)?.name ?? id;
 
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type: 'ProfilePage' });
@@ -162,38 +165,63 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'homelab' && (
             <>
-              <Scene scene="placeholder" label={page.scenes.placeholder} accent="homelab" />
+              <Scene scene="placeholder" label={page.scenes.placeholder} accent="homelab" data={homelab} />
               <p class="meta">{page.homelab.simulatedNote}</p>
               <table>
-                <caption>{page.homelab.caption}</caption>
+                <caption>{H.caption}</caption>
                 <thead>
                   <tr>
-                    <th scope="col">{page.homelab.region}</th>
-                    <th scope="col">{page.homelab.node}</th>
-                    <th scope="col">{page.homelab.services}</th>
+                    <th scope="col">{H.region}</th>
+                    <th scope="col">{H.node}</th>
+                    <th scope="col">{H.services}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {infra.nodes.map((n) => (
-                    <tr>
-                      <td>{regionName(n.region)}</td>
-                      <th scope="row">{n.name}</th>
-                      <td>
-                        <ul class="plain">
-                          {servicesOf(n.id).map((svc) => (
-                            <li>
-                              {svc.name}
-                              {svc.status === 'under-construction' && (
-                                <span class="meta"> ({page.homelab.underConstruction})</span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </td>
-                    </tr>
-                  ))}
+                  {homelab.regions.flatMap((r) =>
+                    r.nodes.map((n) => (
+                      <tr data-node={n.id}>
+                        <td>{r.name}</td>
+                        <th scope="row">{n.name}</th>
+                        <td>
+                          <ul class="plain">{n.services.map((svc) => <li data-service={svc.id}>{svc.name}</li>)}</ul>
+                        </td>
+                      </tr>
+                    )),
+                  )}
                 </tbody>
               </table>
+
+              <h3>{H.decisions}</h3>
+              <ul class="plain">
+                {homelab.adrs.map((a) => (
+                  <li data-adr={a.id}>
+                    <strong><a href={a.url}>{a.title}</a></strong>
+                    <p>{a.summary}</p>
+                    <p class="meta">{H.node}: {a.nodes.map(nodeName).join(', ')}</p>
+                  </li>
+                ))}
+              </ul>
+
+              <h3>{H.backup}</h3>
+              <p>{H.backupIntro} <strong>{homelab.backup.source.name}</strong></p>
+              <ul class="plain">
+                {homelab.backup.targets.map((t) => (
+                  <li data-target={t.id}>
+                    {t.name}
+                    <span class="meta"> · {t.medium === 'cloud' ? H.cloud : H.local}, {t.offsite ? H.offsite : H.onsite}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <h3>{H.wip}</h3>
+              <ul class="plain">
+                {homelab.wip.map((w) => (
+                  <li data-wip={w.id}>
+                    <strong>{w.name}</strong> <span class="meta">({H.underConstruction} · {regionName(w.region)})</span>
+                    <p>{w.summary}</p>
+                  </li>
+                ))}
+              </ul>
             </>
           )}
 

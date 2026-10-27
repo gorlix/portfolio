@@ -9,6 +9,8 @@ export interface SceneContext {
   container: HTMLElement;
   /** 'full' anima, 'reduced' disegna un solo fotogramma statico. */
   tier: Exclude<SceneTier, 'text'>;
+  /** Dati del blocco JSON `[data-scene-data]` del contenitore, se presente (vedi Scene.astro). */
+  data?: unknown;
 }
 
 export interface SceneInstance {

@@ -114,6 +114,20 @@ describe('schemi: casi negativi', () => {
     const infra = parse(readFileSync(join(root, 'infrastructure/it.yml'), 'utf8'));
     const broken = { ...infra, services: [{ ...infra.services[0], node: 'nodo-inesistente' }] };
     expect(infrastructureSchema.safeParse(broken).success).toBe(false);
+    const adr = { ...infra.adrs[0], nodes: ['nodo-inesistente'] };
+    expect(infrastructureSchema.safeParse({ ...infra, adrs: [adr] }).success).toBe(false);
+  });
+
+  it('rifiuta un backup che non rispetta il 3-2-1', () => {
+    const infra = parse(readFileSync(join(root, 'infrastructure/it.yml'), 'utf8'));
+    const targets = infra.backup.targets;
+    const withBackup = (t: unknown[]) => ({ ...infra, backup: { ...infra.backup, targets: t } });
+    expect(infrastructureSchema.safeParse(infra).success).toBe(true);
+    expect(infrastructureSchema.safeParse(withBackup(targets.slice(0, 2))).success).toBe(false);
+    const onsite = targets.map((t: object) => ({ ...t, offsite: false }));
+    expect(infrastructureSchema.safeParse(withBackup(onsite)).success).toBe(false);
+    const sameMedium = targets.map((t: object) => ({ ...t, medium: 'cloud' }));
+    expect(infrastructureSchema.safeParse(withBackup(sameMedium)).success).toBe(false);
   });
 
   it('rifiuta un tema che non elenca tutte le sezioni', () => {

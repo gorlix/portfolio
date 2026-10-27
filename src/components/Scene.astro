@@ -17,12 +17,21 @@ interface Props {
   label: string;
   /** Sezione di appartenenza: i colori arrivano dai token `--sec-<accent>` del tema. */
   accent?: SectionId;
+  /**
+   * Dati della scena, gli stessi che la pagina usa per l'equivalente testuale. Viaggiano come
+   * blocco JSON (non eseguibile, compatibile con la CSP) e il bootstrap li passa al modulo.
+   */
+  data?: unknown;
 }
 
-const { scene, label, accent } = Astro.props;
+const { scene, label, accent, data } = Astro.props;
+// `<` escapato: il blocco non puo chiudere lo script ne aprire tag, qualunque sia il testo.
+const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g, '\\u003c');
 ---
 
-<div class="scene" data-scene={scene} data-accent={accent} role="img" aria-label={label}></div>
+<div class="scene" data-scene={scene} data-accent={accent} role="img" aria-label={label}>
+  {json && <script is:inline type="application/json" data-scene-data set:html={json} />}
+</div>
 
 <style>
   .scene {
