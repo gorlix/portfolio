@@ -1,5 +1,6 @@
 ---
 import Portrait from '../../components/Portrait.astro';
+import Scene from '../../components/Scene.astro';
 import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
@@ -155,6 +156,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'homelab' && (
             <>
+              <Scene scene="placeholder" label={page.scenes.placeholder} accent="homelab" />
               <p class="meta">{page.homelab.simulatedNote}</p>
               <table>
                 <caption>{page.homelab.caption}</caption>
