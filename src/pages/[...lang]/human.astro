@@ -1,0 +1,426 @@
+---
+import Todo from '../../components/Todo.astro';
+import Base from '../../layouts/Base.astro';
+import { getEntries, getSingleton } from '../../lib/data';
+import { formatDate } from '../../lib/format';
+import { localeStaticPaths, localizedPath } from '../../lib/i18n';
+import { loadJsonLd } from '../../lib/machine/page-jsonld';
+import { isTodo, type Locale } from '../../lib/schemas/common';
+
+export const getStaticPaths = localeStaticPaths;
+
+const { locale } = Astro.props as { locale: Locale };
+const [page, profile, theme, experiences, certifications, projects, topics, infra, automations] =
+  await Promise.all([
+    getSingleton('human', locale),
+    getSingleton('profile', locale),
+    getSingleton('theme', locale),
+    getEntries('experiences', locale),
+    getEntries('certifications', locale),
+    getEntries('projects', locale),
+    getEntries('topics', locale),
+    getSingleton('infrastructure', locale),
+    getEntries('automations', locale),
+  ]);
+
+const L = page.labels;
+const here = (path: string) => localizedPath(path, locale);
+
+/** Home + le otto sezioni del tema, nell'ordine di pagina (e del menu). */
+const sections = [{ id: 'home' as const, title: page.homeTitle }, ...theme.sections];
+
+const sortedExperiences = [...experiences].sort((a, b) => {
+  const start = (e: typeof a) => (isTodo(e.data.start) ? '' : e.data.start);
+  return start(b).localeCompare(start(a));
+});
+const isTechnical = (c: (typeof certifications)[number]) => c.data.kind !== 'supplementary';
+const technicalCerts = certifications.filter(isTechnical);
+const supplementaryCerts = certifications.filter((c) => !isTechnical(c));
+const projectsIn = (section: string) =>
+  projects
+    .filter((p) => p.data.section === section)
+    .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
+const topicsIn = (section: string) => topics.filter((t) => t.data.section === section);
+
+const period = (start: unknown, end: unknown) => {
+  if (isTodo(start) || isTodo(end)) return null;
+  return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
+};
+const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
+const servicesOf = (nodeId: string) => infra.services.filter((s) => s.node === nodeId);
+
+const pageTitle = `${profile.name} · ${page.titleSuffix}`;
+const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type: 'ProfilePage' });
+---
+
+<Base
+  locale={locale}
+  path="/human"
+  title={pageTitle}
+  description={page.metaDescription}
+  jsonLd={jsonLd}
+  stickyHeader
+  theme="mocha"
+>
+  <Fragment slot="header">
+    <a class="back" href={here('/')}>{page.backToChoice}</a>
+    <nav class="menu" aria-label={page.menuLabel}>
+      <ul>
+        {sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+      </ul>
+    </nav>
+  </Fragment>
+
+  <article class="path">
+    {
+      sections.map((s) => (
+        <section id={s.id} data-section={s.id} aria-labelledby={`h-${s.id}`}>
+          {s.id === 'home' ? (
+            <h1 id="h-home">{profile.name}</h1>
+          ) : (
+            <h2 id={`h-${s.id}`}>{s.title}</h2>
+          )}
+          <p class="intro">{page.intros[s.id]}</p>
+
+          {s.id === 'home' && (
+            <>
+              <p class="greeting">{page.home.greeting}</p>
+              <p class="hint">{page.home.scrollHint}</p>
+            </>
+          )}
+
+          {s.id === 'lavori' &&
+            sortedExperiences.map(({ data: e }) => {
+              const when = period(e.start, e.end);
+              return (
+                <article class="item">
+                  <h3>
+                    {isTodo(e.role) ? <Todo label={page.todoLabel} hint={e.role.todo} /> : e.role}
+                    {' · '}
+                    {isTodo(e.company) ? <Todo label={page.todoLabel} hint={e.company.todo} /> : e.company}
+                  </h3>
+                  <p class="meta">
+                    {when ?? (
+                      <Todo
+                        label={page.todoLabel}
+                        hint={isTodo(e.start) ? e.start.todo : isTodo(e.end) ? e.end.todo : ''}
+                      />
+                    )}
+                  </p>
+                  <h4>{L.results}</h4>
+                  {isTodo(e.results) ? (
+                    <p><Todo label={page.todoLabel} hint={e.results.todo} /></p>
+                  ) : (
+                    <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
+                  )}
+                  <h4>{L.stack}</h4>
+                  {isTodo(e.stack) ? (
+                    <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
+                  ) : (
+                    <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
+                  )}
+                </article>
+              );
+            })}
+
+          {s.id === 'homelab' && (
+            <>
+              <p class="meta">{page.homelab.simulatedNote}</p>
+              <table>
+                <caption>{page.homelab.caption}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{page.homelab.region}</th>
+                    <th scope="col">{page.homelab.node}</th>
+                    <th scope="col">{page.homelab.services}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {infra.nodes.map((n) => (
+                    <tr>
+                      <td>{regionName(n.region)}</td>
+                      <th scope="row">{n.name}</th>
+                      <td>
+                        <ul class="plain">
+                          {servicesOf(n.id).map((svc) => (
+                            <li>
+                              {svc.name}
+                              {svc.status === 'under-construction' && (
+                                <span class="meta"> ({page.homelab.underConstruction})</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {(s.id === 'homelab' || s.id === 'domotica') &&
+            projectsIn(s.id).map(({ data: p }) => (
+              <article class="item">
+                <h3>{p.name}</h3>
+                <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+                <p class="meta"><a href={p.repo}>{L.repository}</a></p>
+              </article>
+            ))}
+
+          {s.id === 'domotica' &&
+            (automations.length === 0 ? (
+              <p><Todo label={page.todoLabel} hint={page.domotica.automationsTodo} /></p>
+            ) : (
+              automations.map(({ data: a }) => (
+                <article class="item">
+                  <h3>{a.name} <span class="meta">· {a.room}</span></h3>
+                  <dl class="facts">
+                    <div><dt>{page.domotica.trigger}</dt><dd>{a.trigger}</dd></div>
+                    {a.conditions.length > 0 && (
+                      <div><dt>{page.domotica.conditions}</dt><dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd></div>
+                    )}
+                    <div><dt>{page.domotica.actions}</dt><dd><ul>{a.actions.map((x) => <li>{x}</li>)}</ul></dd></div>
+                  </dl>
+                </article>
+              ))
+            ))}
+
+          {s.id === 'certificazioni' && (
+            <>
+              <h3>{L.technicalCertifications}</h3>
+              <ul class="plain">
+                {technicalCerts.map(({ data: c }) => (
+                  <li>
+                    <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
+                    <span class="meta">
+                      {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                      {' · '}
+                      {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+                    </span>
+                    {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
+                  </li>
+                ))}
+              </ul>
+              {supplementaryCerts.length > 0 && (
+                <>
+                  <h3 class="small">{L.supplementaryCertifications}</h3>
+                  <ul class="plain small">
+                    {supplementaryCerts.map(({ data: c }) => (
+                      <li>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
+          )}
+
+          {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
+            topicsIn(s.id).map(({ data: t }) => (
+              <article class="item">
+                <h3>{t.title}</h3>
+                <p>{isTodo(t.text) ? <Todo label={page.todoLabel} hint={t.text.todo} /> : t.text}</p>
+                {t.links.length > 0 && (
+                  <ul class="plain inline">
+                    {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
+                  </ul>
+                )}
+              </article>
+            ))}
+
+          {s.id === 'contatti' && (
+            <dl class="facts">
+              <div>
+                <dt>{L.email}</dt>
+                <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+              </div>
+              <div>
+                <dt>{L.profiles}</dt>
+                <dd>
+                  <ul class="plain inline">
+                    <li><a href={profile.links.github}>GitHub</a></li>
+                    <li><a href={profile.links.linkedin}>LinkedIn</a></li>
+                    {!isTodo(profile.links.devto) && <li><a href={profile.links.devto}>dev.to</a></li>}
+                    <li><a href={profile.links.x}>X</a></li>
+                  </ul>
+                </dd>
+              </div>
+              <div>
+                <dt>{L.cv}</dt>
+                <dd>
+                  {isTodo(profile.cv) ? (
+                    <Todo label={page.todoLabel} hint={profile.cv.todo} />
+                  ) : (
+                    <a href={profile.cv} download>{L.cv}</a>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          )}
+        </section>
+      ))
+    }
+  </article>
+</Base>
+
+<style>
+  .back,
+  .menu a,
+  .path a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .menu ul,
+  .plain,
+  .tags {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .menu a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+  }
+  .menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .path {
+    line-height: 1.6;
+  }
+  /* Sezioni a schermo pieno, ognuna col proprio accento (token --sec-*, mai valori colore qui). */
+  section[id] {
+    --accent: var(--sec-home);
+    --accent-ink: var(--sec-home-ink);
+    box-sizing: border-box;
+    min-height: 100svh;
+    padding: 4rem 1rem 3rem;
+    border-left: 0.375rem solid var(--accent);
+    background: linear-gradient(to bottom, var(--bg), var(--bg-alt));
+    scroll-margin-top: 0;
+  }
+  section[data-section="lavori"] { --accent: var(--sec-lavori); --accent-ink: var(--sec-lavori-ink); }
+  section[data-section="homelab"] { --accent: var(--sec-homelab); --accent-ink: var(--sec-homelab-ink); }
+  section[data-section="domotica"] { --accent: var(--sec-domotica); --accent-ink: var(--sec-domotica-ink); }
+  section[data-section="certificazioni"] { --accent: var(--sec-certificazioni); --accent-ink: var(--sec-certificazioni-ink); }
+  section[data-section="sport"] { --accent: var(--sec-sport); --accent-ink: var(--sec-sport-ink); }
+  section[data-section="interessi"] { --accent: var(--sec-interessi); --accent-ink: var(--sec-interessi-ink); }
+  section[data-section="beneficenza"] { --accent: var(--sec-beneficenza); --accent-ink: var(--sec-beneficenza-ink); }
+  section[data-section="contatti"] { --accent: var(--sec-contatti); --accent-ink: var(--sec-contatti-ink); }
+  section[id] > :not(h1):not(h2) {
+    max-width: 48rem;
+  }
+  h1,
+  h2 {
+    margin: 0 0 0.5rem;
+    color: var(--accent-ink);
+    font-size: 2rem;
+  }
+  h2::before {
+    content: "~/" / "";
+    color: var(--text-muted);
+  }
+  h3 {
+    margin: 1rem 0 0.25rem;
+    font-size: 1rem;
+  }
+  h4 {
+    margin: 0.75rem 0 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .intro {
+    font-size: 1.125rem;
+  }
+  .greeting {
+    font-size: 1.25rem;
+  }
+  .hint,
+  .meta {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .item {
+    margin-top: 1.5rem;
+  }
+  .item ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .item .tags {
+    padding-left: 0;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tags li {
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .plain li {
+    margin-top: 0.75rem;
+  }
+  .plain .meta {
+    display: inline;
+  }
+  .plain.inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .plain.inline li {
+    margin-top: 0;
+  }
+  .small {
+    font-size: 0.875rem;
+  }
+  .facts {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+  }
+  .facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .facts dd {
+    margin: 0;
+  }
+  table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+  }
+  caption {
+    padding-bottom: 0.5rem;
+    text-align: left;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+  th,
+  td {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .plain li:first-child {
+    margin-top: 0;
+  }
+</style>

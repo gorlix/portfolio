@@ -5,6 +5,7 @@ import { certificationSchema, certificationTranslatable } from '../schemas/certi
 import { educationSchema, educationTranslatable } from '../schemas/education';
 import { entranceSchema, entranceTranslatable } from '../schemas/entrance';
 import { experienceSchema, experienceTranslatable } from '../schemas/experiences';
+import { humanSchema, humanTranslatable } from '../schemas/human';
 import { infrastructureSchema, infrastructureTranslatable } from '../schemas/infrastructure';
 import { profileSchema, profileTranslatable } from '../schemas/profile';
 import { projectSchema, projectTranslatable } from '../schemas/projects';
@@ -33,6 +34,7 @@ export const collections = {
   ui: { kind: 'singleton', schema: uiSchema, translatable: uiTranslatable },
   entrance: { kind: 'singleton', schema: entranceSchema, translatable: entranceTranslatable },
   recruiter: { kind: 'singleton', schema: recruiterSchema, translatable: recruiterTranslatable },
+  human: { kind: 'singleton', schema: humanSchema, translatable: humanTranslatable },
   infrastructure: {
     kind: 'singleton',
     schema: infrastructureSchema,

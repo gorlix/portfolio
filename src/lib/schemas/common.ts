@@ -15,6 +15,9 @@ export const sectionIds = [
   'contatti',
 ] as const;
 export const sectionId = z.enum(sectionIds);
+/** Percorso Umano: la Home e la prima tappa, ma non e un collegamento valido per le competenze. */
+export const humanSectionIds = ['home', ...sectionIds] as const;
+export const humanSectionId = z.enum(humanSectionIds);
 
 export const text = z.string().trim().min(1);
 export const url = z.url({ protocol: /^https$/ });

@@ -8,3 +8,4 @@ status:
 featured: false
 description: Syncs Android Do Not Disturb through Home Assistant; migration from Python to
   Rust/Tauri in progress.
+section: domotica
