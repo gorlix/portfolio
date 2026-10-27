@@ -1,0 +1,50 @@
+---
+import type { sectionIds } from '../lib/schemas/common';
+import type { SceneName } from '../scripts/three/registry';
+
+type SectionId = (typeof sectionIds)[number];
+
+/*
+ * Isola 3D di /human (PORT-46). Riquadro con dimensioni riservate (nessun layout shift) che il
+ * bootstrap riempie con un canvas solo quando la sezione si avvicina e il dispositivo lo consente.
+ * Il contenuto vero sta nel testo della sezione, fuori da qui: il 3D e solo un'illustrazione.
+ * Da usare SOLO nella pagina /human: e l'unico punto che include lo script 3D.
+ */
+interface Props {
+  /** Scena del registro (src/scripts/three/registry.ts). */
+  scene: SceneName;
+  /** Testo alternativo della scena (dai YAML IT/EN, mai scritto qui). */
+  label: string;
+  /** Sezione di appartenenza: i colori arrivano dai token `--sec-<accent>` del tema. */
+  accent?: SectionId;
+}
+
+const { scene, label, accent } = Astro.props;
+---
+
+<div class="scene" data-scene={scene} data-accent={accent} role="img" aria-label={label}></div>
+
+<style>
+  .scene {
+    position: relative;
+    width: 100%;
+    max-width: 40rem;
+    aspect-ratio: 4 / 3;
+    margin-inline: auto;
+    contain: layout paint;
+  }
+  .scene[hidden] {
+    display: none;
+  }
+  .scene :global(canvas) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  import '../scripts/three/bootstrap.ts';
+</script>

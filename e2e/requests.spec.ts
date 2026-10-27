@@ -6,6 +6,8 @@ const forbidden = [
   /three/i,
   /\.(glb|gltf|ktx2|basis|hdr|exr)(\?|$)/i,
   /draco|meshopt|webgl/i,
+  // Bootstrap e chunk delle scene 3D (src/scripts/three): solo /human.
+  /\/_astro\/(Scene\.astro|placeholder)[^/]*\.js/i,
   /cloudflareinsights/i,
 ];
 
