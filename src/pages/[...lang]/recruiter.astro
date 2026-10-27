@@ -417,22 +417,29 @@ const profiles = [
       display: none;
     }
     :global(body) {
-      font-size: 10pt;
+      font-size: 9.5pt;
     }
     .page {
       max-width: none;
       padding: 0;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     section[id] {
-      margin-top: 1.25rem;
+      margin-top: 0.75rem;
     }
     h1 {
+      margin-top: 0;
       font-size: 1.6rem;
     }
     h2 {
       break-after: avoid;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    h3 {
+      margin: 0.4rem 0 0.1rem;
+    }
+    h4 {
+      margin: 0.3rem 0 0.1rem;
     }
     h3,
     h4 {
@@ -443,9 +450,28 @@ const profiles = [
       break-inside: avoid;
     }
     .item {
-      margin-top: 0.75rem;
+      margin-top: 0.4rem;
+    }
+    .plain li {
+      margin-top: 0.3rem;
+    }
+    /* Competenze e progetti su due colonne: la stampa resta entro 2 pagine A4. */
+    #competenze,
+    #progetti {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 1.5rem;
+    }
+    #competenze > h2,
+    #progetti > h2,
+    #progetti > .meta {
+      grid-column: 1 / -1;
+    }
+    .tags {
+      gap: 0.25rem;
     }
     .tags li {
+      padding: 0 0.35rem;
       font-size: 0.8rem;
     }
     .page a {
