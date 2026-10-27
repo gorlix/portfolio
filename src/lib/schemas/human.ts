@@ -15,6 +15,8 @@ export const humanSchema = z.strictObject({
   metaDescription: text,
   /** Nome accessibile dell'elenco di link con le sezioni (barra del tempo). */
   menuLabel: text,
+  /** Pulsante che apre l'elenco delle tappe su mobile. */
+  menuToggle: text,
   /** Link discreto e persistente verso la scelta del percorso (`/`). */
   backToChoice: text,
   homeTitle: text,
@@ -68,6 +70,7 @@ export const humanTranslatable = [
   'titleSuffix',
   'metaDescription',
   'menuLabel',
+  'menuToggle',
   'backToChoice',
   'homeTitle',
   'home.greeting',
