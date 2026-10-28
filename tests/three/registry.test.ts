@@ -8,13 +8,13 @@ import {
 } from '../../src/scripts/three/registry';
 
 describe('registro delle scene', () => {
-  it('oggi contiene solo il segnaposto', () => {
-    expect(sceneNames).toEqual(['placeholder']);
+  it('contiene le scene delle sezioni interattive', () => {
+    expect(sceneNames).toEqual(['homelab']);
   });
 
   it('riconosce solo nomi registrati', () => {
-    expect(isSceneName('placeholder')).toBe(true);
-    expect(isSceneName('homelab')).toBe(false);
+    expect(isSceneName('homelab')).toBe(true);
+    expect(isSceneName('placeholder')).toBe(false);
     expect(isSceneName('toString')).toBe(false);
     expect(isSceneName('')).toBe(false);
     expect(isSceneName(undefined)).toBe(false);
@@ -49,7 +49,7 @@ describe('isolamento di three', () => {
 
   it('il registro carica le scene solo con import() dinamico', () => {
     const source = read('registry.ts');
-    expect(source).toMatch(/import\('\.\/scenes\/placeholder'\)/);
+    expect(source).toMatch(/import\('\.\/scenes\/homelab'\)/);
     expect(source).not.toMatch(/^import\s[^;]*from\s+['"]\.\/scenes\//m);
   });
 });

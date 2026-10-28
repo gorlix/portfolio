@@ -46,8 +46,8 @@ export const humanSchema = z.strictObject({
     profiles: text,
     cv: text,
   }),
-  /** Testo alternativo delle scene 3D (oggi solo il segnaposto). */
-  scenes: z.strictObject({ placeholder: text }),
+  /** Testo alternativo delle scene 3D. */
+  scenes: z.strictObject({ homelab: text }),
   homelab: z.strictObject({
     caption: text,
     simulatedNote: text,
@@ -63,6 +63,13 @@ export const humanSchema = z.strictObject({
     offsite: text,
     onsite: text,
     wip: text,
+    /** Controlli HTML della scena (visibili solo quando il 3D e montato). */
+    explore: text,
+    sceneHint: text,
+    nodesLabel: text,
+    layersLabel: text,
+    close: text,
+    noAdrs: text,
   }),
   domotica: z.strictObject({
     projects: text,
@@ -100,7 +107,7 @@ export const humanTranslatable = [
   'labels.email',
   'labels.profiles',
   'labels.cv',
-  'scenes.placeholder',
+  'scenes.homelab',
   'farewell.message',
   'homelab.caption',
   'homelab.simulatedNote',
@@ -116,6 +123,12 @@ export const humanTranslatable = [
   'homelab.offsite',
   'homelab.onsite',
   'homelab.wip',
+  'homelab.explore',
+  'homelab.sceneHint',
+  'homelab.nodesLabel',
+  'homelab.layersLabel',
+  'homelab.close',
+  'homelab.noAdrs',
   'domotica.projects',
   'domotica.automationsTodo',
   'domotica.trigger',

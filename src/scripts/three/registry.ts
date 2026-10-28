@@ -6,7 +6,7 @@ import type { SceneModule } from './types';
  * dinamico, cosi three e le scene finiscono in chunk separati e il bootstrap resta piccolo.
  */
 export const sceneLoaders = {
-  placeholder: () => import('./scenes/placeholder'),
+  homelab: () => import('./scenes/homelab'),
 } satisfies Record<string, () => Promise<SceneModule>>;
 
 export type SceneName = keyof typeof sceneLoaders;
