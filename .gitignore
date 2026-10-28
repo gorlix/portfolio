@@ -10,3 +10,6 @@ dist/
 test-results/
 playwright-report/
 .lighthouseci/
+
+# Local drop folder for personal source material (CV, photos): never commit
+file-drop/
