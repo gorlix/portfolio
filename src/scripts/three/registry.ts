@@ -10,6 +10,7 @@ export const sceneLoaders = {
   domotica: () => import('./scenes/domotica'),
   lavori: () => import('./scenes/lavori'),
   certificazioni: () => import('./scenes/certificazioni'),
+  avatar: () => import('./scenes/avatar'),
 } satisfies Record<string, () => Promise<SceneModule>>;
 
 export type SceneName = keyof typeof sceneLoaders;
