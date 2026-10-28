@@ -88,12 +88,14 @@ Valori gzip, controllati a ogni build da `pnpm check:budget` (`scripts/budget.ts
 |---|---|---|
 | `/`, `/en/` (primo caricamento / di cui JS) | 15 KB / 2 KB | ~6 KB / 1,3 KB |
 | `/recruiter`, `/agent` (primo caricamento / JS) | 15 KB / 0 | ~6 KB / 0 |
-| `/human` primo caricamento, **senza 3D** / JS | 32 KB / 6 KB | ~13 KB / 2,7 KB |
-| `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 140 KB | ~127 KB |
-| ogni scena (Homelab, Domotica) | 16 KB | vedi CI |
+| `/human` primo caricamento, **senza 3D** / JS | 32 KB / 6 KB | ~16 KB / 2,8 KB |
+| `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 140 KB | ~130 KB |
+| ogni scena (Homelab / Domotica) | 16 KB | 4,9 / 2,1 KB |
+| codice condiviso delle scene (orbit, pannello, token) | 4 KB | 1,0 KB |
 | bootstrap 3D / barra del tempo / terminale | 4 / 2 / 2 KB | 2,0 / 0,7 / 1,3 KB |
 
 - `/human`: primo contenuto visibile **prima** del caricamento del 3D; ogni scena si scarica solo quando la sua sezione è a circa uno schermo di distanza, si ferma fuori schermo e non parte con riduzione del movimento, risparmio dati o senza WebGL (test e2e).
+- **Prestazioni a runtime** (misura manuale, Chrome desktop, fase 4): ~57 fps con frame peggiore ~20 ms per entrambe le scene, anche con CPU rallentata 4× come dispositivo medio; heap JS ~1 MB senza 3D, ~5–6 MB con una scena attiva. Fuori schermo nessun `requestAnimationFrame` (test e2e). Da ripetere su un telefono reale prima del lancio.
 - Lighthouse (`lighthouserc.json`): ≥ 95 su Performance, Accessibilità, Best Practices e SEO per i tre percorsi leggeri; su `/human` al massimo 2 script e 10 KB di JS al primo caricamento.
 
 ### 3.6 Lingue
