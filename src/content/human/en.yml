@@ -8,11 +8,12 @@ home:
   greeting: Hi, I'm Alessandro. I tinker, I break things, and then I put them back together better than before. The rest is below.
   scrollHint: Scroll, or jump straight to any stop from the menu.
   badgesLabel: "Technical skills: pick one to see where I use it"
-  posterNotice:
-    webgl: "3D is not available in this browser (no WebGL, or graphics acceleration is off): you see a picture of my desk instead."
-    savedata: "Data saver is on: you see a picture of my desk instead of the 3D scene."
-    error: "The 3D scene did not start: you see a picture of my desk instead."
-    nojs: "JavaScript is off: you see a picture of my desk instead of the 3D scene."
+  posterSubject: of my desk
+posterNotice:
+  webgl: "3D is not available in this browser (no WebGL, or graphics acceleration is off): you see a picture {subject} instead."
+  savedata: "Data saver is on: you see a picture {subject} instead of the 3D scene."
+  error: "The 3D scene did not start: you see a picture {subject} instead."
+  nojs: "JavaScript is off: you see a picture {subject} instead of the 3D scene."
 intros:
   home: Welcome to the human path.
   lavori: Where I have worked and what I got up to, in order of appearance.
@@ -112,3 +113,30 @@ domotica:
   roomsLabel: Rooms
   close: Close
   noAutomations: "Nothing automatic happens here yet. Yet."
+  posterSubject: of the house
+  simulatedNote: "Simulated data: made-up but plausible values, not the real readings from my home."
+  climate:
+    title: Temperatures
+    text: "Every room has its own temperature and humidity sensor, read by Home Assistant."
+    temperature: Temperature
+    humidity: Humidity
+  audio:
+    title: Music Assistant
+    text: "Multi-room audio with Music Assistant: the same music in every room, in sync, or a different one per room."
+    rooms: Speakers in every room.
+  weather:
+    title: Air and weather
+    text: "I keep an eye on indoor air quality and I have a weather station on the roof. From the pressure trend I estimate how the weather will change."
+    air: Air quality
+    co2: CO₂
+    voc: VOC index
+    pm25: PM2.5
+    station: Weather station
+    pressure: Pressure
+    outdoorTemperature: Outdoor temperature
+    outdoorHumidity: Outdoor humidity
+    wind: Wind
+    trendLabel: Forecast from pressure (last 3 hours)
+    falling: "Pressure falling: weather likely to get worse."
+    steady: "Pressure steady: the weather should hold."
+    rising: "Pressure rising: weather likely to improve."

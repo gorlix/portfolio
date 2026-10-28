@@ -154,6 +154,25 @@ for (const route of ['/human/', '/en/human/']) {
     expect(violations, violations.map((v) => `${v.id}: ${v.help}`).join('\n')).toEqual([]);
   });
 
+  test(`${route}: Domotica, le schede guidano la scena e i sensori simulati avanzano`, async ({
+    page,
+  }) => {
+    await page.goto(route);
+    const section = page.locator('#domotica');
+    await section.locator('[data-moment="weather"]').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      window.scrollTo(0, r.top + window.scrollY + r.height / 2 - window.innerHeight / 2);
+    });
+    await expect(section).toHaveAttribute('data-phase', 'cards');
+    await expect(section).toHaveAttribute('data-moment', 'weather');
+    await expect
+      .poll(() => section.locator('[data-scene]').getAttribute('data-scene-state'))
+      .toBe('running');
+    const pressure = section.locator('[data-sim="weather.pressure"]');
+    const first = await pressure.textContent();
+    await expect.poll(() => pressure.textContent(), { timeout: 8000 }).not.toBe(first);
+  });
+
   test(`${route}: fuori schermo la scena si ferma e non chiede fotogrammi`, async ({ page }) => {
     await page.addInitScript(() => {
       const w = window as Window & { __frames?: number };
@@ -226,23 +245,28 @@ for (const route of ['/human/', '/en/human/']) {
     await expect(page.locator('#homelab [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-automation]').first()).toBeVisible();
+    // Domotica (PORT-80): poster della casa e avviso col motivo, al posto del 3D.
+    await page.locator('#domotica').scrollIntoViewIfNeeded();
+    await expect(page.locator('#domotica .poster img')).toBeVisible();
+    await expect(page.locator('#domotica .poster-note [data-reason="webgl"]')).toBeVisible();
+    await expect(page.locator('#domotica .poster-note [data-reason="nojs"]')).toBeHidden();
     expect(urls.filter(isThree)).toEqual([]);
   });
 
   test.describe('reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: Domotica solo testo, Homelab e micro-scene ferme`, async ({ page }) => {
-      const urls: string[] = [];
-      page.on('request', (r) => urls.push(r.url()));
+    test(`${route}: Homelab, Domotica e micro-scene ferme`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'networkidle' });
       await nearScene(page);
       // Homelab immersiva (PORT-76): un fotogramma statico per momento, mai un ciclo di animazione.
       await expect.poll(() => state(page)).toBe('static');
       await expect(scene(page).locator('canvas')).toBeAttached();
+      // Domotica immersiva (PORT-80): stessa regola, e il poster resta nascosto.
       const domotica = page.locator('[data-scene="domotica"]');
       await domotica.scrollIntoViewIfNeeded();
-      await expect.poll(() => domotica.getAttribute('data-scene-state')).toBe('text');
-      expect(urls.filter((u) => /\/_astro\/domotica\./.test(u))).toEqual([]);
+      await expect.poll(() => domotica.getAttribute('data-scene-state')).toBe('static');
+      await expect(domotica.locator('canvas')).toBeAttached();
+      await expect(page.locator('#domotica .poster img')).toBeHidden();
 
       const lavori = page.locator('[data-scene="lavori"]');
       await lavori.scrollIntoViewIfNeeded();
