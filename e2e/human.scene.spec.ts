@@ -3,12 +3,12 @@ import { expect, type Page, test } from '@playwright/test';
 
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
-const isThree = (url: string) => /\/_astro\/(three|homelab|domotica)\./.test(url);
-const scene = (page: Page) => page.locator('[data-scene]').first();
+const isThree = (url: string) => /\/_astro\/(three|homelab|domotica|lavori)\./.test(url);
+const scene = (page: Page) => page.locator('[data-scene="homelab"]');
 const state = (page: Page) => scene(page).getAttribute('data-scene-state');
 const nearScene = (page: Page) =>
   page.evaluate(() => {
-    const el = document.querySelector('[data-scene]') as HTMLElement;
+    const el = document.querySelector('[data-scene="homelab"]') as HTMLElement;
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - window.innerHeight);
   });
 
@@ -59,7 +59,7 @@ for (const route of ['/human/', '/en/human/']) {
   test(`${route}: failover DNS, layer e metriche simulate`, async ({ page }) => {
     await page.goto(route);
     await nearScene(page);
-    await page.evaluate(() => document.querySelector('[data-scene]')?.scrollIntoView());
+    await page.evaluate(() => document.querySelector('[data-scene="homelab"]')?.scrollIntoView());
     await expect.poll(() => state(page)).toBe('running');
     // Da qui in poi la scena e caricata: metriche e log non devono chiedere niente alla rete.
     const requests: string[] = [];
@@ -158,7 +158,7 @@ for (const route of ['/human/', '/en/human/']) {
     });
     await page.goto(route);
     await nearScene(page);
-    await page.evaluate(() => document.querySelector('[data-scene]')?.scrollIntoView());
+    await page.evaluate(() => document.querySelector('[data-scene="homelab"]')?.scrollIntoView());
     await expect.poll(() => state(page)).toBe('running');
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -196,13 +196,110 @@ for (const route of ['/human/', '/en/human/']) {
 
   test.describe('reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: solo testo, three non viene scaricato`, async ({ page }) => {
+    test(`${route}: scene interattive solo testo, micro-scene ferme sulla fine`, async ({
+      page,
+    }) => {
       const urls: string[] = [];
       page.on('request', (r) => urls.push(r.url()));
       await page.goto(route, { waitUntil: 'networkidle' });
       await nearScene(page);
       await expect.poll(() => state(page)).toBe('text');
-      expect(urls.filter(isThree)).toEqual([]);
+      expect(urls.filter((u) => /\/_astro\/(homelab|domotica)\./.test(u))).toEqual([]);
+
+      const lavori = page.locator('[data-scene="lavori"]');
+      await lavori.scrollIntoViewIfNeeded();
+      await expect.poll(() => lavori.getAttribute('data-scene-state')).toBe('static');
+      await expect(lavori.locator('canvas')).toBeAttached();
+      // Statica: nessun avanzamento legato allo scroll.
+      await page.mouse.wheel(0, 300);
+      await page.waitForTimeout(200);
+      expect(await lavori.getAttribute('data-scene-state')).toBe('static');
+      expect(await lavori.getAttribute('data-scene-progress')).toBeNull();
     });
+  });
+
+  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato.
+  const micro = (page: Page) => page.locator('[data-scene="lavori"]');
+  const progress = async (page: Page) =>
+    Number((await micro(page).getAttribute('data-scene-progress')) ?? Number.NaN);
+  /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
+  const placeMicro = (page: Page, fraction: number) =>
+    micro(page).evaluate((el, f) => {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - window.innerHeight * f);
+    }, fraction);
+
+  test(`${route}: nessun 3D prima che l'utente usi la pagina`, async ({ page }) => {
+    const urls: string[] = [];
+    page.on('request', (r) => urls.push(r.url()));
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    expect(await micro(page).getAttribute('data-scene-state')).toBe('idle');
+    expect(urls.filter(isThree)).toEqual([]);
+  });
+
+  test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
+    await page.goto(route);
+    await placeMicro(page, 0.9);
+    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(micro(page).locator('canvas')).toBeAttached();
+    const start = await progress(page);
+
+    await placeMicro(page, 0.5);
+    await expect.poll(() => progress(page)).toBeGreaterThan(start);
+    const middle = await progress(page);
+
+    await placeMicro(page, 0.1);
+    await expect.poll(() => progress(page)).toBe(1);
+
+    await placeMicro(page, 0.8);
+    await expect.poll(() => progress(page)).toBeLessThan(middle);
+  });
+
+  test(`${route}: la micro-scena non blocca ne dirotta lo scroll`, async ({ page }) => {
+    await page.goto(route);
+    await placeMicro(page, 0.6);
+    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
+    const canvas = micro(page).locator('canvas');
+    expect(await canvas.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none');
+
+    // Rotella sopra la scena: la pagina scorre di quanto chiesto, ne piu ne meno.
+    const box = await micro(page).boundingBox();
+    if (!box) throw new Error('micro-scena senza riquadro');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    const before = await page.evaluate(() => window.scrollY);
+    await page.mouse.wheel(0, 400);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before + 400);
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before + 400);
+
+    await page.mouse.wheel(0, -400);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
+  });
+
+  test(`${route}: fuori schermo la micro-scena si ferma e non chiede fotogrammi`, async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const w = window as Window & { __frames?: number };
+      w.__frames = 0;
+      const original = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => {
+        w.__frames = (w.__frames ?? 0) + 1;
+        return original(cb);
+      };
+    });
+    await page.goto(route);
+    await placeMicro(page, 0.5);
+    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
+    // Ferma sullo scroll: la rincorsa si assesta e non chiede altri fotogrammi.
+    await page.waitForTimeout(800);
+    const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
+    const settled = await frames();
+    await page.waitForTimeout(400);
+    expect(await frames()).toBe(settled);
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
   });
 }

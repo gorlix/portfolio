@@ -49,7 +49,7 @@ export const humanSchema = z.strictObject({
     cv: text,
   }),
   /** Testo alternativo delle scene 3D. */
-  scenes: z.strictObject({ homelab: text, domotica: text }),
+  scenes: z.strictObject({ homelab: text, domotica: text, lavori: text }),
   homelab: z.strictObject({
     caption: text,
     simulatedNote: text,
@@ -174,4 +174,5 @@ export const humanTranslatable = [
   'domotica.close',
   'domotica.noAutomations',
   'scenes.domotica',
+  'scenes.lavori',
 ];

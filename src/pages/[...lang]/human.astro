@@ -137,6 +137,15 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             </>
           )}
 
+          {s.id === 'lavori' && (
+            <Scene
+              scene="lavori"
+              label={page.scenes.lavori}
+              accent="lavori"
+              data={{ count: sortedExperiences.length }}
+            />
+          )}
+
           {s.id === 'lavori' &&
             sortedExperiences.map(({ data: e }) => {
               const when = period(e.start, e.end);

@@ -34,6 +34,15 @@ describe('decideTier', () => {
     expect(decideTier({ ...weak, webgl: false, majorPerformanceCaveat: true })).toBe('text');
   });
 
+  it('micro-scena con reduced-motion: fotogramma statico finale, non testo', () => {
+    expect(decideTier({ ...capable, reducedMotion: true }, 'micro')).toBe('reduced');
+    expect(decideTier({ ...capable, reducedMotion: true }, 'interactive')).toBe('text');
+    // Senza WebGL o con risparmio dati anche la micro-scena lascia solo il testo.
+    expect(decideTier({ ...capable, reducedMotion: true, webgl: false }, 'micro')).toBe('text');
+    expect(decideTier({ ...capable, saveData: true }, 'micro')).toBe('text');
+    expect(decideTier(capable, 'micro')).toBe('full');
+  });
+
   it('dispositivo debole o resa software: scena statica', () => {
     expect(decideTier({ ...capable, deviceMemory: 2 })).toBe('reduced');
     expect(decideTier({ ...capable, deviceMemory: 0.5 })).toBe('reduced');
