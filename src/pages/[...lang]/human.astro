@@ -2,6 +2,8 @@
 import { getImage } from 'astro:assets';
 import domoticaPosterDesktopSrc from '../../assets/human/domotica-poster-desktop.png';
 import domoticaPosterMobileSrc from '../../assets/human/domotica-poster-mobile.png';
+import lavoriPosterDesktopSrc from '../../assets/human/lavori-poster-desktop.png';
+import lavoriPosterMobileSrc from '../../assets/human/lavori-poster-mobile.png';
 import posterDesktopSrc from '../../assets/human/poster-desktop.png';
 import posterMobileSrc from '../../assets/human/poster-mobile.png';
 import AutomationSteps from '../../components/AutomationSteps.astro';
@@ -50,13 +52,21 @@ const [
 
 /** Poster statici delle scene immersive: fallback se il 3D non parte (niente WebGL, risparmio dati, JS spento). */
 const poster = (src: ImageMetadata) => getImage({ src, format: 'webp', quality: 70 });
-const [posterDesktop, posterMobile, domoticaPosterDesktop, domoticaPosterMobile] =
-  await Promise.all([
-    poster(posterDesktopSrc),
-    poster(posterMobileSrc),
-    poster(domoticaPosterDesktopSrc),
-    poster(domoticaPosterMobileSrc),
-  ]);
+const [
+  posterDesktop,
+  posterMobile,
+  lavoriPosterDesktop,
+  lavoriPosterMobile,
+  domoticaPosterDesktop,
+  domoticaPosterMobile,
+] = await Promise.all([
+  poster(posterDesktopSrc),
+  poster(posterMobileSrc),
+  poster(lavoriPosterDesktopSrc),
+  poster(lavoriPosterMobileSrc),
+  poster(domoticaPosterDesktopSrc),
+  poster(domoticaPosterMobileSrc),
+]);
 const posterReasons = ['webgl', 'savedata', 'error', 'nojs'] as const;
 /** Avviso del poster con il soggetto della sezione ("della scrivania", "della casa"). */
 const posterNotice = (subject: string) =>
@@ -184,6 +194,17 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
           )}
           {s.id === 'lavori' && (
             <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={lavoriPosterMobile.src} />
+                <img
+                  src={lavoriPosterDesktop.src}
+                  width={lavoriPosterDesktop.options.width}
+                  height={lavoriPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
               <Scene scene="lavori" label={page.scenes.lavori} accent="lavori" data={tree} />
             </div>
           )}

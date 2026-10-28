@@ -245,6 +245,10 @@ for (const route of ['/human/', '/en/human/']) {
     await expect(page.locator('#homelab [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-automation]').first()).toBeVisible();
+    // Lavori (PORT-81): poster dell'albero e avviso col motivo, al posto del 3D.
+    await page.locator('#lavori').scrollIntoViewIfNeeded();
+    await expect(page.locator('#lavori .poster img')).toBeVisible();
+    await expect(page.locator('#lavori .poster-note [data-reason="webgl"]')).toBeVisible();
     // Domotica (PORT-80): poster della casa e avviso col motivo, al posto del 3D.
     await page.locator('#domotica').scrollIntoViewIfNeeded();
     await expect(page.locator('#domotica .poster img')).toBeVisible();
@@ -452,8 +456,9 @@ for (const route of ['/human/', '/en/human/']) {
         timeout: 15_000,
       })
       .not.toMatch(/^(idle|loading)$/);
-    // La scrivania della Home anima di continuo: si nasconde, qui conta solo la micro-scena.
-    await page.addStyleTag({ content: '#home .stage { display: none; }' });
+    // Le scene immersive (scrivania, albero, casa) animano di continuo mentre sono visibili: si
+    // nascondono, qui conta solo la micro-scena.
+    await page.addStyleTag({ content: '[data-story] .stage { display: none; }' });
     await placeMicro(page, 0.5);
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     // Ferma sullo scroll: la rincorsa si assesta e non chiede altri fotogrammi.
