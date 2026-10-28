@@ -37,6 +37,7 @@ scenes:
   homelab: "Two low-poly platforms, Home and Production, with the homelab nodes and a beam of light joining them"
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
   lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
+  certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
 farewell:
   command: "$ logout"
   message: "Thanks for stopping by. If you want another lap, the door is right here:"

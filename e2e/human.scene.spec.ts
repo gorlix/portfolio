@@ -3,7 +3,8 @@ import { expect, type Page, test } from '@playwright/test';
 
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
-const isThree = (url: string) => /\/_astro\/(three|homelab|domotica|lavori)\./.test(url);
+const isThree = (url: string) =>
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni)\./.test(url);
 const scene = (page: Page) => page.locator('[data-scene="homelab"]');
 const state = (page: Page) => scene(page).getAttribute('data-scene-state');
 const nearScene = (page: Page) =>
@@ -301,5 +302,38 @@ for (const route of ['/human/', '/en/human/']) {
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
+  });
+
+  // Micro-scena Certificazioni (PORT-61): stesso motore, canvas dentro la sezione.
+  const certs = (page: Page) => page.locator('[data-scene="certificazioni"]');
+  const placeCerts = (page: Page, fraction: number) =>
+    certs(page).evaluate((el, f) => {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, top - window.innerHeight * f);
+    }, fraction);
+
+  test(`${route}: la scena Certificazioni avanza con lo scroll`, async ({ page }) => {
+    await page.goto(route);
+    await expect(certs(page).locator('script[data-scene-data]')).toBeAttached();
+    await placeCerts(page, 0.9);
+    await expect.poll(() => certs(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(certs(page).locator('canvas')).toBeAttached();
+    const read = async () =>
+      Number((await certs(page).getAttribute('data-scene-progress')) ?? Number.NaN);
+    const start = await read();
+    await placeCerts(page, 0.3);
+    await expect.poll(read).toBeGreaterThan(start);
+  });
+
+  test(`${route}: Certificazioni con reduced-motion e un fotogramma statico`, async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await placeCerts(page, 0.5);
+    await expect.poll(() => certs(page).getAttribute('data-scene-state')).toBe('static');
+    expect(await certs(page).getAttribute('data-scene-progress')).toBeNull();
+    await context.close();
   });
 }
