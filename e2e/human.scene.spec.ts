@@ -169,12 +169,23 @@ for (const route of ['/human/', '/en/human/']) {
     // In cima (la scena Contatti, in fondo, sarebbe attiva e chiederebbe fotogrammi). Li c'e
     // l'avatar: la sua breve rincorsa verso l'avanzamento deve finire, poi zero fotogrammi.
     await page.evaluate(() => window.scrollTo(0, 0));
+    // Le scene in cima (avatar) si montano in modo asincrono: si conta solo quando sono pronte,
+    // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          [...document.querySelectorAll<HTMLElement>('[data-scene]')]
+            .filter((el) => el.getBoundingClientRect().top < window.innerHeight * 2)
+            .every((el) => !/idle|loading/.test(el.dataset.sceneState ?? '')),
+        ),
+      )
+      .toBe(true);
     await expect.poll(() => state(page)).toBe('paused');
     const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
     await expect
       .poll(async () => {
         const before = await frames();
-        await page.waitForTimeout(300);
+        await page.waitForTimeout(500);
         return (await frames()) === before;
       })
       .toBe(true);
@@ -210,15 +221,18 @@ for (const route of ['/human/', '/en/human/']) {
 
   test.describe('reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: scene interattive solo testo, micro-scene ferme sulla fine`, async ({
-      page,
-    }) => {
+    test(`${route}: Domotica solo testo, Homelab e micro-scene ferme`, async ({ page }) => {
       const urls: string[] = [];
       page.on('request', (r) => urls.push(r.url()));
       await page.goto(route, { waitUntil: 'networkidle' });
       await nearScene(page);
-      await expect.poll(() => state(page)).toBe('text');
-      expect(urls.filter((u) => /\/_astro\/(homelab|domotica)\./.test(u))).toEqual([]);
+      // Homelab immersiva (PORT-76): un fotogramma statico per momento, mai un ciclo di animazione.
+      await expect.poll(() => state(page)).toBe('static');
+      await expect(scene(page).locator('canvas')).toBeAttached();
+      const domotica = page.locator('[data-scene="domotica"]');
+      await domotica.scrollIntoViewIfNeeded();
+      await expect.poll(() => domotica.getAttribute('data-scene-state')).toBe('text');
+      expect(urls.filter((u) => /\/_astro\/domotica\./.test(u))).toEqual([]);
 
       const lavori = page.locator('[data-scene="lavori"]');
       await lavori.scrollIntoViewIfNeeded();

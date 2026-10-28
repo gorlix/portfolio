@@ -94,6 +94,9 @@ export const humanSchema = z.strictObject({
     failoverActive: text,
     /** Equivalente testuale del gesto, sempre visibile. */
     failoverText: text,
+    /** Titoli delle schede della sezione immersiva. */
+    failoverTitle: text,
+    projects: text,
   }),
   domotica: z.strictObject({
     projects: text,
@@ -171,6 +174,8 @@ export const humanTranslatable = [
   'homelab.failoverNormal',
   'homelab.failoverActive',
   'homelab.failoverText',
+  'homelab.failoverTitle',
+  'homelab.projects',
   'domotica.projects',
   'domotica.automationsTodo',
   'domotica.trigger',

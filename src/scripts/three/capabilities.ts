@@ -9,11 +9,12 @@
 export type SceneTier = 'full' | 'reduced' | 'text';
 
 /**
- * Scena interattiva (Homelab, Domotica: protagonista della sezione) o micro-scena narrativa
- * guidata dallo scroll. Cambia solo la risposta a reduced-motion: la micro-scena resta come
- * fotogramma statico finale, che non si muove e illustra lo stesso testo.
+ * Scena interattiva (Domotica: protagonista della sezione), micro-scena narrativa guidata dallo
+ * scroll o scena immersiva (sfondo della sezione guidato dalle schede, PORT-76). Cambia solo la
+ * risposta a reduced-motion: micro e immersiva restano come fotogramma statico (la fine, o un
+ * fotogramma per scheda), che non si muove e illustra lo stesso testo.
  */
-export type SceneKind = 'interactive' | 'micro';
+export type SceneKind = 'interactive' | 'micro' | 'immersive';
 
 export interface CapabilityInput {
   /** Contesto WebGL ottenibile. */
@@ -53,8 +54,8 @@ const isWeak = (value: number | undefined, limit: number): boolean =>
 export function decideTier(input: CapabilityInput, kind: SceneKind = 'interactive'): SceneTier {
   // Chi chiede meno dati o non ha WebGL riceve solo il testo, che contiene gia tutto.
   if (input.saveData || !input.webgl) return 'text';
-  // Meno movimento: la scena interattiva lascia il posto al testo, la micro-scena si ferma alla fine.
-  if (input.reducedMotion) return kind === 'micro' ? 'reduced' : 'text';
+  // Meno movimento: la scena interattiva lascia il posto al testo, le altre restano ferme.
+  if (input.reducedMotion) return kind === 'interactive' ? 'text' : 'reduced';
   if (
     input.majorPerformanceCaveat ||
     input.lowBattery === true ||

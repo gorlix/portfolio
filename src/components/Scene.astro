@@ -48,6 +48,12 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
   .scene[data-kind='micro'] {
     max-width: 24rem;
   }
+  /* Scena immersiva: riempie lo sfondo fisso della sezione (lo "stage" della pagina). */
+  .scene[data-kind='immersive'] {
+    max-width: none;
+    height: 100%;
+    aspect-ratio: auto;
+  }
   .scene[hidden] {
     display: none;
   }

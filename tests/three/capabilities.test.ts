@@ -49,6 +49,14 @@ describe('decideTier', () => {
     expect(decideTier(capable, 'micro')).toBe('full');
   });
 
+  it('scena immersiva con reduced-motion: un fotogramma statico per momento, non testo', () => {
+    expect(decideTier({ ...capable, reducedMotion: true }, 'immersive')).toBe('reduced');
+    expect(decideTier({ ...capable, webgl: false }, 'immersive')).toBe('text');
+    expect(decideTier({ ...capable, saveData: true }, 'immersive')).toBe('text');
+    expect(decideTier({ ...capable, lowBattery: true }, 'immersive')).toBe('reduced');
+    expect(decideTier(capable, 'immersive')).toBe('full');
+  });
+
   it('dispositivo debole o resa software: scena statica', () => {
     expect(decideTier({ ...capable, deviceMemory: 2 })).toBe('reduced');
     expect(decideTier({ ...capable, deviceMemory: 0.5 })).toBe('reduced');

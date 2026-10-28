@@ -82,6 +82,8 @@ const period = (start: unknown, end: unknown) => {
   if (isTodo(start) || isTodo(end)) return null;
   return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
 };
+/** Sezioni col layout immersivo (spec §7.3, PORT-76): per ora solo il pilota Homelab. */
+const immersive = (id: string) => id === 'homelab';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -125,13 +127,18 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   <article class="path">
     {
       sections.map((s) => (
-        <section id={s.id} data-section={s.id} aria-labelledby={`h-${s.id}`}>
+        <section id={s.id} data-section={s.id} aria-labelledby={`h-${s.id}`} data-story={immersive(s.id) ? '' : undefined}>
+          {s.id === 'homelab' && (
+            <div class="stage">
+              <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
+            </div>
+          )}
           {s.id === 'home' ? (
             <h1 id="h-home">{profile.name}</h1>
           ) : (
             <h2 id={`h-${s.id}`}>{s.title}</h2>
           )}
-          <p class="intro">{page.intros[s.id]}</p>
+          {!immersive(s.id) && <p class="intro">{page.intros[s.id]}</p>}
 
           {s.id === 'home' && (
             <>
@@ -214,8 +221,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'homelab' && (
             <>
-              <div class="lab">
-                <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
                 <div class="lab-ui" data-panel-ui hidden>
                   <p class="meta">{H.sceneHint}</p>
                   <div class="lab-controls">
@@ -289,6 +296,10 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </div>
                 </div>
               </div>
+
+              <div class="cards">
+              <article class="card" data-moment="nodes">
+              <h3>{H.nodesLabel}</h3>
               <p class="meta">{page.homelab.simulatedNote}</p>
               <table>
                 <caption>{H.caption}</caption>
@@ -313,7 +324,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   )}
                 </tbody>
               </table>
+              </article>
 
+              <article class="card" data-moment="decisions">
               <h3>{H.decisions}</h3>
               <ul class="plain">
                 {homelab.adrs.map((a) => (
@@ -324,7 +337,16 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </li>
                 ))}
               </ul>
+              </article>
 
+              {homelab.failover && (
+                <article class="card" data-moment="failover">
+                  <h3>{H.failoverTitle}</h3>
+                  <p>{H.failoverText}</p>
+                </article>
+              )}
+
+              <article class="card" data-moment="backup">
               <h3>{H.backup}</h3>
               <p>{H.backupIntro} <strong>{homelab.backup.source.name}</strong></p>
               <ul class="plain">
@@ -335,9 +357,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </li>
                 ))}
               </ul>
+              </article>
 
-              {homelab.failover && <p>{H.failoverText}</p>}
-
+              <article class="card" data-moment="wip">
               <h3>{H.wip}</h3>
               <ul class="plain">
                 {homelab.wip.map((w) => (
@@ -347,10 +369,23 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </li>
                 ))}
               </ul>
+              </article>
+
+              <article class="card" data-moment="projects">
+                <h3>{H.projects}</h3>
+                {projectsIn(s.id).map(({ data: p }) => (
+                  <div class="item">
+                    <h4>{p.name}</h4>
+                    <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+                    <p class="meta"><a href={p.repo}>{L.repository}</a></p>
+                  </div>
+                ))}
+              </article>
+              </div>
             </>
           )}
 
-          {(s.id === 'homelab' || s.id === 'domotica') &&
+          {s.id === 'domotica' &&
             projectsIn(s.id).map(({ data: p }) => (
               <article class="item">
                 <h3>{p.name}</h3>
@@ -695,6 +730,225 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   }
   .lab-panel a {
     color: var(--link);
+  }
+
+  /*
+   * Sezione immersiva (spec §7.3, PORT-76). Sfondo fisso ("stage") con la scena, che resta sotto
+   * tutta la sezione grazie a sticky + margine negativo: lo scroll e sempre quello nativo.
+   * Il bootstrap mette sulla sezione `data-phase` (hero | cards) e `--stage-opacity`.
+   */
+  section[data-story] {
+    --pad-l: 1rem;
+    /* Altezza dell'intestazione fissa (solo da 48rem): il titolo si ferma subito sotto. */
+    --head: 0rem;
+    position: relative;
+    /* Contesto proprio sotto l'intestazione fissa: le schede lunghe le scorrono sotto. */
+    z-index: 0;
+    padding-block: var(--head) 0;
+    background: var(--bg);
+  }
+  @media (min-width: 48rem) {
+    section[data-story] {
+      --pad-l: 4rem;
+      --head: 2.375rem;
+    }
+  }
+  section[data-story] > .stage {
+    max-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 0;
+    height: 100svh;
+    margin: calc(-1 * var(--head)) -1rem calc(var(--head) - 100svh) calc(-1 * var(--pad-l));
+    opacity: var(--stage-opacity, 1);
+    background: radial-gradient(ellipse at 60% 45%, color-mix(in srgb, var(--accent) 10%, var(--bg)), var(--bg) 70%);
+    pointer-events: none;
+  }
+  .stage :global(.scene) {
+    margin: 0;
+  }
+  /* Il 3D si usa solo nella prima schermata; durante le schede rotella e dita vanno alla pagina. */
+  section[data-phase="hero"] .stage :global(canvas) {
+    pointer-events: auto;
+  }
+  /* Titolo fisso in alto a sinistra finche si e nella sezione; rimpicciolito durante le schede. */
+  section[data-story] > h2 {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: block;
+    width: fit-content;
+    margin: 0;
+    padding: 1.25rem 2.5rem 0.5rem 0.5rem;
+    font-size: clamp(1.75rem, 6vw, 3.25rem);
+    transform-origin: left top;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+    pointer-events: none;
+  }
+  section[data-story] > h2 {
+    top: var(--head);
+  }
+  /* Durante le schede il titolo ha un fondo pieno: le schede gli scorrono sotto senza mescolarsi. */
+  section[data-phase="cards"] > h2 {
+    transform: scale(0.6);
+    border-radius: 0 0 0.5rem 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+  /* Prima schermata: intro in alto a sinistra, comandi a destra; il vuoto lascia passare i gesti al 3D. */
+  section[data-story] > .hero {
+    position: relative;
+    z-index: 1;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: none;
+    margin: 0;
+    pointer-events: none;
+  }
+  .hero > * {
+    pointer-events: auto;
+  }
+  .hero .intro {
+    max-width: 32rem;
+    margin: 0 0 1rem 0.5rem;
+  }
+  @media (scripting: enabled) {
+    section[data-story] > .hero {
+      box-sizing: border-box;
+      min-height: calc(100svh - 6rem);
+      align-content: space-between;
+    }
+  }
+  @media (min-width: 72rem) {
+    section[data-story] > .hero {
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      align-content: start;
+      align-items: start;
+    }
+    .hero .lab-ui {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      padding: 1rem;
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+      border-radius: 0.75rem;
+      background: color-mix(in srgb, var(--bg) 84%, transparent);
+      backdrop-filter: blur(12px);
+    }
+  }
+  /* Telefono: comandi in una barra in basso, pannello del nodo come foglio che sale dal basso. */
+  @media (max-width: 71.99rem) {
+    .hero .lab-ui {
+      align-self: end;
+      padding: 0.75rem;
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+      border-radius: 0.75rem;
+      background: color-mix(in srgb, var(--bg) 86%, transparent);
+      backdrop-filter: blur(12px);
+    }
+    .hero .lab-ui > .meta {
+      display: none;
+    }
+    .hero .lab-ui {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hero .lab-controls > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+    .hero .lab-nodes {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .hero .lab-nodes button {
+      white-space: nowrap;
+    }
+    .hero .lab-panel {
+      position: fixed;
+      inset: auto 0 0 0;
+      z-index: 3;
+      max-height: 60svh;
+      overflow-y: auto;
+      border-radius: 0.75rem 0.75rem 0 0;
+      box-shadow: 0 -0.5rem 2rem color-mix(in srgb, var(--bg-deep) 70%, transparent);
+    }
+  }
+  /* Il foglio appartiene alla prima schermata: durante le schede non copre il testo. */
+  section[data-phase="cards"] .hero .lab-panel {
+    display: none;
+  }
+  /* Schede in vetro smerigliato: bordo nell'accento della sezione, fallback opaco senza blur. */
+  .cards {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    padding-block: 2rem 4rem;
+  }
+  @media (scripting: enabled) {
+    section[data-story]:not(:has(.scene[data-scene-state="text"])) .cards {
+      gap: 70svh;
+      padding-block: 30svh 75svh;
+    }
+  }
+  .card {
+    box-sizing: border-box;
+    max-width: 34rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .card,
+    .hero .lab-ui {
+      background: var(--bg-alt);
+    }
+  }
+  .card > h3:first-child {
+    margin-top: 0;
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+  }
+  .card table {
+    margin-top: 0.5rem;
+  }
+  /* Schermi stretti e testo ingrandito: la scheda resta nel viewport (reflow WCAG 1.4.10). */
+  @media (max-width: 30rem) {
+    .card {
+      padding: 1rem 0.75rem;
+    }
+    .card :is(th, td) {
+      padding: 0.375rem 0.25rem;
+    }
+  }
+  /* Il nome del nodo non si spezza sul trattino ("node-1"). */
+  .card th[scope="row"] {
+    white-space: nowrap;
+  }
+  /* Solo a 320 px (zoom 400%) le parole lunghe vanno a capo dove serve. */
+  @media (max-width: 22rem) {
+    .card :is(th, td) {
+      overflow-wrap: anywhere;
+    }
+  }
+  .card .item {
+    margin-top: 1rem;
+  }
+  .card h4 {
+    color: var(--text);
+  }
+  /* Senza JavaScript non c'e scena: niente sfondo fisso, le schede restano sul fondo semplice. */
+  @media (scripting: none) {
+    .stage {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    section[data-story] > h2 {
+      transition: none;
+    }
   }
   h1,
   h2 {
