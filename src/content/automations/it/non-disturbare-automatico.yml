@@ -1,0 +1,10 @@
+name: Non disturbare automatico
+room: studio
+rank: 2
+trigger: Il telefono inizia a caricarsi in una delle mie zone, oppure parte un evento del calendario "Non disturbare"
+conditions:
+  - Il telefono non è collegato al Wi-Fi (facoltativo)
+actions:
+  - Accende il Non disturbare di Android, al livello scelto
+  - Manda una notifica con i pulsanti per metterlo in pausa per un po'
+repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint

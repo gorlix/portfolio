@@ -35,6 +35,7 @@ labels:
   cv: Résumé (PDF)
 scenes:
   homelab: "Two low-poly platforms, Home and Production, with the homelab nodes and a beam of light joining them"
+  domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
 farewell:
   command: "$ logout"
   message: "Thanks for stopping by. If you want another lap, the door is right here:"
@@ -65,3 +66,24 @@ domotica:
   trigger: Trigger
   conditions: Conditions
   actions: Actions
+  room: Room
+  rooms:
+    - id: camera
+      name: Bedroom
+      kind: room
+    - id: studio
+      name: Study
+      kind: room
+    - id: soggiorno
+      name: Living room
+      kind: room
+    - id: cucina
+      name: Kitchen
+      kind: room
+    - id: casa
+      name: Whole house
+      kind: house
+  sceneHint: "Pick a room to see what happens there on its own."
+  roomsLabel: Rooms
+  close: Close
+  noAutomations: "Nothing automatic happens here yet. Yet."

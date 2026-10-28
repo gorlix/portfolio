@@ -120,6 +120,24 @@ describe('build Homelab', () => {
   });
 });
 
+describe('build Domotica', () => {
+  // Elenco testuale e scena leggono lo stesso modello: stesse automazioni, nello stesso ordine.
+  it.each(['/human/', '/en/human/'])('%s: scena ed elenco mostrano gli stessi dati', (url) => {
+    const html = pages.find((p) => p.url === url)?.html ?? '';
+    const block = html.match(
+      /<div[^>]*data-accent="domotica"[^>]*>\s*<script type="application\/json" data-scene-data>([\s\S]*?)<\/script>/,
+    );
+    expect(block, url).toBeTruthy();
+    const model = JSON.parse(block?.[1] ?? '{}') as { automations: { slug: string }[] };
+    const listed = [...html.matchAll(/data-automation="([^"]+)"/g)].map((m) => m[1]);
+    expect(listed.length, url).toBeGreaterThan(0);
+    expect(
+      model.automations.map((a) => a.slug),
+      url,
+    ).toEqual(listed);
+  });
+});
+
 describe('build SEO', () => {
   const meta = (html: string, key: 'name' | 'property', value: string) =>
     [...html.matchAll(/<meta [^>]*>/g)]

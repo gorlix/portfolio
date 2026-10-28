@@ -9,11 +9,12 @@ import {
 
 describe('registro delle scene', () => {
   it('contiene le scene delle sezioni interattive', () => {
-    expect(sceneNames).toEqual(['homelab']);
+    expect(sceneNames).toEqual(['homelab', 'domotica']);
   });
 
   it('riconosce solo nomi registrati', () => {
     expect(isSceneName('homelab')).toBe(true);
+    expect(isSceneName('domotica')).toBe(true);
     expect(isSceneName('placeholder')).toBe(false);
     expect(isSceneName('toString')).toBe(false);
     expect(isSceneName('')).toBe(false);
@@ -41,7 +42,15 @@ describe('isolamento di three', () => {
     readFileSync(new URL(`../../src/scripts/three/${file}`, import.meta.url), 'utf8');
   const anyThree = /from\s+['"]three['"]|import\(\s*['"]three['"]\s*\)/;
 
-  for (const file of ['bootstrap.ts', 'capabilities.ts', 'registry.ts', 'tokens.ts', 'types.ts']) {
+  for (const file of [
+    'bootstrap.ts',
+    'capabilities.ts',
+    'registry.ts',
+    'tokens.ts',
+    'types.ts',
+    'panel.ts',
+    'orbit.ts',
+  ]) {
     it(`${file} non importa three`, () => {
       expect(read(file)).not.toMatch(anyThree);
     });

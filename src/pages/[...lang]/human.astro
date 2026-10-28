@@ -1,10 +1,12 @@
 ---
+import AutomationSteps from '../../components/AutomationSteps.astro';
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
 import Timeline from '../../components/Timeline.astro';
 import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
+import { domoticaModel } from '../../lib/domotica';
 import { formatDate } from '../../lib/format';
 import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
@@ -78,6 +80,11 @@ const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
 const nodeName = (id: string) => infra.nodes.find((n) => n.id === id)?.name ?? id;
 const adrById = (id: string) => homelab.adrs.find((a) => a.id === id);
+
+const D = page.domotica;
+const domotica = domoticaModel(D.rooms, automations);
+const automationBySlug = (slug: string) => automations.find((e) => e.slug === slug)?.data;
+const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
 
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type: 'ProfilePage' });
@@ -283,23 +290,55 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               </article>
             ))}
 
-          {s.id === 'domotica' &&
-            (automations.length === 0 ? (
-              <p><Todo label={page.todoLabel} hint={page.domotica.automationsTodo} /></p>
-            ) : (
-              automations.map(({ data: a }) => (
-                <article class="item">
-                  <h3>{a.name} <span class="meta">· {a.room}</span></h3>
-                  <dl class="facts">
-                    <div><dt>{page.domotica.trigger}</dt><dd>{a.trigger}</dd></div>
-                    {a.conditions.length > 0 && (
-                      <div><dt>{page.domotica.conditions}</dt><dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd></div>
-                    )}
-                    <div><dt>{page.domotica.actions}</dt><dd><ul>{a.actions.map((x) => <li>{x}</li>)}</ul></dd></div>
-                  </dl>
-                </article>
-              ))
-            ))}
+          {s.id === 'domotica' && (
+            <>
+              <div class="lab">
+                <Scene scene="domotica" label={page.scenes.domotica} accent="domotica" data={domotica} />
+                <div class="lab-ui" data-panel-ui hidden>
+                  <p class="meta">{D.sceneHint}</p>
+                  <ul class="plain lab-items" aria-label={D.roomsLabel}>
+                    {domotica.rooms.map((r) => (
+                      <li>
+                        <button type="button" data-panel-open={r.id} aria-expanded="false" aria-controls="domotica-panel">
+                          {r.name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div class="lab-panel" id="domotica-panel" data-panel hidden>
+                    {domotica.rooms.map((r) => (
+                      <div data-panel-item={r.id} hidden>
+                        <h3 tabindex="-1" data-panel-heading>{r.name}</h3>
+                        {r.automations.length === 0 ? (
+                          <p class="meta">{D.noAutomations}</p>
+                        ) : (
+                          r.automations.map((slug) => automationBySlug(slug)).map((a) => a && (
+                            <article>
+                              <h4>{a.name}</h4>
+                              <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
+                            </article>
+                          ))
+                        )}
+                      </div>
+                    ))}
+                    <button type="button" data-panel-close>{D.close}</button>
+                  </div>
+                </div>
+              </div>
+
+              {domotica.automations.map(({ slug }) => {
+                const a = automationBySlug(slug);
+                return a && (
+                  <article class="item" data-automation={slug}>
+                    <h3>{a.name} <span class="meta">· {roomName(a.room)}</span></h3>
+                    <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
+                    {a.repo && <p class="meta"><a href={a.repo}>{L.repository}</a></p>}
+                  </article>
+                );
+              })}
+              <p><Todo label={page.todoLabel} hint={D.automationsTodo} /></p>
+            </>
+          )}
 
           {s.id === 'certificazioni' && (
             <>
@@ -455,7 +494,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   }
   .lab-controls,
   .lab-nodes,
-  .lab-layers {
+  .lab-layers,
+  .lab-items {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -463,7 +503,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   .lab-controls {
     justify-content: space-between;
   }
-  .lab-nodes li {
+  .lab .lab-nodes li,
+  .lab .lab-items li {
     margin-top: 0;
   }
   .lab-panel li {
@@ -483,10 +524,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
       flex-direction: column;
       align-items: stretch;
     }
-    .lab-nodes {
+    .lab-nodes,
+    .lab-items {
       flex-direction: column;
     }
-    .lab-nodes button {
+    .lab-nodes button,
+    .lab-items button {
       width: 100%;
       text-align: left;
     }

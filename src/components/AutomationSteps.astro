@@ -1,0 +1,71 @@
+---
+import type { Automation } from '../lib/schemas/automations';
+import { isTodo } from '../lib/schemas/common';
+import Todo from './Todo.astro';
+
+/*
+ * Trigger -> condizioni -> azioni di un'automazione (spec §12.2). Usato sia nell'elenco testuale
+ * della sezione Domotica sia nel pannello della scena, cosi le due viste mostrano lo stesso testo.
+ */
+interface Props {
+  automation: Automation;
+  labels: { trigger: string; conditions: string; actions: string };
+  todoLabel: string;
+}
+
+const { automation: a, labels, todoLabel } = Astro.props;
+---
+
+<dl class="steps">
+  <div>
+    <dt>{labels.trigger}</dt>
+    <dd>{isTodo(a.trigger) ? <Todo label={todoLabel} hint={a.trigger.todo} /> : a.trigger}</dd>
+  </div>
+  {
+    isTodo(a.conditions) ? (
+      <div>
+        <dt>{labels.conditions}</dt>
+        <dd><Todo label={todoLabel} hint={a.conditions.todo} /></dd>
+      </div>
+    ) : (
+      a.conditions.length > 0 && (
+        <div>
+          <dt>{labels.conditions}</dt>
+          <dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd>
+        </div>
+      )
+    )
+  }
+  <div>
+    <dt>{labels.actions}</dt>
+    <dd>
+      {
+        isTodo(a.actions) ? (
+          <Todo label={todoLabel} hint={a.actions.todo} />
+        ) : (
+          <ul>{a.actions.map((x) => <li>{x}</li>)}</ul>
+        )
+      }
+    </dd>
+  </div>
+</dl>
+
+<style>
+  .steps {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.5rem 0 0;
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  dd {
+    margin: 0;
+  }
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+</style>

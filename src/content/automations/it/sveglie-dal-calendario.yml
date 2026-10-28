@@ -1,0 +1,10 @@
+name: Sveglie dal calendario
+room: camera
+rank: 1
+trigger: Ogni sera all'ora impostata (di default le 23:00)
+conditions:
+  - Nel calendario c'è un evento sveglia per domattina
+actions:
+  - Imposta in silenzio una serie di sveglie scaglionate sul telefono Android
+  - Manda una notifica di conferma, così vado a dormire tranquillo
+repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint

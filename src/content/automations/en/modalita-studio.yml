@@ -1,0 +1,8 @@
+name: Study mode on the PC
+room: studio
+rank: 3
+trigger: Do Not Disturb turns on
+conditions: []
+actions:
+  - Turns on study mode on the Linux PC, which closes the apps that distract me
+repo: https://github.com/gorlix/ha-focus-mode-linux

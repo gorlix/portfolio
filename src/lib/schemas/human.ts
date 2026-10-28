@@ -1,6 +1,8 @@
 import { z } from 'astro/zod';
 import { humanSectionIds, text } from './common';
 
+const id = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+
 const sectionTexts = z.strictObject(
   Object.fromEntries(humanSectionIds.map((id) => [id, text])) as Record<
     (typeof humanSectionIds)[number],
@@ -47,7 +49,7 @@ export const humanSchema = z.strictObject({
     cv: text,
   }),
   /** Testo alternativo delle scene 3D. */
-  scenes: z.strictObject({ homelab: text }),
+  scenes: z.strictObject({ homelab: text, domotica: text }),
   homelab: z.strictObject({
     caption: text,
     simulatedNote: text,
@@ -78,6 +80,17 @@ export const humanSchema = z.strictObject({
     trigger: text,
     conditions: text,
     actions: text,
+    room: text,
+    /**
+     * Stanze della casa della scena, in ordine di pianta. `house` e la casa intera, per le
+     * automazioni che non stanno in una stanza sola. Disposizione generica, non la casa vera.
+     */
+    rooms: z.array(z.strictObject({ id, name: text, kind: z.enum(['room', 'house']) })).min(1),
+    /** Controlli HTML della scena (visibili solo quando il 3D e montato). */
+    sceneHint: text,
+    roomsLabel: text,
+    close: text,
+    noAutomations: text,
   }),
   /** Chiusura del percorso: saluto in stile terminale e ritorno alla scelta. */
   farewell: z.strictObject({ command: text, message: text }),
@@ -134,4 +147,11 @@ export const humanTranslatable = [
   'domotica.trigger',
   'domotica.conditions',
   'domotica.actions',
+  'domotica.room',
+  'domotica.rooms.*.name',
+  'domotica.sceneHint',
+  'domotica.roomsLabel',
+  'domotica.close',
+  'domotica.noAutomations',
+  'scenes.domotica',
 ];

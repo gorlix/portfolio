@@ -1,0 +1,10 @@
+name: Alarms from the calendar
+room: camera
+rank: 1
+trigger: Every evening at the chosen time (23:00 by default)
+conditions:
+  - There is a wake-up event in the calendar for tomorrow morning
+actions:
+  - Quietly sets a series of staggered alarms on the Android phone
+  - Sends a confirmation notification, so I can go to sleep in peace
+repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint

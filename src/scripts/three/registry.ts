@@ -7,6 +7,7 @@ import type { SceneModule } from './types';
  */
 export const sceneLoaders = {
   homelab: () => import('./scenes/homelab'),
+  domotica: () => import('./scenes/domotica'),
 } satisfies Record<string, () => Promise<SceneModule>>;
 
 export type SceneName = keyof typeof sceneLoaders;
