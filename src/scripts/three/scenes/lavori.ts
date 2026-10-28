@@ -1,22 +1,36 @@
 import {
+  AdditiveBlending,
   AmbientLight,
+  BufferAttribute,
+  BufferGeometry,
   CircleGeometry,
   Color,
   CylinderGeometry,
   DirectionalLight,
+  DoubleSide,
   Group,
   IcosahedronGeometry,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
+  type Object3D,
   PerspectiveCamera,
+  QuadraticBezierCurve3,
   Scene,
-  TorusGeometry,
   Vector3,
   WebGLRenderer,
 } from 'three';
 import type { WorkTree } from '../../../lib/work';
 import { pixelRatioFor } from '../capabilities';
-import { cardFraming, fitDistance, layoutTree, leafIndex, type Side } from '../lavori/tree';
+import {
+  cardFraming,
+  fitDistance,
+  LEAF_LENGTH,
+  layoutTree,
+  leafIndex,
+  type Side,
+  trunkOffset,
+} from '../lavori/tree';
 import { attachOrbit } from '../orbit';
 import { blendAt } from '../story';
 import { firstToken } from '../tokens';
@@ -41,7 +55,6 @@ const STORY_CATCH_UP = 5;
 const INTRO_SECONDS = 7;
 /** Luce delle foglie: tutte a meta nella vista d'insieme, solo l'attiva su una scheda. */
 const LIT = { overview: 0.62, active: 1, dimmed: 0.1 };
-const LEAF_RADIUS = 0.46;
 
 interface Pose {
   target: Vector3;
@@ -89,11 +102,12 @@ export function mount({
   const tint = (names: readonly `--${string}`[]) => new Color(firstToken(container, names));
   const surface = tint(['--surface', '--bg-alt']);
   const colors = {
-    trunk: tint(['--surface-hi', '--surface']).lerp(tint(['--border', '--surface-hi']), 0.35),
-    ground: surface,
+    wood: tint(['--surface-hi', '--surface'])
+      .lerp(tint(['--sec-domotica-alt', '--sec-lavori', '--text']), 0.3)
+      .lerp(tint(['--text']), 0.12),
+    ground: surface.clone().lerp(tint(['--bg-alt', '--surface']), 0.5),
     work: tint(['--sec-lavori', '--text']),
     volunteer: tint(['--sec-beneficenza', '--sec-lavori', '--text']),
-    ring: tint(['--text']),
     light: tint(['--text']),
   };
 
@@ -103,36 +117,95 @@ export function mount({
   const root = new Group();
   scene.add(root);
 
-  // Tronco: un tronco di cono lungo tutta la linea del tempo, con un poco di base allargata.
-  const trunkMaterial = own(
-    new MeshStandardMaterial({ color: colors.trunk, flatShading: true, roughness: 0.95 }),
+  // Legno: superficie chiara con un tocco caldo e un po' di testo, per staccarsi dallo sfondo.
+  const woodMaterial = own(
+    new MeshStandardMaterial({ color: colors.wood, flatShading: true, roughness: 0.9 }),
   );
-  const trunkGeometry = own(new CylinderGeometry(0.1, 0.22, height, 7, 1));
-  trunkGeometry.translate(0, height / 2, 0);
-  root.add(new Mesh(trunkGeometry, trunkMaterial));
-  // Cima: una piccola chioma spenta, cosi il tronco non finisce nel vuoto.
-  const crownMaterial = own(
-    new MeshStandardMaterial({ color: colors.trunk, flatShading: true, roughness: 0.95 }),
-  );
-  const crown = new Mesh(own(new IcosahedronGeometry(0.34, 0)), crownMaterial);
-  crown.position.y = height + 0.1;
-  root.add(crown);
-  const groundGeometry = own(new CircleGeometry(2.4, 9).rotateX(-Math.PI / 2));
-  const ground = new Mesh(
-    groundGeometry,
-    own(new MeshStandardMaterial({ color: colors.ground, flatShading: true, roughness: 1 })),
-  );
-  ground.position.y = -0.02;
-  root.add(ground);
+  const up = new Vector3(0, 1, 0);
+  const direction = new Vector3();
+  /** Tratto di legno rastremato da `from` a `to` (raggi in basso e in alto). */
+  const segment = (from: Vector3, to: Vector3, bottom: number, top: number, sides = 6): Mesh => {
+    const geometry = own(new CylinderGeometry(top, bottom, 1, sides, 1).translate(0, 0.5, 0));
+    const mesh = new Mesh(geometry, woodMaterial);
+    mesh.position.copy(from);
+    mesh.quaternion.setFromUnitVectors(up, direction.subVectors(to, from).normalize());
+    mesh.scale.set(1, from.distanceTo(to), 1);
+    root.add(mesh);
+    return mesh;
+  };
 
-  // Ramo = cilindro unitario in verticale, ruotato e allungato dalla biforcazione alla punta.
-  const branchGeometry = own(new CylinderGeometry(0.045, 0.075, 1, 5, 1).translate(0, 0.5, 0));
-  const leafGeometry = own(new IcosahedronGeometry(LEAF_RADIUS, 0));
-  const budGeometry = own(new IcosahedronGeometry(0.1, 0));
-  const ringGeometry = own(new TorusGeometry(LEAF_RADIUS * 1.35, 0.025, 4, 18));
-  const ringMaterial = own(
-    new MeshStandardMaterial({ color: colors.ring, emissive: colors.ring, emissiveIntensity: 0.9 }),
+  // Tronco: catena di tratti che si assottigliano verso l'alto, con una lieve curva.
+  const TRUNK = { bottom: 0.27, top: 0.07 };
+  const pieces = Math.max(4, Math.round(height / 0.9));
+  const trunkAt = (k: number): Vector3 => {
+    const y = (height * k) / pieces;
+    return new Vector3(trunkOffset(y), y, trunkOffset(y * 1.3 + 2) * 0.6);
+  };
+  for (let k = 0; k < pieces; k += 1) {
+    const r = (f: number) => mix(TRUNK.bottom, TRUNK.top, f);
+    segment(trunkAt(k), trunkAt(k + 1), r(k / pieces), r((k + 1) / pieces), 7);
+  }
+  // Radici: quattro contrafforti che escono dal piede e scendono nel terreno.
+  for (let k = 0; k < 5; k += 1) {
+    const angle = (k / 5) * Math.PI * 2 + 0.4;
+    const out = new Vector3(Math.cos(angle) * 0.62, -0.02, Math.sin(angle) * 0.62);
+    segment(new Vector3(Math.cos(angle) * 0.08, 0.4, Math.sin(angle) * 0.08), out, 0.1, 0.03, 5);
+  }
+
+  // Foglia: mandorla bassa e piegata lungo la nervatura, due faccette per lato; si apre lungo +X.
+  const leafGeometry = own(
+    (() => {
+      const steps = 6;
+      const half = 0.31;
+      const fold = 0.32;
+      const positions: number[] = [];
+      const row = (k: number) => {
+        const t = k / steps;
+        const w = Math.sin(Math.PI * t ** 0.78) ** 0.9 * half;
+        return { x: t * LEAF_LENGTH, w };
+      };
+      for (let k = 0; k < steps; k += 1) {
+        const a = row(k);
+        const b = row(k + 1);
+        // Nervatura (y = 0) e due bordi rialzati: ogni tratto ha due quadrilateri, uno per lato.
+        const mA = [a.x, 0, 0];
+        const mB = [b.x, 0, 0];
+        for (const sign of [1, -1]) {
+          const lA = [a.x, a.w * fold, sign * a.w];
+          const lB = [b.x, b.w * fold, sign * b.w];
+          positions.push(...mA, ...lA, ...lB, ...mA, ...lB, ...mB);
+        }
+      }
+      return new BufferGeometry().setAttribute(
+        'position',
+        new BufferAttribute(new Float32Array(positions), 3),
+      );
+    })(),
   );
+  leafGeometry.computeVertexNormals();
+  const budGeometry = own(new IcosahedronGeometry(0.1, 0));
+  const leafMaterial = (color: Color, emissive: Color) =>
+    own(
+      new MeshStandardMaterial({
+        color,
+        emissive,
+        emissiveIntensity: 0,
+        flatShading: true,
+        roughness: 0.8,
+        side: DoubleSide,
+      }),
+    );
+  // Foglie decorative (spente) lungo i rami e in cima: stesso materiale, nessun costo in piu.
+  const filler = surface.clone().lerp(colors.work, 0.38);
+  const fillerMaterial = leafMaterial(filler, filler);
+  const tuft = (parent: Object3D, at: Vector3, yaw: number, tilt: number, scale: number): void => {
+    const mesh = new Mesh(leafGeometry, fillerMaterial);
+    mesh.position.copy(at);
+    mesh.rotation.set(0.9, yaw, tilt);
+    mesh.scale.setScalar(scale);
+    parent.add(mesh);
+  };
+  const curve = new QuadraticBezierCurve3(new Vector3(), new Vector3(), new Vector3());
 
   interface LeafView {
     slug: string;
@@ -140,53 +213,107 @@ export function mount({
     material: MeshStandardMaterial;
     dim: Color;
     bright: Color;
-    ring: Mesh | null;
+    halo: MeshBasicMaterial | null;
     phase: number;
   }
-  const up = new Vector3(0, 1, 0);
   const views: LeafView[] = leaves.map((leaf, i) => {
-    const { base, tip } = layout.branches[i] as (typeof layout.branches)[number];
-    const from = new Vector3(base.x, base.y, base.z);
-    const to = new Vector3(tip.x, tip.y, tip.z);
-    const branch = new Mesh(branchGeometry, trunkMaterial);
-    branch.position.copy(from);
-    branch.quaternion.setFromUnitVectors(up, to.clone().sub(from).normalize());
-    branch.scale.set(1, from.distanceTo(to), 1);
-    root.add(branch);
+    const { base, tip, side } = layout.branches[i] as (typeof layout.branches)[number];
+    const sign = side === 'right' ? 1 : -1;
+    const from = new Vector3(base.x + trunkOffset(base.y), base.y, base.z);
+    const to = new Vector3(tip.x + trunkOffset(base.y), tip.y, tip.z);
+    // Ramo: esce quasi in orizzontale e si piega verso l'alto sotto la foglia.
+    curve.v0.copy(from);
+    curve.v1.set(mix(from.x, to.x, 0.75), mix(from.y, to.y, 0.1), mix(from.z, to.z, 0.5));
+    curve.v2.copy(to);
+    const points = [0, 1 / 3, 2 / 3, 1].map((t) => curve.getPoint(t));
+    for (let k = 0; k < 3; k += 1) {
+      const r = (f: number) => mix(0.085, 0.03, f);
+      segment(points[k] as Vector3, points[k + 1] as Vector3, r(k / 3), r((k + 1) / 3), 5);
+    }
+    // Due foglioline spente sul ramo, una sopra e una sotto.
+    tuft(root, curve.getPoint(0.45), sign > 0 ? 0.5 : Math.PI - 0.5, 0.7, 0.4);
+    tuft(root, curve.getPoint(0.72), sign > 0 ? -0.6 : Math.PI + 0.6, 0.5, 0.34);
 
     const bright = (leaf.volunteer ? colors.volunteer : colors.work).clone();
-    const dim = bright.clone().lerp(surface, 0.72);
-    const material = own(
-      new MeshStandardMaterial({
-        color: dim,
-        emissive: bright,
-        emissiveIntensity: 0,
-        flatShading: true,
-        roughness: 0.8,
-      }),
-    );
-    // La foglia ondeggia attorno al punto d'attacco del ramo: il pivot sta sulla punta.
+    const dim = bright.clone().lerp(surface, 0.7);
+    const material = leafMaterial(dim, bright);
+    // La foglia ondeggia attorno all'attacco del ramo: il pivot sta sulla punta.
     const pivot = new Group();
     pivot.position.copy(to);
-    const blob = new Mesh(leafGeometry, material);
-    blob.scale.set(1.15, 0.7, 0.9);
-    pivot.add(blob);
+    const blade = new Group();
+    blade.rotation.set(0.85, sign > 0 ? 0 : Math.PI, 0.3);
+    const leafMesh = new Mesh(leafGeometry, material);
+    blade.add(leafMesh);
     if (leaf.detail) {
       const bud = new Mesh(budGeometry, material);
-      bud.position.set(0, LEAF_RADIUS * 0.85, 0);
-      pivot.add(bud);
+      bud.position.set(0.05, 0.1, 0);
+      blade.add(bud);
     }
-    let ring: Mesh | null = null;
+    // In corso: alone morbido, una copia piu grande della foglia, additiva, che pulsa piano.
+    let halo: MeshBasicMaterial | null = null;
     if (leaf.ongoing) {
-      ring = new Mesh(ringGeometry, ringMaterial);
-      ring.rotation.x = Math.PI / 2;
-      ring.scale.set(1.15, 1.15, 1);
-      pivot.add(ring);
+      halo = own(
+        new MeshBasicMaterial({
+          color: bright,
+          transparent: true,
+          opacity: 0,
+          blending: AdditiveBlending,
+          depthWrite: false,
+          side: DoubleSide,
+        }),
+      );
+      const glow = new Mesh(leafGeometry, halo);
+      glow.position.set(-0.06, -0.03, 0);
+      glow.scale.set(1.14, 1.1, 1.3);
+      blade.add(glow);
     }
+    pivot.add(blade);
     root.add(pivot);
-    return { slug: leaf.slug, pivot, material, dim, bright, ring, phase: i * 1.7 };
+    return { slug: leaf.slug, pivot, material, dim, bright, halo, phase: i * 1.7 };
   });
   const slugs = views.map((v) => v.slug);
+
+  // Cima: ciuffo di gemme e foglioline giovani, spente. E il futuro della linea del tempo.
+  const crown = new Group();
+  crown.position.copy(trunkAt(pieces));
+  [0.0, 1.3, 2.5, 3.7, 5.0].forEach((yaw, k) => {
+    tuft(crown, new Vector3(0, 0.02 * k, 0), yaw, 0.95 - (k % 2) * 0.35, 0.46 - (k % 2) * 0.08);
+  });
+  tuft(crown, new Vector3(0, 0.05, 0), 0.8, 1.35, 0.3);
+  const bud = new Mesh(budGeometry, fillerMaterial);
+  bud.position.y = 0.12;
+  bud.scale.setScalar(1.1);
+  crown.add(bud);
+  root.add(crown);
+
+  // Terreno: un disco basso e discreto, qualche sasso e ciuffi d'erba.
+  const ground = new Mesh(
+    own(new CircleGeometry(2.7, 9).rotateX(-Math.PI / 2)),
+    own(new MeshStandardMaterial({ color: colors.ground, flatShading: true, roughness: 1 })),
+  );
+  ground.position.y = -0.03;
+  root.add(ground);
+  const rockGeometry = own(new IcosahedronGeometry(0.2, 0));
+  for (const [x, z, s] of [
+    [1.15, 0.7, 1],
+    [-1.3, 0.35, 0.7],
+    [0.6, -1.25, 0.55],
+  ] as const) {
+    const rock = new Mesh(rockGeometry, woodMaterial);
+    rock.position.set(x, 0.04, z);
+    rock.scale.set(s * 1.3, s * 0.6, s);
+    root.add(rock);
+  }
+  for (const [x, z] of [
+    [-0.9, -0.85],
+    [1.5, -0.3],
+    [-1.6, 0.95],
+    [0.3, 1.45],
+  ] as const) {
+    for (let k = 0; k < 3; k += 1) {
+      tuft(root, new Vector3(x + k * 0.07, 0, z + k * 0.04), k * 2.1, 1.2, 0.26);
+    }
+  }
 
   const ambient = new AmbientLight(colors.light, 0.85);
   const sun = new DirectionalLight(colors.light, 1.5);
@@ -204,8 +331,14 @@ export function mount({
   const names = moments.length > 0 ? moments : ['overview'];
 
   const leafPoint = (index: number): Vector3 => {
-    const { base, tip } = layout.branches[index] as (typeof layout.branches)[number];
-    return new Vector3((base.x + tip.x) / 2, (base.y + tip.y) / 2, (base.z + tip.z) / 2);
+    // Tra il tronco e il centro della foglia: si vede il ramo che la porta.
+    const { base, tip, side } = layout.branches[index] as (typeof layout.branches)[number];
+    const reach = (side === 'right' ? 1 : -1) * LEAF_LENGTH * 0.5;
+    return new Vector3(
+      (base.x + tip.x + reach) / 2 + trunkOffset(base.y),
+      (base.y + tip.y + 0.2) / 2,
+      (base.z + tip.z) / 2,
+    );
   };
 
   /** Inquadratura del momento `index`. */
@@ -216,12 +349,17 @@ export function mount({
     if (leaf < 0) {
       // Insieme: tutto l'albero. In apertura (livello 'full') la camera sale piano dal basso.
       const intro = tier === 'full' && names[index] === 'overview' && !userYawSet() ? introT() : 1;
-      const target = new Vector3(0, height * mix(0.3, 0.46, intro), 0);
+      const target = new Vector3(0, height * mix(0.42, 0.5, intro), 0);
       return {
         target,
         yaw: userYaw ?? Math.sin(elapsed * 0.15) * 0.15,
-        elevation: mix(-0.04, 0.12, intro),
-        distance: fitDistance(height + 1.6, portrait ? 6.2 : 4.8, aspect, camera.fov),
+        elevation: mix(0.02, 0.1, intro),
+        distance: fitDistance(
+          portrait ? height + 2.4 : height + 3.2,
+          portrait ? 5.6 : 5.4,
+          aspect,
+          camera.fov,
+        ),
         shift: 0,
         lift: portrait ? -0.03 : 0,
         lit: views.map(() => (names[index] === 'exit' ? LIT.overview + 0.1 : LIT.overview)),
@@ -276,14 +414,14 @@ export function mount({
     views.forEach((view, i) => {
       const level = mix(a.lit[i] ?? 0, b.lit[i] ?? 0, t);
       view.material.color.lerpColors(view.dim, view.bright, level);
-      view.material.emissiveIntensity = level * level * 0.5;
+      view.material.emissiveIntensity = level * level * 0.32;
       // Ondeggio e pulsazione solo con l'animazione accesa: a 'reduced' elapsed resta 0.
       const wave = tier === 'full' ? Math.sin(elapsed * SWAY.speed + view.phase) : 0;
       view.pivot.rotation.z = wave * SWAY.amplitude;
       view.pivot.rotation.x = wave * SWAY.amplitude * 0.5;
-      if (view.ring) {
-        const pulse = tier === 'full' ? 1 + Math.sin(elapsed * 2 + view.phase) * 0.08 : 1;
-        view.ring.scale.set(1.15 * pulse, 1.15 * pulse, 1);
+      if (view.halo) {
+        const pulse = tier === 'full' ? 0.75 + Math.sin(elapsed * 1.6 + view.phase) * 0.25 : 0.8;
+        view.halo.opacity = (0.06 + level * 0.2) * pulse;
       }
     });
   };

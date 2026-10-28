@@ -11,8 +11,10 @@ export const STEP = 1.15;
 export const TRUNK_BASE = 1.1;
 export const CROWN = 1.5;
 /** Sporgenza orizzontale del ramo e salita dalla biforcazione alla punta. */
-export const REACH = 1.55;
-export const RISE = 0.45;
+export const REACH = 1.2;
+export const RISE = 0.5;
+/** Lunghezza della foglia, dal picciolo alla punta. */
+export const LEAF_LENGTH = 1.05;
 
 export interface Point {
   x: number;
@@ -78,6 +80,9 @@ export interface Framing {
  * sopra la scheda che occupa il centro.
  */
 export function cardFraming(side: Side, widthPx: number): Framing {
-  if (widthPx >= SIDE_BY_SIDE_PX) return { shift: side === 'right' ? -0.8 : 0.8, lift: 0 };
+  if (widthPx >= SIDE_BY_SIDE_PX) return { shift: side === 'right' ? -0.7 : 0.7, lift: 0 };
   return { shift: 0, lift: 0.26 };
 }
+
+/** Scostamento orizzontale del tronco a quota `y`: una leggera curva, non un palo dritto. */
+export const trunkOffset = (y: number): number => Math.sin(y * 0.75 + 0.6) * 0.11;
