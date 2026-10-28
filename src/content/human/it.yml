@@ -34,7 +34,7 @@ labels:
   profiles: Profili
   cv: CV (PDF)
 scenes:
-  placeholder: Cubo low-poly segnaposto in attesa della scena 3D
+  homelab: "Due piattaforme low-poly, Casa e Produzione, con i nodi dell'homelab e un fascio di luce che le collega"
 farewell:
   command: "$ logout"
   message: "Grazie di essere passato. Se vuoi rifare il giro, la porta è qui:"
@@ -53,6 +53,12 @@ homelab:
   offsite: "fuori sede"
   onsite: "in sede"
   wip: "Lavori in corso"
+  explore: "Esplora la scena"
+  sceneHint: "Trascina in orizzontale per girarla, scegli un nodo per vedere cosa ospita."
+  nodesLabel: "Nodi"
+  layersLabel: "Livelli"
+  close: "Chiudi"
+  noAdrs: "Nessuna decisione documentata per questo nodo, per ora."
 domotica:
   projects: Progetti pubblici
   automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)
