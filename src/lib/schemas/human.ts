@@ -25,8 +25,6 @@ export const humanSchema = z.strictObject({
   home: z.strictObject({
     greeting: text,
     scrollHint: text,
-    /** Spazio riservato all'avatar low-poly (il modello arriva nelle fasi 3D). */
-    avatarLabel: text,
     /** Nome accessibile dell'elenco di badge: ciascuno porta alla sezione dove la competenza si vede. */
     badgesLabel: text,
   }),
@@ -54,6 +52,7 @@ export const humanSchema = z.strictObject({
     domotica: text,
     lavori: text,
     certificazioni: text,
+    avatar: text,
     interessi: text,
   }),
   homelab: z.strictObject({
@@ -123,7 +122,6 @@ export const humanTranslatable = [
   'homeTitle',
   'home.greeting',
   'home.scrollHint',
-  'home.avatarLabel',
   'home.badgesLabel',
   ...humanSectionIds.map((id) => `intros.${id}`),
   'labels.ongoing',
@@ -183,4 +181,5 @@ export const humanTranslatable = [
   'scenes.lavori',
   'scenes.interessi',
   'scenes.certificazioni',
+  'scenes.avatar',
 ];

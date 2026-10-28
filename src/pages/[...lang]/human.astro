@@ -119,7 +119,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             <>
               <div class="who">
                 <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
-                <div class="avatar">{page.home.avatarLabel}</div>
+                <div class="avatar">
+                  <Scene scene="avatar" label={page.scenes.avatar} />
+                </div>
               </div>
               <p class="greeting">{page.home.greeting}</p>
               <nav aria-label={page.home.badgesLabel}>
@@ -687,22 +689,24 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     gap: 1rem;
     margin: 1rem 0;
   }
-  /* Spazio riservato (stesse dimensioni del ritratto): nessun layout shift quando arrivera l'avatar. */
+  /* Riquadro riservato (stesse dimensioni del ritratto): nessun layout shift quando arriva il 3D. */
   .avatar {
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 160px;
     height: 160px;
-    padding: 0.5rem;
-    border: 1px dashed var(--border);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--surface);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    text-align: center;
+  }
+  .avatar :global(.scene[data-kind='micro']) {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  /* Senza WebGL la scena si nasconde e con lei il riquadro: resta il ritratto. */
+  .avatar:has(.scene[hidden]) {
+    display: none;
   }
   .badges {
     display: flex;

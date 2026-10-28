@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|interessi)\./.test(url);
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|figure|interessi)\./.test(url);
 const scene = (page: Page) => page.locator('[data-scene="homelab"]');
 const state = (page: Page) => scene(page).getAttribute('data-scene-state');
 const nearScene = (page: Page) =>
@@ -256,6 +256,55 @@ for (const route of ['/human/', '/en/human/']) {
       window.scrollTo(0, top - window.innerHeight * f);
     }, fraction);
 
+  // Avatar della prima schermata (PORT-59).
+  test(`${route}: avatar riservato e fermo prima del primo gesto`, async ({ page }) => {
+    const urls: string[] = [];
+    page.on('request', (r) => urls.push(r.url()));
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    const avatar = page.locator('#home .avatar [data-scene="avatar"]');
+    await expect(avatar).toHaveAttribute('data-scene-state', 'idle');
+    await expect(avatar).toHaveAttribute('role', 'img');
+    const box = await page.locator('#home .avatar').boundingBox();
+    expect(box?.width).toBe(160);
+    expect(box?.height).toBe(160);
+    expect(urls.filter(isThree)).toEqual([]);
+  });
+
+  test(`${route}: senza WebGL l'avatar sparisce e resta il ritratto`, async ({ page }) => {
+    await page.addInitScript(() => {
+      const original = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (
+        this: HTMLCanvasElement,
+        type: string,
+        ...args: never[]
+      ) {
+        if (/webgl/.test(type)) return null;
+        return (original as (...a: unknown[]) => unknown).call(this, type, ...args);
+      } as typeof original;
+    });
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await page.mouse.wheel(0, 50);
+    await expect
+      .poll(() => page.locator('#home [data-scene="avatar"]').getAttribute('data-scene-state'))
+      .toBe('text');
+    await expect(page.locator('#home .avatar')).toBeHidden();
+    await expect(page.locator('#home .portrait')).toBeVisible();
+    await expect(page.locator('#home .greeting')).toBeVisible();
+  });
+
+  test.describe('avatar con reduced motion', () => {
+    test.use({ reducedMotion: 'reduce' });
+    test(`${route}: avatar statico sulla posa finale`, async ({ page }) => {
+      await page.goto(route, { waitUntil: 'networkidle' });
+      await page.mouse.wheel(0, 50);
+      const avatar = page.locator('#home [data-scene="avatar"]');
+      await expect.poll(() => avatar.getAttribute('data-scene-state')).toBe('static');
+      await expect(avatar.locator('canvas')).toBeAttached();
+      expect(await avatar.getAttribute('data-scene-progress')).toBeNull();
+    });
+  });
+
   test(`${route}: nessun 3D prima che l'utente usi la pagina`, async ({ page }) => {
     const urls: string[] = [];
     page.on('request', (r) => urls.push(r.url()));
@@ -267,6 +316,8 @@ for (const route of ['/human/', '/en/human/']) {
 
   test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
     await page.goto(route);
+    // Una sola micro-scena attiva per volta: isola Lavori togliendo l'avatar della prima schermata.
+    await page.locator('#home .avatar').evaluate((el) => el.remove());
     await placeMicro(page, 0.9);
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     await expect(micro(page).locator('canvas')).toBeAttached();

@@ -51,7 +51,7 @@ for (const [route, lang] of [
       await expect(page.locator('#contatti a[href^="mailto:"]')).toHaveCount(1);
     });
 
-    test('prima schermata: saluto, ritratto, avatar riservato e badge verso la sezione collegata', async ({
+    test('prima schermata: saluto, ritratto, avatar e badge verso la sezione collegata', async ({
       page,
     }) => {
       await page.goto(route);

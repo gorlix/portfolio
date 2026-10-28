@@ -7,7 +7,6 @@ homeTitle: Start
 home:
   greeting: Hi, I'm Alessandro. I tinker, I break things, and then I put them back together better than before. The rest is below.
   scrollHint: Scroll, or jump straight to any stop from the menu.
-  avatarLabel: Low-poly avatar coming soon
   badgesLabel: "Technical skills: pick one to see where I use it"
 intros:
   home: Welcome to the human path.
@@ -36,6 +35,7 @@ labels:
 scenes:
   homelab: "Two low-poly platforms, Home and Production, with the homelab nodes and a beam of light joining them"
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
+  avatar: "My low-poly avatar: it turns to face you and waves as you scroll"
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
   certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"

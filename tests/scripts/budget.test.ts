@@ -24,7 +24,7 @@ describe('checkBudgets', () => {
   });
 
   it('un chunk nuovo senza budget e un errore, non passa in silenzio', () => {
-    expect(checkBudgets({ chunks: [{ file: 'avatar.x.js', gzip: 10 }], pages: [] })[0]).toContain(
+    expect(checkBudgets({ chunks: [{ file: 'zzz.x.js', gzip: 10 }], pages: [] })[0]).toContain(
       'senza budget',
     );
   });
