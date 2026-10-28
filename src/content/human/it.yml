@@ -7,7 +7,6 @@ homeTitle: Inizio
 home:
   greeting: Ciao, sono Alessandro. Smanetto, rompo cose e poi le rimetto insieme meglio di prima. Qui trovi il resto.
   scrollHint: Scorri, oppure salta direttamente a una tappa dal menu.
-  avatarLabel: Avatar low-poly in arrivo
   badgesLabel: "Competenze tecniche: scegline una per vedere dove la uso"
 intros:
   home: Benvenuto nel percorso umano.
@@ -38,6 +37,7 @@ scenes:
   domotica: "Casa low-poly vista dall'alto, con le stanze che si illuminano quando parte un'automazione"
   beneficenza: "Una rete di punti che si avvicinano piano e si collegano al centro"
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
+  avatar: "Il mio avatar low-poly: si gira verso di te e saluta mentre scorri"
   lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
   certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
 farewell:

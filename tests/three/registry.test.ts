@@ -17,6 +17,7 @@ describe('registro delle scene', () => {
       'certificazioni',
       'beneficenza',
       'contatti',
+      'avatar',
     ]);
   });
 
