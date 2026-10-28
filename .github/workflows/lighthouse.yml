@@ -1,15 +1,22 @@
 name: Lighthouse
 
-# Predisposto, non bloccante: si lancia a mano. Diventa un controllo obbligatorio
-# quando esistono le pagine vere e i budget di peso (spec §3.5) sono stati misurati.
+# Gira su ogni PR verso main (e a mano). Le soglie in lighthouserc.json decidono cosa
+# blocca (error) e cosa avvisa soltanto (warn); spec §3.5.
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lighthouse:
+    name: Lighthouse
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

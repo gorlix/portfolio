@@ -17,7 +17,7 @@
     "assert": {
       "assertMatrix": [
         {
-          "matchingUrlPattern": "/(en/)?index\\.html$",
+          "matchingUrlPattern": "^https?://[^/]+/(en/)?index\\.html$",
           "assertions": {
             "categories:performance": [
               "warn",
@@ -58,7 +58,7 @@
           }
         },
         {
-          "matchingUrlPattern": "/(en/)?(recruiter|agent)/index\\.html$",
+          "matchingUrlPattern": "^https?://[^/]+/(en/)?(recruiter|agent)/index\\.html$",
           "assertions": {
             "categories:performance": [
               "warn",
@@ -99,7 +99,7 @@
           }
         },
         {
-          "matchingUrlPattern": "/(en/)?human/index\\.html$",
+          "matchingUrlPattern": "^https?://[^/]+/(en/)?human/index\\.html$",
           "assertions": {
             "categories:performance": [
               "warn",
