@@ -77,6 +77,29 @@ for (const route of ['/human/', '/en/human/']) {
     });
   }
 
+  test(`${route}: fuori schermo la scena si ferma e non chiede fotogrammi`, async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as Window & { __frames?: number };
+      w.__frames = 0;
+      const original = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => {
+        w.__frames = (w.__frames ?? 0) + 1;
+        return original(cb);
+      };
+    });
+    await page.goto(route);
+    await nearScene(page);
+    await page.evaluate(() => document.querySelector('[data-scene]')?.scrollIntoView());
+    await expect.poll(() => state(page)).toBe('running');
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(() => state(page)).toBe('paused');
+    const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
+    const before = await frames();
+    await page.waitForTimeout(500);
+    expect(await frames()).toBe(before);
+  });
+
   test(`${route}: senza WebGL resta il testo e three non viene scaricato`, async ({ page }) => {
     const urls: string[] = [];
     page.on('request', (r) => urls.push(r.url()));

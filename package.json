@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "prepare": "git config core.hooksPath .githooks",
-    "check:machine": "node scripts/validate-machine.ts dist"
+    "check:machine": "node scripts/validate-machine.ts dist",
+    "check:budget": "node scripts/check-budget.ts dist"
   },
   "dependencies": {
     "@catppuccin/palette": "^1.8.0",
