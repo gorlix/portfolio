@@ -24,7 +24,7 @@ export const chunkBudgets: ChunkBudget[] = [
   {
     name: 'scena',
     pattern:
-      /^(homelab|domotica|lavori|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
+      /^(homelab|domotica|lavori|trimind|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
     maxGzip: 16 * KB,
   },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
@@ -48,7 +48,13 @@ export const pageBudgets: PageBudget[] = [
     maxScriptGzip: 0,
   },
   // Il 3D non conta: arriva dopo, solo vicino alle scene.
-  { name: 'umano', pattern: /^\/(en\/)?human\/$/, maxTotalGzip: 32 * KB, maxScriptGzip: 6 * KB },
+  // Pagine di approfondimento dei lavori (`/human/lavori/<slug>/`, PORT-82): stessi limiti.
+  {
+    name: 'umano',
+    pattern: /^\/(en\/)?human\/(lavori\/[a-z0-9-]+\/)?$/,
+    maxTotalGzip: 32 * KB,
+    maxScriptGzip: 6 * KB,
+  },
 ];
 
 export interface Measured {

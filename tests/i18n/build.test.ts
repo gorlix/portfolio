@@ -73,14 +73,22 @@ describe('build i18n', () => {
     }
   });
 
-  it('il selettore lingua e fatto di link; script solo esterni: uno in ingresso, due su /human', () => {
+  it('il selettore lingua e fatto di link; script solo esterni: uno in ingresso, due su /human, uno negli approfondimenti', () => {
     for (const { url, html } of pages) {
       // JSON-LD e dati delle scene sono blocchi di dati, non codice: non contano tra gli script.
       const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)]
         .map((m) => m[0])
         .filter((tag) => !/^<script type="application\/(ld\+)?json"/.test(tag));
-      // Ingresso: terminale. Percorso Umano: bootstrap 3D e barra del tempo. Altrove nessuno.
-      const expected: Record<string, number> = { '/': 1, '/en/': 1, '/human/': 2, '/en/human/': 2 };
+      // Ingresso: terminale. Percorso Umano: bootstrap 3D e barra del tempo; approfondimenti dei
+      // lavori: solo il bootstrap 3D. Altrove nessuno.
+      const expected: Record<string, number> = {
+        '/': 1,
+        '/en/': 1,
+        '/human/': 2,
+        '/en/human/': 2,
+        '/human/lavori/trimind/': 1,
+        '/en/human/lavori/trimind/': 1,
+      };
       expect(scripts.length, url).toBe(expected[url] ?? 0);
       for (const tag of scripts) {
         expect(tag, url).toMatch(/^<script type="module" src="\/_astro\/[^"]+\.js"><\/script>$/);
@@ -253,11 +261,11 @@ describe('Web Analytics solo su /human (PORT-72)', () => {
     for (const { url, html } of pages) expect(html, url).not.toContain('cloudflareinsights');
   });
 
-  it('con token il beacon sta solo su /human e /en/human, una volta, nella head', () => {
+  it('con token il beacon sta solo nel percorso Umano (e i suoi approfondimenti), una volta, nella head', () => {
     expect(withToken.length).toBe(pages.length);
     for (const { url, html } of withToken) {
       const count = html.split('static.cloudflareinsights.com/beacon.min.js').length - 1;
-      if (url === '/human/' || url === '/en/human/') {
+      if (/^\/(en\/)?human\//.test(url)) {
         expect(count, url).toBe(1);
         const head = html.slice(0, html.indexOf('</head>'));
         expect(head, url).toContain(`data-cf-beacon="{&quot;token&quot;:&quot;${token}&quot;}"`);
@@ -295,7 +303,13 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
     const listed = Object.values(profile().pages)
       .flatMap((u) => [u.it, u.en])
       .sort();
-    expect(Object.keys(profile().pages).sort()).toEqual(['agent', 'home', 'human', 'recruiter']);
+    expect(Object.keys(profile().pages).sort()).toEqual([
+      'agent',
+      'home',
+      'human',
+      'recruiter',
+      'trimind',
+    ]);
     expect(listed).toEqual(siteUrls());
   });
 
@@ -378,6 +392,8 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
 
 describe('criteri di accettazione minimi §16 (PORT-73)', () => {
   const isHuman = (url: string) => url === '/human/' || url === '/en/human/';
+  /** Percorso Umano con le sue pagine di approfondimento: gli unici con 3D. */
+  const isHumanPath = (url: string) => /^\/(en\/)?human\//.test(url);
   const textOf = (html: string) =>
     html
       .replace(/<script\b[\s\S]*?<\/script>/g, ' ')
@@ -387,7 +403,7 @@ describe('criteri di accettazione minimi §16 (PORT-73)', () => {
 
   it('nessun asset 3D e nessuno script delle scene fuori da /human', () => {
     const threeAsset = /three|homelab|domotica|Scene\.astro|\.(glb|gltf|ktx2|basis|hdr|exr)\b/i;
-    for (const { url, html } of pages.filter((p) => !isHuman(p.url))) {
+    for (const { url, html } of pages.filter((p) => !isHumanPath(p.url))) {
       for (const tag of html.match(/<(?:script|link)\b[^>]*>/g) ?? []) {
         expect(tag, `${url}: ${tag}`).not.toMatch(threeAsset);
       }

@@ -10,6 +10,7 @@ export const sceneLoaders = {
   homelab: () => import('./scenes/homelab'),
   domotica: () => import('./scenes/domotica'),
   lavori: () => import('./scenes/lavori'),
+  trimind: () => import('./scenes/trimind'),
   certificazioni: () => import('./scenes/certificazioni'),
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),

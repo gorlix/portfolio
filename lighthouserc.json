@@ -10,7 +10,9 @@
         "/agent/index.html",
         "/en/agent/index.html",
         "/human/index.html",
-        "/en/human/index.html"
+        "/en/human/index.html",
+        "/human/lavori/trimind/index.html",
+        "/en/human/lavori/trimind/index.html"
       ],
       "numberOfRuns": 1
     },
@@ -99,7 +101,7 @@
           }
         },
         {
-          "matchingUrlPattern": "^https?://[^/]+/(en/)?human/index\\.html$",
+          "matchingUrlPattern": "^https?://[^/]+/(en/)?human/(lavori/[a-z0-9-]+/)?index\\.html$",
           "assertions": {
             "categories:performance": [
               "warn",
