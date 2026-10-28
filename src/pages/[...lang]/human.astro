@@ -990,6 +990,18 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     border-radius: 0.5rem;
     background: var(--surface);
   }
+  /*
+   * Finche la scena non e montata (idle, in caricamento, errore) il riquadro esce dal flusso:
+   * nessuno spazio, bordo o sfondo. Non e display:none ne ritagliato, cosi l'osservatore del
+   * bootstrap lo vede ancora e puo montare la scena; poi rientra nel flusso alla stessa misura.
+   */
+  .avatar:not(:has(.scene:is([data-scene-state='running'], [data-scene-state='paused'], [data-scene-state='static']))) {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    border-color: transparent;
+    background: none;
+  }
   .avatar :global(.scene[data-kind='micro']) {
     width: 100%;
     max-width: none;
