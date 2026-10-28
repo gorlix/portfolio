@@ -169,12 +169,23 @@ for (const route of ['/human/', '/en/human/']) {
     // In cima (la scena Contatti, in fondo, sarebbe attiva e chiederebbe fotogrammi). Li c'e
     // l'avatar: la sua breve rincorsa verso l'avanzamento deve finire, poi zero fotogrammi.
     await page.evaluate(() => window.scrollTo(0, 0));
+    // Le scene in cima (avatar) si montano in modo asincrono: si conta solo quando sono pronte,
+    // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          [...document.querySelectorAll<HTMLElement>('[data-scene]')]
+            .filter((el) => el.getBoundingClientRect().top < window.innerHeight * 2)
+            .every((el) => !/idle|loading/.test(el.dataset.sceneState ?? '')),
+        ),
+      )
+      .toBe(true);
     await expect.poll(() => state(page)).toBe('paused');
     const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
     await expect
       .poll(async () => {
         const before = await frames();
-        await page.waitForTimeout(300);
+        await page.waitForTimeout(500);
         return (await frames()) === before;
       })
       .toBe(true);
