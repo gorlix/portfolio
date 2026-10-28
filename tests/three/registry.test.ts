@@ -19,6 +19,9 @@ describe('registro delle scene', () => {
       'contatti',
       'avatar',
       'interessi',
+      'sci',
+      'tennis',
+      'pallavolo',
     ]);
   });
 

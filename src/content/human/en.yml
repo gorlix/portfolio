@@ -41,6 +41,9 @@ scenes:
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
   certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
+  sci: "A low-poly mountain with a line that carves down in turns as you scroll"
+  tennis: "A ball that hits the line of a clay court, kicks up the clay and flies towards you"
+  pallavolo: "Two low-poly characters passing the ball with a forearm pass"
 farewell:
   command: "$ logout"
   message: "Thanks for stopping by. If you want another lap, the door is right here:"

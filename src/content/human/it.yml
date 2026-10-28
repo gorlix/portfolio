@@ -41,6 +41,9 @@ scenes:
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
   lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
   certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
+  sci: "Una montagna low-poly con una linea che scende disegnando curve mentre scorri"
+  tennis: "Una pallina che segna la riga di un campo in terra rossa, solleva la terra e arriva verso di te"
+  pallavolo: "Due personaggi low-poly che si passano la palla con un bagher"
 farewell:
   command: "$ logout"
   message: "Grazie di essere passato. Se vuoi rifare il giro, la porta è qui:"

@@ -54,6 +54,9 @@ export const humanSchema = z.strictObject({
     certificazioni: text,
     beneficenza: text,
     contatti: text,
+    sci: text,
+    tennis: text,
+    pallavolo: text,
     avatar: text,
     interessi: text,
   }),
@@ -185,5 +188,8 @@ export const humanTranslatable = [
   'scenes.certificazioni',
   'scenes.beneficenza',
   'scenes.contatti',
+  'scenes.sci',
+  'scenes.tennis',
+  'scenes.pallavolo',
   'scenes.avatar',
 ];

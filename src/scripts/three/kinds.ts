@@ -12,6 +12,9 @@ export const microScenes = [
   'beneficenza',
   'contatti',
   'interessi',
+  'sci',
+  'tennis',
+  'pallavolo',
 ] as const;
 
 export function sceneKind(name: string): SceneKind {

@@ -59,6 +59,22 @@ for (const route of ['/human/', '/en/human/']) {
       await expect(page).toHaveURL(/#lavori$/);
     });
 
+    test('i sotto-segmenti di Sport seguono lo scroll', async ({ page }) => {
+      await page.goto(route);
+      for (const sub of ['sport-ski', 'sport-tennis', 'sport-volleyball']) {
+        await page.evaluate((id) => {
+          const el = document.getElementById(id) as HTMLElement;
+          window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.4);
+        }, sub);
+        await expect(
+          page.locator(`nav[data-timeline] .subs a[href="#${sub}"][aria-current="location"]`),
+        ).toHaveCount(1);
+        await expect(
+          page.locator('nav[data-timeline] .subs a[aria-current="location"]'),
+        ).toHaveCount(1);
+      }
+    });
+
     test('lo scroll non è bloccato', async ({ page }) => {
       await page.goto(route);
       const overflow = await page.evaluate(() => getComputedStyle(document.body).overflow);
