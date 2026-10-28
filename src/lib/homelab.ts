@@ -45,6 +45,8 @@ export interface HomelabModel {
   overlays: [string, string][];
   /** Coppia primario/backup dietro l'IP virtuale; assente se i dati non la dichiarano. */
   failover?: { primary: HomelabEndpoint; backup: HomelabEndpoint };
+  /** Seme e righe di log della simulazione (metriche e log generati nel browser). */
+  simulation: Infrastructure['simulation'];
 }
 
 export function homelabModel(infra: Infrastructure): HomelabModel {
@@ -85,6 +87,7 @@ export function homelabModel(infra: Infrastructure): HomelabModel {
     overlays: infra.links
       .filter((l) => l.kind === 'overlay')
       .map((l) => [l.from, l.to] as [string, string]),
+    simulation: infra.simulation,
     ...(failover && {
       failover: { primary: endpoint(failover.from), backup: endpoint(failover.to) },
     }),

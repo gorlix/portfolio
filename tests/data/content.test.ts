@@ -118,6 +118,13 @@ describe('schemi: casi negativi', () => {
     expect(infrastructureSchema.safeParse({ ...infra, adrs: [adr] }).success).toBe(false);
   });
 
+  it('rifiuta righe di log simulate di servizi che non esistono', () => {
+    const infra = parse(readFileSync(join(root, 'infrastructure/it.yml'), 'utf8'));
+    const logs = [{ service: 'servizio-fantasma', message: 'boo' }];
+    const broken = { ...infra, simulation: { ...infra.simulation, logs } };
+    expect(infrastructureSchema.safeParse(broken).success).toBe(false);
+  });
+
   it('rifiuta un backup che non rispetta il 3-2-1', () => {
     const infra = parse(readFileSync(join(root, 'infrastructure/it.yml'), 'utf8'));
     const targets = infra.backup.targets;

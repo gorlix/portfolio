@@ -113,3 +113,39 @@ wip:
     name: CI per l'infrastruttura
     summary: Controlli automatici su ogni modifica prima del deploy. Oggi alcuni li faccio ancora a occhio.
     region: produzione
+simulation:
+  seed: 20261027
+  logs:
+    - service: traefik-casa
+      message: "GET /status 200 4ms"
+    - service: traefik-produzione
+      message: "GET /login 302 11ms"
+    - service: adguard-primario
+      message: "query A example.test cached 0ms"
+    - service: adguard-backup
+      message: "sync: config up to date"
+    - service: home-assistant
+      message: "automation triggered: evening lights"
+    - service: frigate
+      message: "camera-1: motion detected, clip saved"
+    - service: authentik
+      message: "login ok, session refreshed"
+    - service: nextcloud
+      message: "cron: background jobs done in 2.1s"
+    - service: monitoring
+      message: "scrape ok: 3 targets, 0 down"
+    - service: tunnel-casa
+      message: "tunnel healthy, 4 connections"
+    - service: tunnel-produzione
+      message: "tunnel healthy, 4 connections"
+  failover:
+    down:
+      - service: adguard-primario
+        message: "keepalived: health check failed, VRRP MASTER -> FAULT"
+      - service: adguard-backup
+        message: "keepalived: VRRP BACKUP -> MASTER, VIP acquired"
+    up:
+      - service: adguard-primario
+        message: "keepalived: health check ok, VRRP FAULT -> MASTER"
+      - service: adguard-backup
+        message: "keepalived: VRRP MASTER -> BACKUP, VIP released"

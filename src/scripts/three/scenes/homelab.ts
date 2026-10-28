@@ -1,11 +1,15 @@
 import {
   AmbientLight,
   BoxGeometry,
+  BufferGeometry,
   Color,
+  ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
   EdgesGeometry,
   Group,
+  IcosahedronGeometry,
+  Line,
   LineBasicMaterial,
   LineSegments,
   Mesh,
@@ -16,12 +20,15 @@ import {
   Raycaster,
   Scene,
   SphereGeometry,
+  TorusGeometry,
   Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three';
 import type { HomelabModel } from '../../../lib/homelab';
+import { createSimulator, type LogLine } from '../homelab/metrics';
 import { bindHomelabUi } from '../homelab/ui';
+import { attachOrbit } from '../orbit';
 import { firstToken } from '../tokens';
 import type { SceneContext, SceneInstance } from '../types';
 
@@ -30,8 +37,9 @@ import type { SceneContext, SceneInstance } from '../types';
  * dai dati e un fascio di luce che le unisce (la rete overlay). Tutto procedurale, nessun modello
  * esterno. I dati sono gli stessi della tabella testuale (src/lib/homelab.ts); pannelli e controlli
  * sono HTML veri, gestiti da ../homelab/ui.ts.
- * Orbit leggero solo in orizzontale: il canvas ha `touch-action: pan-y` e nessun ascoltatore della
- * rotella, quindi lo scroll della pagina non viene mai catturato.
+ * Orbit leggero solo in orizzontale (../orbit.ts): lo scroll della pagina non viene mai catturato.
+ * Metriche e log sono simulati con un seme (../homelab/metrics.ts) e avanzano solo mentre la scena
+ * anima; il gesto di failover sposta il VIP, il carico e i log sul nodo di backup.
  */
 
 const REGION_GAP = 4.6;
@@ -44,13 +52,16 @@ const BEAM_Y = PLATFORM_TOP + 0.45;
 const PULSES = 3;
 /** Radianti di rotazione massima a destra e a sinistra: si gira la scena, non la si ribalta. */
 const MAX_YAW = 0.7;
-const YAW_PER_PX = 0.006;
-/** Sotto questa distanza un trascinamento e ancora un click. */
-const CLICK_SLOP_PX = 6;
 /** Oscillazione lenta finche l'utente non prende il controllo. */
 const SWAY = { amplitude: 0.22, speed: 0.18 };
 
-const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
+/** Secondi reali tra un passo della simulazione e il successivo, e punti delle sparkline. */
+const SIM_EVERY = 1.2;
+const SPARK_POINTS = 30;
+/** Ora simulata d'inizio: sera, quando l'homelab lavora di piu. */
+const SIM_START_MINUTE = 19 * 60;
+const VIP_SPEED = 3;
+const UP = new Vector3(0, 1, 0);
 
 export function mount({ canvas, container, tier, data }: SceneContext): SceneInstance {
   const model = data as HomelabModel | undefined;
@@ -87,6 +98,11 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
     led: tint(['--ctp-green', '--text']),
     beam: tint(['--ctp-sapphire', '--sec-homelab']),
     marker: tint(['--ctp-yellow', '--text']),
+    danger: tint(['--danger', '--ctp-red']),
+    vip: tint(['--ctp-teal', '--sec-homelab']),
+    backup: tint(['--ctp-sky', '--sec-homelab']),
+    cloud: tint(['--ctp-lavender', '--surface-hi']),
+    wip: tint(['--ctp-peach', '--text']),
     light: tint(['--text']),
   };
 
@@ -210,24 +226,136 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
   sun.position.set(3, 6, 4);
   scene.add(sun);
 
+  // --- Layer Backup 3-2-1: frecce dal nodo d'origine verso i tre destinatari ------------------
+  const backupLayer = new Group();
+  backupLayer.visible = false;
+  root.add(backupLayer);
+  const arrowMaterial = own(new LineBasicMaterial({ color: colors.backup }));
+  const tipGeometry = own(new ConeGeometry(0.07, 0.2, 6));
+  const tipMaterial = own(new MeshBasicMaterial({ color: colors.backup }));
+  const cloudGeometry = own(new IcosahedronGeometry(0.22, 0));
+  const cloudMaterial = own(
+    new MeshStandardMaterial({ color: colors.cloud, flatShading: true, roughness: 0.8 }),
+  );
+  const diskGeometry = own(new CylinderGeometry(0.28, 0.28, 0.12, 8));
+  const backupPulses: { from: Vector3; to: Vector3; mesh: Mesh }[] = [];
+  const sourceView = nodes.get(model.backup.source.node);
+  if (sourceView) {
+    const from = sourceView.body.position.clone().setY(PLATFORM_TOP + NODE_SIZE.h + 0.1);
+    const clouds = model.backup.targets.filter((t) => t.medium === 'cloud');
+    model.backup.targets.forEach((t) => {
+      const to =
+        t.medium === 'cloud'
+          ? new Vector3((clouds.indexOf(t) - (clouds.length - 1) / 2) * 2.2, 2.5, -1.4)
+          : new Vector3(from.x + 1.1, PLATFORM_TOP + 0.08, 1.35);
+      // Destinatario: una nuvola di tre facce per il cloud, un disco per la copia locale.
+      if (t.medium === 'cloud') {
+        for (const [dx, dy, scale] of [
+          [-0.2, 0, 0.9],
+          [0.18, 0.04, 1],
+          [0, 0.16, 0.8],
+        ] as const) {
+          const puff = new Mesh(cloudGeometry, cloudMaterial);
+          puff.position.set(to.x + dx, to.y + dy, to.z);
+          puff.scale.setScalar(scale);
+          backupLayer.add(puff);
+        }
+      } else {
+        const disk = new Mesh(diskGeometry, cloudMaterial);
+        disk.position.copy(to);
+        backupLayer.add(disk);
+      }
+      const end = to.clone().lerp(from, 0.12);
+      backupLayer.add(
+        new Line(own(new BufferGeometry().setFromPoints([from, end])), arrowMaterial),
+      );
+      const tip = new Mesh(tipGeometry, tipMaterial);
+      tip.position.copy(end);
+      tip.quaternion.setFromUnitVectors(UP, end.clone().sub(from).normalize());
+      backupLayer.add(tip);
+      const pulse = new Mesh(pulseGeometry, tipMaterial);
+      backupLayer.add(pulse);
+      backupPulses.push({ from, to: end, mesh: pulse });
+    });
+  }
+
+  // --- Lavori in corso: impalcature trasparenti sul retro delle piattaforme --------------------
+  const wipLayer = new Group();
+  root.add(wipLayer);
+  const scaffoldGeometry = own(new BoxGeometry(0.6, 0.8, 0.45));
+  const scaffoldEdges = own(new EdgesGeometry(scaffoldGeometry));
+  const scaffoldMaterial = own(
+    new MeshBasicMaterial({
+      color: colors.wip,
+      transparent: true,
+      opacity: 0.14,
+      depthWrite: false,
+    }),
+  );
+  const scaffoldLines = own(
+    new LineBasicMaterial({ color: colors.wip, transparent: true, opacity: 0.75 }),
+  );
+  for (const region of model.regions) {
+    const x = regionX.get(region.id) ?? 0;
+    region.wip.forEach((_, k) => {
+      const box = new Mesh(scaffoldGeometry, scaffoldMaterial);
+      box.position.set(
+        x + 0.55 + (k - (region.wip.length - 1) / 2) * 0.8,
+        PLATFORM_TOP + 0.4,
+        -1.2,
+      );
+      box.add(new LineSegments(scaffoldEdges, scaffoldLines));
+      wipLayer.add(box);
+    });
+  }
+
+  // --- Failover: anello del VIP sopra il nodo che risponde -------------------------------------
+  const vipMaterial = own(new MeshBasicMaterial({ color: colors.vip }));
+  const vip = new Mesh(own(new TorusGeometry(0.34, 0.035, 6, 24)), vipMaterial);
+  vip.rotation.x = Math.PI / 2;
+  const vipAt = (nodeId: string | undefined) =>
+    (nodeId ? nodes.get(nodeId)?.body.position.clone() : undefined)?.setY(
+      PLATFORM_TOP + NODE_SIZE.h + 0.22,
+    ) ?? new Vector3();
+  const vipTarget = vipAt(model.failover?.primary.node);
+  vip.position.copy(vipTarget);
+  vip.visible = model.failover !== undefined;
+  root.add(vip);
+
+  // --- Simulazione: metriche e log con seme (nessuna rete) -------------------------------------
+  const nodeIds = model.regions.flatMap((r) => r.nodes.map((n) => n.id));
+  const serviceNode = new Map(
+    model.regions.flatMap((r) => r.nodes.flatMap((n) => n.services.map((s) => [s.id, n] as const))),
+  );
+  const sim = createSimulator({
+    nodeIds,
+    seed: model.simulation.seed,
+    startMinute: SIM_START_MINUTE,
+    templates: model.simulation.logs,
+  });
+
   // --- Stato ------------------------------------------------------------------------------------
   let selected: string | null = null;
   let decisions = false;
+  let failing = false;
   let yaw = 0;
   let userYaw: number | null = null;
   let elapsed = 0;
+  let sinceSim = 0;
 
-  const paintSelection = (): void => {
+  const paint = (): void => {
     for (const [id, view] of nodes) {
       const on = id === selected;
       view.body.material.color.copy(on ? colors.selected : colors.node);
       view.body.material.emissive.copy(on ? colors.selected : colors.platform);
       view.body.material.emissiveIntensity = on ? 0.25 : 0;
       if (view.marker) view.marker.visible = decisions;
+      const down = failing && id === model.failover?.primary.node;
+      view.leds.color.copy(down ? colors.danger : colors.led);
     }
   };
 
-  const place = (): void => {
+  const place = (dt: number): void => {
     root.rotation.y = yaw;
     for (const beam of beams) {
       beam.pulses.forEach((pulse, k) => {
@@ -235,18 +363,36 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
         pulse.position.set(beam.from + (beam.to - beam.from) * t, BEAM_Y, 0);
       });
     }
+    backupPulses.forEach((p, k) => {
+      p.mesh.position.lerpVectors(p.from, p.to, (elapsed * 0.45 + k / 3) % 1);
+    });
     for (const view of nodes.values()) {
       if (!view.marker) continue;
       view.marker.rotation.y = elapsed * 0.8;
     }
+    // Il VIP scivola verso il nodo che risponde; a scena ferma arriva subito.
+    if (dt === 0) vip.position.copy(vipTarget);
+    else vip.position.lerp(vipTarget, Math.min(1, dt * VIP_SPEED));
+    vip.rotation.z = elapsed * 0.6;
+  };
+
+  const logLine = (line: LogLine): void => {
+    const node = serviceNode.get(line.service);
+    const service = node?.services.find((s) => s.id === line.service);
+    if (node) ui.log(node.id, line, service?.name ?? line.service);
+  };
+  const simulate = (): void => {
+    const result = sim.tick();
+    ui.metrics(result.metrics, (id) => sim.history(id, SPARK_POINTS));
+    if (result.log) logLine(result.log);
   };
 
   // --- Ciclo di disegno -------------------------------------------------------------------------
   let frame = 0;
   let last = 0;
   let disposed = false;
-  const draw = (): void => {
-    place();
+  const draw = (dt = 0): void => {
+    place(dt);
     renderer.render(scene, camera);
   };
   /** A scena ferma (livello ridotto o fuori schermo) basta un fotogramma dopo ogni cambiamento. */
@@ -258,7 +404,13 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
     last = now;
     elapsed += dt;
     yaw = userYaw ?? Math.sin(elapsed * SWAY.speed) * SWAY.amplitude;
-    draw();
+    // Metriche e log avanzano solo mentre la scena anima: fuori schermo o fermi, restano fermi.
+    sinceSim += dt;
+    if (sinceSim >= SIM_EVERY) {
+      sinceSim = 0;
+      simulate();
+    }
+    draw(dt);
     frame = requestAnimationFrame(tick);
   };
   const stop = (): void => {
@@ -268,67 +420,65 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
   };
 
   // --- Interfaccia HTML -------------------------------------------------------------------------
+  const nodeName = (id: string | undefined) =>
+    model.regions.flatMap((r) => r.nodes).find((n) => n.id === id)?.name ?? '';
   const ui = bindHomelabUi(container, {
     select(nodeId) {
       selected = nodeId;
-      paintSelection();
+      paint();
       invalidate();
     },
     layer(name, on) {
       if (name === 'decisions') decisions = on;
-      paintSelection();
+      if (name === 'backup') backupLayer.visible = on;
+      if (name === 'wip') wipLayer.visible = on;
+      paint();
       invalidate();
     },
+    failover(on) {
+      const pair = model.failover;
+      if (!pair) return '';
+      failing = on;
+      if (on) sim.shiftLoad(pair.primary.node, pair.backup.node);
+      else sim.restoreLoad();
+      for (const line of on ? model.simulation.failover.down : model.simulation.failover.up)
+        logLine(sim.push(line));
+      vipTarget.copy(vipAt(on ? pair.backup.node : pair.primary.node));
+      simulate();
+      paint();
+      invalidate();
+      return nodeName(on ? pair.backup.node : pair.primary.node);
+    },
   });
+  if (model.failover) ui.failoverStatus(nodeName(model.failover.primary.node), false);
+  // Primo quadro: anche a scena ferma il pannello mostra valori e un po' di storico.
+  simulate();
 
   // --- Puntatore: orbit orizzontale e selezione -------------------------------------------------
   const raycaster = new Raycaster();
   const pointer = new Vector2();
   const bodies = [...nodes.values()].map((v) => v.body);
-  const pick = (event: PointerEvent): string | null => {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) return null;
-    pointer.set(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1,
-    );
+  const pick = (x: number, y: number): string | null => {
+    pointer.set(x, y);
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObjects(bodies, false)[0];
     return (hit?.object.userData.nodeId as string | undefined) ?? null;
   };
-
-  let drag: { id: number; x: number; y: number; yaw: number; moved: boolean } | null = null;
-  const onDown = (event: PointerEvent): void => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw, moved: false };
-  };
-  const onMove = (event: PointerEvent): void => {
-    if (!drag || drag.id !== event.pointerId) {
-      if (event.pointerType === 'mouse') canvas.style.cursor = pick(event) ? 'pointer' : '';
-      return;
-    }
-    const dx = event.clientX - drag.x;
-    if (!drag.moved && Math.hypot(dx, event.clientY - drag.y) < CLICK_SLOP_PX) return;
-    if (!drag.moved) canvas.setPointerCapture(event.pointerId);
-    drag.moved = true;
-    userYaw = clamp(drag.yaw + dx * YAW_PER_PX, MAX_YAW);
-    yaw = userYaw;
-    invalidate();
-  };
-  const onUp = (event: PointerEvent): void => {
-    if (!drag || drag.id !== event.pointerId) return;
-    const wasClick = !drag.moved;
-    drag = null;
-    if (wasClick) ui.selectFromScene(pick(event));
-  };
-  // Il browser si e preso il gesto (scroll verticale): nessuna rotazione, nessun click.
-  const onCancel = (): void => {
-    drag = null;
-  };
-  canvas.addEventListener('pointerdown', onDown);
-  canvas.addEventListener('pointermove', onMove);
-  canvas.addEventListener('pointerup', onUp);
-  canvas.addEventListener('pointercancel', onCancel);
+  const detachOrbit = attachOrbit(canvas, {
+    maxYaw: MAX_YAW,
+    yaw: () => yaw,
+    onYaw(value) {
+      userYaw = value;
+      yaw = value;
+      invalidate();
+    },
+    onClick(x, y) {
+      ui.selectFromScene(pick(x, y));
+    },
+    onHover(x, y) {
+      canvas.style.cursor = pick(x, y) ? 'pointer' : '';
+    },
+  });
 
   const fitCamera = (aspect: number): void => {
     // La camera arretra finche entrambe le piattaforme stanno nel riquadro, anche su schermi stretti.
@@ -340,7 +490,7 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
     camera.lookAt(target);
   };
 
-  paintSelection();
+  paint();
 
   return {
     start() {
@@ -361,10 +511,7 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
       disposed = true;
       stop();
       ui.dispose();
-      canvas.removeEventListener('pointerdown', onDown);
-      canvas.removeEventListener('pointermove', onMove);
-      canvas.removeEventListener('pointerup', onUp);
-      canvas.removeEventListener('pointercancel', onCancel);
+      detachOrbit();
       for (const resource of owned) resource.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
