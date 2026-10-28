@@ -78,8 +78,8 @@ const badges = skills.filter((k) => k.data.kind === 'technical' && k.data.badge 
 const work = chronological(experiences.map((e) => ({ ...e, start: e.data.start })));
 const tree = workTree(work.map((e) => ({ slug: e.slug, ...e.data })));
 const W = page.work;
-/** Punti del CV nella scheda: i primi tre; il resto, se c'e, sta nella pagina di approfondimento. */
-const HIGHLIGHTS = 3;
+/** Punti del CV nella scheda: fino a tre; con una pagina di approfondimento due, il resto sta li. */
+const highlights = (detail: boolean) => (detail ? 2 : 3);
 const isTechnical = (c: (typeof certifications)[number]) => c.data.kind !== 'supplementary';
 const technicalCerts = certifications.filter(isTechnical);
 const supplementaryCerts = certifications.filter((c) => !isTechnical(c));
@@ -292,7 +292,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                         <p><Todo label={page.todoLabel} hint={e.results.todo} /></p>
                       ) : (
                         <ul>
-                          {e.results.slice(0, HIGHLIGHTS).map(splitResult).map((r) => (
+                          {e.results.slice(0, highlights(e.detail !== undefined)).map(splitResult).map((r) => (
                             <li>{r.label && <strong>{r.label}: </strong>}{r.text}</li>
                           ))}
                         </ul>
@@ -782,6 +782,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     max-width: 48rem;
   }
   /* Sezioni interattive (spec §7.3): titolo in alto a sinistra su un gradiente del colore di sezione. */
+  section[data-section="lavori"] > h2,
   section[data-section="homelab"] > h2,
   section[data-section="domotica"] > h2 {
     display: inline-block;
