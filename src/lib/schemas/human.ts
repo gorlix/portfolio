@@ -52,6 +52,8 @@ export const humanSchema = z.strictObject({
     domotica: text,
     lavori: text,
     certificazioni: text,
+    beneficenza: text,
+    contatti: text,
     avatar: text,
   }),
   homelab: z.strictObject({
@@ -179,5 +181,7 @@ export const humanTranslatable = [
   'scenes.domotica',
   'scenes.lavori',
   'scenes.certificazioni',
+  'scenes.beneficenza',
+  'scenes.contatti',
   'scenes.avatar',
 ];

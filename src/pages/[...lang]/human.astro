@@ -86,6 +86,9 @@ const domotica = domoticaModel(D.rooms, automations);
 const automationBySlug = (slug: string) => automations.find((e) => e.slug === slug)?.data;
 const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
 
+/** Canali mostrati in Contatti (email, GitHub, LinkedIn, X, piu dev.to e CV se presenti). */
+const contactChannels = 4 + [profile.links.devto, profile.cv].filter((v) => !isTodo(v)).length;
+
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type: 'ProfilePage' });
 ---
@@ -417,6 +420,15 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             </>
           )}
 
+          {s.id === 'beneficenza' && (
+            <Scene
+              scene="beneficenza"
+              label={page.scenes.beneficenza}
+              accent="beneficenza"
+              data={{ count: topicsIn('beneficenza').length }}
+            />
+          )}
+
           {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
             topicsIn(s.id).map(({ slug, data: t }) => (
               <article class="item" id={`${s.id}-${slug}`}>
@@ -432,6 +444,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'contatti' && (
             <>
+            <Scene scene="contatti" label={page.scenes.contatti} accent="contatti" data={{ count: contactChannels }} />
             <dl class="facts">
               <div>
                 <dt>{L.email}</dt>
