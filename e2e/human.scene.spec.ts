@@ -268,15 +268,21 @@ for (const route of ['/human/', '/en/human/']) {
       await expect(domotica.locator('canvas')).toBeAttached();
       await expect(page.locator('#domotica .poster img')).toBeHidden();
 
+      // Lavori ad albero (PORT-81): immersiva, un fotogramma statico per momento.
       const lavori = page.locator('[data-scene="lavori"]');
       await lavori.scrollIntoViewIfNeeded();
       await expect.poll(() => lavori.getAttribute('data-scene-state')).toBe('static');
       await expect(lavori.locator('canvas')).toBeAttached();
+
+      const certificazioni = page.locator('[data-scene="certificazioni"]');
+      await certificazioni.scrollIntoViewIfNeeded();
+      await expect.poll(() => certificazioni.getAttribute('data-scene-state')).toBe('static');
+      await expect(certificazioni.locator('canvas')).toBeAttached();
       // Statica: nessun avanzamento legato allo scroll.
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(200);
-      expect(await lavori.getAttribute('data-scene-state')).toBe('static');
-      expect(await lavori.getAttribute('data-scene-progress')).toBeNull();
+      expect(await certificazioni.getAttribute('data-scene-state')).toBe('static');
+      expect(await certificazioni.getAttribute('data-scene-progress')).toBeNull();
 
       // Interessi (PORT-63): stessa regola, fotogramma finale con tutti gli oggetti.
       const interessi = page.locator('[data-scene="interessi"]');
@@ -307,8 +313,9 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(value).toBe(1);
   });
 
-  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato.
-  const micro = (page: Page) => page.locator('[data-scene="lavori"]');
+  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
+  // Certificazioni (Lavori e diventata immersiva con PORT-81).
+  const micro = (page: Page) => page.locator('[data-scene="certificazioni"]');
   const progress = async (page: Page) =>
     Number((await micro(page).getAttribute('data-scene-progress')) ?? Number.NaN);
   /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */

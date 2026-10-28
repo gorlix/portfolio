@@ -139,6 +139,7 @@ Tema scelto da Alessandro: **Catppuccin**.
 /recruiter             Landing page single-page professionale
 /agent                 Vetrina estetica in stile terminale (human-readable)
 /human                 Percorso immersivo 3D
+/human/lavori/<slug>   Approfondimento di un lavoro (oggi: /human/lavori/trimind), immersivo 3D
 /en/...                Stesse pagine in inglese (struttura speculare)
 
 Root (testo puro, per macchine):
@@ -148,6 +149,7 @@ Root (testo puro, per macchine):
 - Ogni percorso ha un **indirizzo diretto** valido: chi arriva con `/recruiter` salta il terminale.
 - Link discreto per **tornare alla scelta** presente in tutti i percorsi.
 - Le sezioni dell'Umano sono raggiungibili via ancora (`/human#homelab`) e condivisibili.
+- Le **pagine di approfondimento** dei lavori stanno sotto `/human/lavori/<slug>/` (gemelle EN sotto `/en/`): stesse regole di `/human` (unico percorso con 3D: CSP, budget, limiti Lighthouse), JSON-LD `WebPage`, in sitemap e nei file per macchine. Ci si arriva da "Approfondisci" nell'albero dei Lavori e si torna a `/human#lavori`. Quali esperienze hanno una pagina lo dicono i dati (`detail` nell'esperienza), non i componenti.
 
 ---
 
@@ -239,6 +241,7 @@ Root (testo puro, per macchine):
 - La **barra del tempo** resta a sinistra, sopra lo sfondo.
 - Il contenuto di ogni scena (storyboard scheda → inquadratura) lo propone Claude Code e lo approva Alessandro, sezione per sezione, con screenshot. Si parte dal **pilota Homelab** (§12.1); le altre sezioni restano com'erano finché il loro storyboard non è approvato.
 - **Lo scroll non viene mai bloccato:** l'interazione è facoltativa e chi vuole passa oltre.
+- **Sezioni già migrate:** Home (PORT-79), Lavori ad albero (PORT-81), Homelab (PORT-76/77), Domotica (PORT-80). Le pagine di approfondimento (PORT-82) usano lo stesso schema con una sola sezione: la scena parte da sola come la Home (la pagina si apre in cima), niente barra del tempo, indicatore "n di 5" nelle schede, link di ritorno nell'intestazione e in fondo.
 
 ---
 
@@ -354,7 +357,8 @@ Entità principali (campi indicativi):
 
 Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui dettagli: "smanetto, rompo cose e poi le rimetto insieme meglio di prima"), micro-scene brevi. Con il layout immersivo (§7.3) le micro-scene diventano momenti dello sfondo condiviso, ciascuno guidato da una scheda; la migrazione avviene sezione per sezione con storyboard approvato.
 
-- **Lavori:** timeline verticale; ogni esperienza è una micro-scena con ruolo, periodo, uno o due risultati. `TODO(Alessandro): dati da LinkedIn` (il profilo non è leggibile automaticamente: servono screenshot o testo).
+- **Lavori (immersiva, PORT-81):** un **albero low-poly** il cui tronco è la linea del tempo; da lì si diramano le esperienze, **una foglia a sinistra e una a destra** in ordine cronologico dal basso. Prima schermata: albero intero e intro. Poi una **scheda in stile CV per esperienza** (ruolo, azienda, periodo, riassunto, i primi tre punti del CV, stack), dal lato della sua foglia: la camera sale lungo il tronco e la foglia si accende. Uscita: albero intero, dissolvenza verso Homelab. Il volontariato è marcato come tale (foglia e marca nella scheda). Schede e foglie nascono dagli stessi dati: una nuova esperienza aggiunge una foglia. Dove l'esperienza ha una pagina dedicata (`detail`), la scheda ha **"Approfondisci"**.
+- **Approfondimento Trimind (`/human/lavori/trimind/`, PORT-82):** una mappa low-poly in cinque momenti, solo con i fatti del CV: 1) **Infrastruttura**: VPS chiusa senza porte aperte con ~20 container, un solo tunnel verso una nuvola con scudo Zero Trust; 2) **Backup**: snapshot verso un bucket, quelli oltre 15 giorni sfumano (GDPR art. 17); 3) **CI/CD**: nastro da 4 repository a un runner self-hosted, slot blu/verde che si scambiano; 4) **Osservabilità e multi-provider**: pannelli con grafici simulati (etichettati come tali) e un task che si divide in tre fasci verso tre provider e torna con barre qualità/costo/latenza; 5) **Qualità**: motore di scoring a stadi e ~490 spunte che diventano verdi. Nessun dato reale d'infrastruttura (nomi, domini, IP, repository privati). Fallback: poster con avviso; senza JS testo sul fondo semplice.
 - **Certificazioni:** **tecniche** = badge 3D grandi che si materializzano uno alla volta, con ente, data e link di verifica. **Accessorie** (BLSD, idrogeologico e simili) = fila di badge piccoli più sotto, titolo "Altro che ho imparato". Le tecniche compaiono **anche come piccoli badge nella prima schermata** dell'Umano e in evidenza nel recruiter.
 - **Sport:** tre micro-scene, ciascuna con una frase sua:
   - **Sci:** montagna 3D, una linea che scende ("la curva perfetta").
