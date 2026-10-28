@@ -18,8 +18,9 @@ export interface PageBudget {
 const KB = 1024;
 
 export const chunkBudgets: ChunkBudget[] = [
-  // three intero (tree-shaken), caricato solo quando una scena si avvicina.
-  { name: 'three', pattern: /^three\./, maxGzip: 140 * KB },
+  // three intero (tree-shaken), caricato solo quando una scena si avvicina. 144 KB (deciso da
+  // Alessandro, PORT-81): main era gia a 140,0 KB esatti, ogni scena nuova sforava di pochi byte.
+  { name: 'three', pattern: /^three\./, maxGzip: 144 * KB },
   // Ogni scena di /human, con i suoi moduli (dati, controlli, metriche).
   {
     name: 'scena',
