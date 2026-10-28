@@ -24,7 +24,7 @@ export const chunkBudgets: ChunkBudget[] = [
   {
     name: 'scena',
     pattern:
-      /^(homelab|domotica|lavori|certificazioni|avatar|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
+      /^(homelab|domotica|lavori|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
     maxGzip: 16 * KB,
   },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
@@ -33,7 +33,8 @@ export const chunkBudgets: ChunkBudget[] = [
     pattern: /^(orbit|panel|tokens|micro|phases|figure)\./,
     maxGzip: 4 * KB,
   },
-  { name: 'bootstrap 3D', pattern: /^Scene\.astro_/, maxGzip: 4 * KB },
+  // 4,5 KB: include l'avvio senza gesto della scena della Home (PORT-79).
+  { name: 'bootstrap 3D', pattern: /^Scene\.astro_/, maxGzip: 4.5 * KB },
   { name: 'barra del tempo', pattern: /^Timeline\.astro_/, maxGzip: 2 * KB },
   { name: 'terminale', pattern: /^Terminal\.astro_/, maxGzip: 2 * KB },
 ];

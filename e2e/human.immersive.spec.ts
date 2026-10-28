@@ -98,11 +98,19 @@ for (const route of ['/human/', '/en/human/']) {
       };
     });
     await page.goto(route);
+    // La scrivania della Home parte da sola poco dopo il caricamento: si aspetta che sia montata.
+    await expect
+      .poll(() => page.locator('[data-scene="scrivania"]').getAttribute('data-scene-state'), {
+        timeout: 15_000,
+      })
+      .not.toMatch(/^(idle|loading)$/);
     await centre(page, 'nodes');
     await expect(scene(page)).toHaveAttribute('data-scene-state', 'running');
-    // In cima: l'avatar finisce la sua breve rincorsa, poi nessun fotogramma (nemmeno dal racconto).
+    // In cima la scrivania della Home anima di continuo: la si nasconde, cosi resta da misurare
+    // solo Homelab, che fuori schermo non deve chiedere fotogrammi (nemmeno dal racconto).
+    await page.addStyleTag({ content: '#home .stage { display: none; }' });
     await page.evaluate(() => window.scrollTo(0, 0));
-    // Le scene in cima (avatar) si montano in modo asincrono: si conta solo quando sono pronte,
+    // Le scene in cima (micro-scene) si montano in modo asincrono: si conta solo quando sono pronte,
     // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
     await expect
       .poll(() =>

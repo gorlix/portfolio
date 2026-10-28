@@ -59,14 +59,17 @@ for (const [route, lang] of [
       await expect(page.locator('#contatti a[href^="mailto:"]')).toHaveCount(1);
     });
 
-    test('prima schermata: saluto, ritratto, niente cornice avatar vuota e badge verso la sezione collegata', async ({
+    test('prima schermata: saluto, ritratto, niente spazio di uscita e badge verso la sezione collegata', async ({
       page,
     }) => {
       await page.goto(route);
       const home = page.locator('#home');
       await expect(home.locator('.portrait')).toBeVisible();
-      // Senza JS la cornice dell'avatar resterebbe vuota: si nasconde (media `scripting: none`).
-      await expect(home.locator('.avatar')).toBeHidden();
+      // Senza JS non c'e scena: lo spazio d'uscita della camera sparisce (media `scripting: none`).
+      await expect(home.locator('.exit')).toBeHidden();
+      // Al posto del 3D: poster della scrivania e avviso che spiega perche.
+      await expect(home.locator('.poster img')).toBeVisible();
+      await expect(home.locator('.poster-note [data-reason="nojs"]')).toBeVisible();
       const badges = home.locator('nav[aria-label] a[href^="#"]');
       // Solo le competenze con `badge: true` nei dati (6-8).
       await expect(badges).toHaveCount(badgeSkills);

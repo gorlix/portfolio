@@ -8,6 +8,11 @@ home:
   greeting: Ciao, sono Alessandro. Smanetto, rompo cose e poi le rimetto insieme meglio di prima. Qui trovi il resto.
   scrollHint: Scorri, oppure salta direttamente a una tappa dal menu.
   badgesLabel: "Competenze tecniche: scegline una per vedere dove la uso"
+  posterNotice:
+    webgl: "Il 3D non è disponibile su questo browser (WebGL assente o accelerazione grafica spenta): al suo posto vedi un'immagine della scrivania."
+    savedata: "Hai attivato il risparmio dati: al posto del 3D vedi un'immagine della scrivania."
+    error: "Il 3D non è partito: al suo posto vedi un'immagine della scrivania."
+    nojs: "JavaScript è disattivato: al posto del 3D vedi un'immagine della scrivania."
 intros:
   home: Benvenuto nel percorso umano.
   lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.
@@ -37,7 +42,7 @@ scenes:
   domotica: "Casa low-poly vista dall'alto, con le stanze che si illuminano quando parte un'automazione"
   beneficenza: "Una rete di punti che si avvicinano piano e si collegano al centro"
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
-  avatar: "Il mio avatar low-poly: si gira verso di te e saluta mentre scorri"
+  scrivania: "La mia scrivania low-poly: monitor col terminale, tastiera split, stampante 3D e mini-server con le spie che lampeggiano"
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
   lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
   certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"

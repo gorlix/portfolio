@@ -16,7 +16,8 @@ import type { SceneInstance } from './types';
  * Caricamento pigro delle scene 3D di /human (spec §3.5 e §10). Incluso solo da Scene.astro.
  * Nessun import statico di three: ogni scena arriva con `import()` quando la sua sezione si avvicina,
  * e mai prima che l'utente faccia qualcosa (scroll, tasto, tocco): il primo caricamento resta leggero
- * anche con una scena nella prima schermata.
+ * anche con una scena nella prima schermata. Unica eccezione la scena della Home (`data-autostart`),
+ * che parte da sola a pagina caricata e inattiva.
  * Il testo della sezione e gia nell'HTML: se qualcosa manca o fallisce, resta quello.
  *
  * Micro-scene (./kinds.ts): avanzano con la posizione del riquadro nel viewport, letta su `scroll`
@@ -36,6 +37,9 @@ const NEAR_MARGIN = '100% 0px 100% 0px';
  */
 const ENGAGE_EVENTS = ['scroll', 'wheel', 'keydown', 'pointerdown', 'touchstart'];
 
+/** Attesa massima (ms) dopo `load` prima di avviare le scene `data-autostart`. */
+const AUTOSTART_DELAY = 1500;
+
 let capabilities: CapabilityInput | undefined;
 /** Le capacita si misurano una volta sola, al primo avvicinamento di una scena. */
 const tierFor = (name: string): SceneTier => {
@@ -48,9 +52,13 @@ const setState = (el: HTMLElement, state: SceneState): void => {
   el.dataset.sceneState = state;
 };
 
-/** Il riquadro sparisce: resta solo il testo della sezione. */
-const toText = (el: HTMLElement): void => {
+/** Perche una scena ripiega sul testo: lo legge l'avviso del poster (Home) via CSS. */
+type FallbackReason = 'webgl' | 'savedata' | 'error';
+
+/** Il riquadro sparisce: resta solo il testo della sezione (e, nella Home, il poster). */
+const toText = (el: HTMLElement, reason: FallbackReason = 'error'): void => {
   setState(el, 'text');
+  el.dataset.sceneReason = reason;
   el.hidden = true;
 };
 
@@ -167,7 +175,7 @@ async function mountScene(el: HTMLElement): Promise<void> {
   }
   const level = tierFor(name);
   if (level === 'text') {
-    toText(el);
+    toText(el, capabilities?.saveData ? 'savedata' : 'webgl');
     return;
   }
   const micro = sceneKind(name) === 'micro' && level === 'full';
@@ -319,6 +327,22 @@ function init(): void {
   else
     for (const type of ENGAGE_EVENTS)
       addEventListener(type, engage, { capture: true, passive: true });
+
+  // Scena della prima schermata (`data-autostart`): e gia davanti agli occhi, quindi non aspetta
+  // un gesto. Parte comunque solo dopo il primo contenuto visibile: a pagina caricata e al primo
+  // momento di calma, cosi il testo in vetro e subito leggibile e il 3D non gli passa davanti.
+  const autostart = containers.filter((el) => el.hasAttribute('data-autostart'));
+  if (autostart.length > 0) {
+    const begin = (): void => {
+      for (const el of autostart) if (el.dataset.sceneState === 'idle') near.observe(el);
+    };
+    const whenIdle = (): void => {
+      if ('requestIdleCallback' in window) requestIdleCallback(begin, { timeout: AUTOSTART_DELAY });
+      else setTimeout(begin, AUTOSTART_DELAY);
+    };
+    if (document.readyState === 'complete') whenIdle();
+    else addEventListener('load', whenIdle, { once: true });
+  }
 
   // Solo lettura della posizione: passivo, non puo ne bloccare ne ritardare lo scroll.
   addEventListener('scroll', scheduleSync, { passive: true });

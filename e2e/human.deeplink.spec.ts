@@ -2,7 +2,7 @@ import { expect, type Page, test } from '@playwright/test';
 
 // Link diretti a una sezione di /human (spec §7.3): si atterra sulla sezione con l'hash intatto e,
 // se la sezione ha una scena, il 3D parte senza aspettare un gesto. Senza hash resta "al primo gesto".
-const isThree = (url: string) => /\/_astro\/(three|homelab|avatar)\./.test(url);
+const isThree = (url: string) => /\/_astro\/(homelab)\./.test(url);
 const homelabInView = (page: Page) =>
   page.evaluate(() => {
     const rect = (document.querySelector('#homelab') as HTMLElement).getBoundingClientRect();

@@ -4,9 +4,12 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|figure|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|scrivania|figure|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
     url,
   );
+// Scene che aspettano il gesto o la vicinanza: tutte tranne la scrivania della Home, che parte da
+// sola a pagina caricata (e con lei il chunk three).
+const isLazyScene = (url: string) => isThree(url) && !/\/_astro\/(three|scrivania)\./.test(url);
 const scene = (page: Page) => page.locator('[data-scene="homelab"]');
 const state = (page: Page) => scene(page).getAttribute('data-scene-state');
 const nearScene = (page: Page) =>
@@ -23,7 +26,7 @@ for (const route of ['/human/', '/en/human/']) {
     page.on('request', (r) => urls.push(r.url()));
     await page.goto(route, { waitUntil: 'networkidle' });
     expect(await state(page)).toBe('idle');
-    expect(urls.filter(isThree)).toEqual([]);
+    expect(urls.filter(isLazyScene)).toEqual([]);
 
     await nearScene(page);
     await expect.poll(() => state(page)).toMatch(/running|paused|static/);
@@ -162,14 +165,21 @@ for (const route of ['/human/', '/en/human/']) {
       };
     });
     await page.goto(route);
+    // La scrivania della Home parte da sola poco dopo il caricamento: si aspetta che sia montata.
+    await expect
+      .poll(() => page.locator('[data-scene="scrivania"]').getAttribute('data-scene-state'), {
+        timeout: 15_000,
+      })
+      .not.toMatch(/^(idle|loading)$/);
     await nearScene(page);
     await page.evaluate(() => document.querySelector('[data-scene="homelab"]')?.scrollIntoView());
     await expect.poll(() => state(page)).toBe('running');
 
-    // In cima (la scena Contatti, in fondo, sarebbe attiva e chiederebbe fotogrammi). Li c'e
-    // l'avatar: la sua breve rincorsa verso l'avanzamento deve finire, poi zero fotogrammi.
+    // In cima la scrivania della Home anima di continuo (cursore, spie): la si nasconde, cosi resta
+    // da misurare solo Homelab, che fuori schermo deve fermarsi del tutto.
+    await page.addStyleTag({ content: '#home .stage { display: none; }' });
     await page.evaluate(() => window.scrollTo(0, 0));
-    // Le scene in cima (avatar) si montano in modo asincrono: si conta solo quando sono pronte,
+    // Le scene in cima (micro-scene) si montano in modo asincrono: si conta solo quando sono pronte,
     // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
     await expect
       .poll(() =>
@@ -284,24 +294,34 @@ for (const route of ['/human/', '/en/human/']) {
       window.scrollTo(0, top - window.innerHeight * f);
     }, fraction);
 
-  // Avatar della prima schermata (PORT-59).
-  test(`${route}: avatar riservato e fermo prima del primo gesto`, async ({ page }) => {
+  // Scrivania della Home (PORT-79): parte da sola, dopo il primo contenuto visibile.
+  const desk = (page: Page) => page.locator('#home [data-scene="scrivania"]');
+  const isHomelabChunk = (url: string) => /\/_astro\/homelab\./.test(url);
+
+  test(`${route}: la scrivania parte senza gesti, il testo in vetro e gia leggibile`, async ({
+    page,
+  }) => {
     const urls: string[] = [];
     page.on('request', (r) => urls.push(r.url()));
-    await page.goto(route, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(300);
-    const avatar = page.locator('#home .avatar [data-scene="avatar"]');
-    await expect(avatar).toHaveAttribute('data-scene-state', 'idle');
-    await expect(avatar).toHaveAttribute('role', 'img');
-    // Prima del montaggio il riquadro non occupa spazio ne mostra bordo o sfondo (nessuna scatola vuota).
-    await expect(page.locator('#home .avatar')).toBeHidden();
-    expect(
-      await page.locator('#home .avatar').evaluate((el) => getComputedStyle(el).position),
-    ).toBe('absolute');
-    expect(urls.filter(isThree)).toEqual([]);
+    await page.goto(route);
+    await expect(page.locator('#home .glass .greeting')).toBeVisible();
+    await expect(desk(page)).toHaveAttribute('role', 'img');
+    await expect
+      .poll(() => desk(page).getAttribute('data-scene-state'), { timeout: 15_000 })
+      .toMatch(/running|paused/);
+    await expect(desk(page).locator('canvas')).toBeAttached();
+    expect(urls.filter(isThree).length).toBeGreaterThan(0);
+    // Le altre scene aspettano ancora: nessun avatar, nessun Homelab prima di un gesto.
+    expect(urls.filter(isHomelabChunk)).toEqual([]);
+    await expect(page.locator('#home .avatar')).toHaveCount(0);
+    // Col 3D attivo il poster resta nascosto (e lazy: mai scaricato) e l'avviso non compare.
+    expect(urls.filter((u) => /\/_astro\/poster-/.test(u))).toEqual([]);
+    await expect(page.locator('#home .poster-note')).toBeHidden();
   });
 
-  test(`${route}: senza WebGL l'avatar sparisce e resta il ritratto`, async ({ page }) => {
+  test(`${route}: senza WebGL la scrivania sparisce e restano ritratto e saluto`, async ({
+    page,
+  }) => {
     await page.addInitScript(() => {
       const original = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (
@@ -313,25 +333,24 @@ for (const route of ['/human/', '/en/human/']) {
         return (original as (...a: unknown[]) => unknown).call(this, type, ...args);
       } as typeof original;
     });
-    await page.goto(route, { waitUntil: 'networkidle' });
-    await page.mouse.wheel(0, 50);
-    await expect
-      .poll(() => page.locator('#home [data-scene="avatar"]').getAttribute('data-scene-state'))
-      .toBe('text');
-    await expect(page.locator('#home .avatar')).toBeHidden();
+    await page.goto(route);
+    await expect.poll(() => desk(page).getAttribute('data-scene-state')).toBe('text');
     await expect(page.locator('#home .portrait')).toBeVisible();
     await expect(page.locator('#home .greeting')).toBeVisible();
+    // Al posto del 3D: poster della scrivania e avviso col motivo.
+    await expect(page.locator('#home .poster img')).toBeVisible();
+    await expect(page.locator('#home .poster-note [data-reason="webgl"]')).toBeVisible();
+    await expect(page.locator('#home .poster-note [data-reason="savedata"]')).toBeHidden();
   });
 
-  test.describe('avatar con reduced motion', () => {
+  test.describe('scrivania con reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: avatar statico sulla posa finale`, async ({ page }) => {
-      await page.goto(route, { waitUntil: 'networkidle' });
-      await page.mouse.wheel(0, 50);
-      const avatar = page.locator('#home [data-scene="avatar"]');
-      await expect.poll(() => avatar.getAttribute('data-scene-state')).toBe('static');
-      await expect(avatar.locator('canvas')).toBeAttached();
-      expect(await avatar.getAttribute('data-scene-progress')).toBeNull();
+    test(`${route}: scrivania ferma sul primo fotogramma`, async ({ page }) => {
+      await page.goto(route);
+      await expect
+        .poll(() => desk(page).getAttribute('data-scene-state'), { timeout: 15_000 })
+        .toBe('static');
+      await expect(desk(page).locator('canvas')).toBeAttached();
     });
   });
 
@@ -341,13 +360,11 @@ for (const route of ['/human/', '/en/human/']) {
     await page.goto(route, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     expect(await micro(page).getAttribute('data-scene-state')).toBe('idle');
-    expect(urls.filter(isThree)).toEqual([]);
+    expect(urls.filter(isLazyScene)).toEqual([]);
   });
 
   test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
     await page.goto(route);
-    // Una sola micro-scena attiva per volta: isola Lavori togliendo l'avatar della prima schermata.
-    await page.locator('#home .avatar').evaluate((el) => el.remove());
     await placeMicro(page, 0.9);
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     await expect(micro(page).locator('canvas')).toBeAttached();
@@ -398,6 +415,14 @@ for (const route of ['/human/', '/en/human/']) {
       };
     });
     await page.goto(route);
+    // La scrivania della Home parte da sola poco dopo il caricamento: si aspetta che sia montata.
+    await expect
+      .poll(() => page.locator('[data-scene="scrivania"]').getAttribute('data-scene-state'), {
+        timeout: 15_000,
+      })
+      .not.toMatch(/^(idle|loading)$/);
+    // La scrivania della Home anima di continuo: si nasconde, qui conta solo la micro-scena.
+    await page.addStyleTag({ content: '#home .stage { display: none; }' });
     await placeMicro(page, 0.5);
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     // Ferma sullo scroll: la rincorsa si assesta e non chiede altri fotogrammi.

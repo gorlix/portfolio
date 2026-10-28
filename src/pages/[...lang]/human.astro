@@ -1,4 +1,7 @@
 ---
+import { getImage } from 'astro:assets';
+import posterDesktopSrc from '../../assets/human/poster-desktop.png';
+import posterMobileSrc from '../../assets/human/poster-mobile.png';
 import AutomationSteps from '../../components/AutomationSteps.astro';
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
@@ -39,6 +42,12 @@ const [
   getEntries('topics', locale),
   getSingleton('infrastructure', locale),
   getEntries('automations', locale),
+]);
+
+/** Poster statici della scrivania: fallback se il 3D non parte (niente WebGL, risparmio dati, JS spento). */
+const [posterDesktop, posterMobile] = await Promise.all([
+  getImage({ src: posterDesktopSrc, format: 'webp', quality: 70 }),
+  getImage({ src: posterMobileSrc, format: 'webp', quality: 70 }),
 ]);
 
 const L = page.labels;
@@ -83,7 +92,7 @@ const period = (start: unknown, end: unknown) => {
   return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
 };
 /** Sezioni col layout immersivo (spec §7.3, PORT-76): per ora solo il pilota Homelab. */
-const immersive = (id: string) => id === 'homelab';
+const immersive = (id: string) => id === 'homelab' || id === 'home';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -128,6 +137,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     {
       sections.map((s) => (
         <section id={s.id} data-section={s.id} aria-labelledby={`h-${s.id}`} data-story={immersive(s.id) ? '' : undefined}>
+          {s.id === 'home' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={posterMobile.src} />
+                <img
+                  src={posterDesktop.src}
+                  width={posterDesktop.options.width}
+                  height={posterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="scrivania" label={page.scenes.scrivania} autostart />
+            </div>
+          )}
           {s.id === 'homelab' && (
             <div class="stage">
               <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
@@ -142,25 +167,33 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'home' && (
             <>
-              <div class="who">
-                <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
-                <div class="avatar">
-                  <Scene scene="avatar" label={page.scenes.avatar} />
+              <div class="hero home" data-moment="hero">
+                <div class="glass">
+                  <div class="who">
+                    <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
+                    <p class="greeting">{page.home.greeting}</p>
+                  </div>
+                  <nav aria-label={page.home.badgesLabel}>
+                    <ul class="badges">
+                      {badges.map((k) => (
+                        <li>
+                          <a href={`#${k.data.linkedSection}`} data-to={k.data.linkedSection}>
+                            {k.data.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                  <p class="hint">{page.home.scrollHint}</p>
+                  <p class="poster-note" role="status">
+                    <span data-reason="webgl">{page.home.posterNotice.webgl}</span>
+                    <span data-reason="savedata">{page.home.posterNotice.savedata}</span>
+                    <span data-reason="error">{page.home.posterNotice.error}</span>
+                    <span data-reason="nojs">{page.home.posterNotice.nojs}</span>
+                  </p>
                 </div>
               </div>
-              <p class="greeting">{page.home.greeting}</p>
-              <nav aria-label={page.home.badgesLabel}>
-                <ul class="badges">
-                  {badges.map((k) => (
-                    <li>
-                      <a href={`#${k.data.linkedSection}`} data-to={k.data.linkedSection}>
-                        {k.data.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-              <p class="hint">{page.home.scrollHint}</p>
+              <div class="exit" data-moment="exit" aria-hidden="true"></div>
             </>
           )}
 
@@ -589,6 +622,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
       padding-left: 4rem;
     }
   }
+  section[data-section="home"] { --accent: var(--sec-home); --accent-ink: var(--sec-home-ink); }
   section[data-section="lavori"] { --accent: var(--sec-lavori); --accent-ink: var(--sec-lavori-ink); }
   section[data-section="homelab"] { --accent: var(--sec-homelab); --accent-ink: var(--sec-homelab-ink); }
   section[data-section="domotica"] { --accent: var(--sec-domotica); --accent-ink: var(--sec-domotica-ink); }
@@ -772,7 +806,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     pointer-events: auto;
   }
   /* Titolo fisso in alto a sinistra finche si e nella sezione; rimpicciolito durante le schede. */
-  section[data-story] > h2 {
+  section[data-story] > :is(h1, h2) {
     position: sticky;
     top: 0;
     z-index: 2;
@@ -785,11 +819,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     transition: transform 0.25s ease, background-color 0.25s ease;
     pointer-events: none;
   }
-  section[data-story] > h2 {
+  section[data-story] > :is(h1, h2) {
     top: var(--head);
   }
   /* Durante le schede il titolo ha un fondo pieno: le schede gli scorrono sotto senza mescolarsi. */
-  section[data-phase="cards"] > h2 {
+  section[data-phase="cards"] > :is(h1, h2) {
     transform: scale(0.6);
     border-radius: 0 0 0.5rem 0;
     background: color-mix(in srgb, var(--bg) 92%, transparent);
@@ -944,9 +978,66 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     .stage {
       display: none;
     }
+    /* Senza JS la scrivania resta come poster fermo; le altre sezioni restano sul fondo semplice. */
+    section[data-section="home"] .stage {
+      display: block;
+    }
+  }
+  /*
+   * Poster della scrivania: sempre nel markup ma nascosto (e, essendo lazy, mai scaricato) finche il 3D
+   * funziona. Compare solo se la scena ripiega sul testo (niente WebGL, risparmio dati) o va in errore,
+   * e senza JavaScript.
+   */
+  .poster {
+    display: none;
+  }
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  .stage:has(.scene:is([data-scene-state="text"], [data-scene-state="error"])) .poster {
+    display: block;
+  }
+  @media (scripting: none) {
+    section[data-section="home"] .poster {
+      display: block;
+    }
+  }
+  /* Avviso sotto il vetro, solo quando al posto del 3D c'e il poster; un solo motivo alla volta. */
+  .poster-note {
+    display: none;
+    margin: 0.75rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  .poster-note > span {
+    display: none;
+  }
+  section[data-section="home"]:has(.scene[data-scene-state="text"], .scene[data-scene-state="error"]) .poster-note {
+    display: block;
+  }
+  section[data-section="home"]:has(.scene[data-scene-reason="webgl"]) .poster-note > [data-reason="webgl"],
+  section[data-section="home"]:has(.scene[data-scene-reason="savedata"]) .poster-note > [data-reason="savedata"],
+  section[data-section="home"]:has(.scene[data-scene-reason="error"]) .poster-note > [data-reason="error"] {
+    display: inline;
+  }
+  @media (scripting: none) {
+    section[data-section="home"] .poster-note {
+      display: block;
+    }
+    section[data-section="home"] .poster-note > [data-reason="nojs"] {
+      display: inline;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    section[data-story] > h2 {
+    section[data-story] > :is(h1, h2),
+    .glass {
       transition: none;
     }
   }
@@ -980,43 +1071,6 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1rem 0;
-  }
-  /* Riquadro riservato (stesse dimensioni del ritratto): nessun layout shift quando arriva il 3D. */
-  .avatar {
-    box-sizing: border-box;
-    width: 160px;
-    height: 160px;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    background: var(--surface);
-  }
-  /*
-   * Finche la scena non e montata (idle, in caricamento, errore) il riquadro esce dal flusso:
-   * nessuno spazio, bordo o sfondo. Non e display:none ne ritagliato, cosi l'osservatore del
-   * bootstrap lo vede ancora e puo montare la scena; poi rientra nel flusso alla stessa misura.
-   */
-  .avatar:not(:has(.scene:is([data-scene-state='running'], [data-scene-state='paused'], [data-scene-state='static']))) {
-    position: absolute;
-    visibility: hidden;
-    pointer-events: none;
-    border-color: transparent;
-    background: none;
-  }
-  .avatar :global(.scene[data-kind='micro']) {
-    width: 100%;
-    max-width: none;
-    height: 100%;
-    aspect-ratio: auto;
-  }
-  /* Senza WebGL la scena si nasconde e con lei il riquadro: resta il ritratto. */
-  .avatar:has(.scene[hidden]) {
-    display: none;
-  }
-  /* Senza JavaScript il 3D non arriva mai: la cornice resterebbe vuota, quindi sparisce. */
-  @media (scripting: none) {
-    .avatar {
-      display: none;
-    }
   }
   .badges {
     display: flex;
@@ -1078,7 +1132,91 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     font-family: var(--font-mono);
   }
   .greeting {
+    margin: 0;
     font-size: 1.25rem;
+  }
+  /*
+   * Home immersiva (PORT-79): la prima schermata e un pannello in vetro sopra la scrivania, a sinistra
+   * su schermi larghi e in basso sul telefono; il vuoto lascia la scena visibile. "exit" e lo spazio
+   * in cui la camera si avvicina al monitor prima di cedere il posto alla sezione dopo.
+   */
+  .hero.home {
+    display: block;
+    min-height: auto;
+  }
+  @media (scripting: enabled) {
+    section[data-story] > .hero.home {
+      display: flex;
+      align-items: flex-end;
+      min-height: calc(100svh - 6rem);
+    }
+  }
+  .glass {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 34rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: var(--bg-alt);
+    }
+  }
+  @media (min-width: 72rem) {
+    section[data-story] > .hero.home {
+      align-items: center;
+    }
+  }
+  /* Uscita: il vetro si dissolve e lascia la camera libera di avvicinarsi al monitor. */
+  .glass {
+    transition: opacity 0.3s ease;
+  }
+  section[data-phase="cards"] .glass {
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (max-width: 48rem) {
+    .glass {
+      padding: 0.75rem;
+    }
+    /* Telefono: ritratto piccolo accanto al saluto, per lasciare in vista la scrivania. */
+    .glass .who {
+      flex-wrap: nowrap;
+      align-items: center;
+      margin: 0 0 0.5rem;
+    }
+    .glass :global(.portrait) {
+      width: 72px;
+      height: 72px;
+    }
+    .glass :global(.portrait img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .glass .greeting {
+      font-size: 0.9375rem;
+    }
+    .glass .badges {
+      margin: 0.5rem 0;
+    }
+    .glass .hint {
+      font-size: 0.875rem;
+    }
+  }
+  .exit {
+    height: 80svh;
+  }
+  @media (scripting: none) {
+    .exit {
+      display: none;
+    }
   }
   .hint,
   .meta {

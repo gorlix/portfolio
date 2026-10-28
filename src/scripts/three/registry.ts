@@ -6,13 +6,13 @@ import type { SceneModule } from './types';
  * dinamico, cosi three e le scene finiscono in chunk separati e il bootstrap resta piccolo.
  */
 export const sceneLoaders = {
+  scrivania: () => import('./scenes/scrivania'),
   homelab: () => import('./scenes/homelab'),
   domotica: () => import('./scenes/domotica'),
   lavori: () => import('./scenes/lavori'),
   certificazioni: () => import('./scenes/certificazioni'),
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),
-  avatar: () => import('./scenes/avatar'),
   interessi: () => import('./scenes/interessi'),
   sci: () => import('./scenes/sci'),
   tennis: () => import('./scenes/tennis'),
