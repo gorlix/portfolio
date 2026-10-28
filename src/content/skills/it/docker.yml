@@ -2,3 +2,4 @@ name: "Docker"
 kind: technical
 linkedSection: homelab
 group: "Container"
+badge: true

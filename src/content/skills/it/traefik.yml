@@ -2,3 +2,4 @@ name: Traefik
 kind: technical
 linkedSection: homelab
 group: "Rete e sicurezza"
+badge: true
