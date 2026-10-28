@@ -124,6 +124,18 @@
               {
                 "minScore": 0.95
               }
+            ],
+            "resource-summary:script:size": [
+              "error",
+              {
+                "maxNumericValue": 10240
+              }
+            ],
+            "resource-summary:script:count": [
+              "error",
+              {
+                "maxNumericValue": 2
+              }
             ]
           }
         }
