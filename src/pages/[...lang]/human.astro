@@ -47,8 +47,8 @@ const here = (path: string) => localizedPath(path, locale);
 /** Home + le otto sezioni del tema, nell'ordine di pagina (e del menu). */
 const sections = [{ id: 'home' as const, title: page.homeTitle }, ...theme.sections];
 
-/** Badge: solo competenze tecniche, senza livello, ciascuna verso la sezione collegata. */
-const badges = skills.filter((k) => k.data.kind === 'technical');
+/** Badge: 6–8 badge scelti nei dati (badge: true), senza livello, ciascuno verso la sezione collegata. */
+const badges = skills.filter((k) => k.data.kind === 'technical' && k.data.badge === true);
 
 const sortedExperiences = [...experiences].sort((a, b) => {
   const start = (e: typeof a) => (isTodo(e.data.start) ? '' : e.data.start);

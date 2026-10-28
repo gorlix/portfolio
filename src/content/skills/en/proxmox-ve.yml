@@ -2,3 +2,4 @@ name: Proxmox VE
 kind: technical
 linkedSection: homelab
 group: Virtualization
+badge: true

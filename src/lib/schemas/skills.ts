@@ -6,6 +6,7 @@ export const skillSchema = z.strictObject({
   group: text,
   kind: z.enum(['technical', 'supplementary']),
   linkedSection: sectionId,
+  badge: z.boolean().optional(),
 });
 
 export const skillTranslatable = ['group'];

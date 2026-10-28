@@ -2,3 +2,4 @@ name: "Prometheus"
 kind: technical
 linkedSection: lavori
 group: "Observability"
+badge: true
