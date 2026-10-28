@@ -15,6 +15,8 @@ describe('registro delle scene', () => {
       'domotica',
       'lavori',
       'certificazioni',
+      'beneficenza',
+      'contatti',
       'avatar',
       'interessi',
     ]);
