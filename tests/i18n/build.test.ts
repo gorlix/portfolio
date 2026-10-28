@@ -221,3 +221,106 @@ describe('JSON-LD', () => {
     }
   });
 });
+
+describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
+  const read = (name: string) => readFileSync(join(outDir, name), 'utf8');
+  const profile = () =>
+    JSON.parse(read('profile.json')) as {
+      name: string;
+      email: string;
+      sameAs: string[];
+      knowsAbout: string[];
+      pages: Record<string, { it: string; en: string }>;
+      projects: { name: string; repository: string }[];
+    };
+
+  type Node = Record<string, unknown> & { '@type': string; '@id'?: string };
+  const graphOf = (html: string): Node[] => {
+    const raw = html.match(/<script type="application\/ld\+json">([^<]*)<\/script>/)?.[1] ?? '{}';
+    return (JSON.parse(raw) as { '@graph'?: Node[] })['@graph'] ?? [];
+  };
+
+  const siteUrls = () => pages.map((p) => `${site}${p.url}`).sort();
+  const urlsIn = (text: string) => [...text.matchAll(/https:\/\/alessandrogorla\.it[^\s)"',<>]*/g)];
+
+  it('profile.json elenca tutte le pagine, /human incluso, nelle due lingue, e solo quelle generate', () => {
+    const listed = Object.values(profile().pages)
+      .flatMap((u) => [u.it, u.en])
+      .sort();
+    expect(Object.keys(profile().pages).sort()).toEqual(['agent', 'home', 'human', 'recruiter']);
+    expect(listed).toEqual(siteUrls());
+  });
+
+  it('llms.txt e agent.md citano ogni pagina (IT ed EN), /human incluso', () => {
+    for (const file of ['llms.txt', 'agent.md']) {
+      const text = read(file);
+      for (const url of siteUrls()) expect(text, `${file} manca ${url}`).toContain(url);
+    }
+  });
+
+  it('ogni URL del sito citato nei file per macchine esiste (pagina o file della root)', () => {
+    const known = new Set([
+      ...siteUrls(),
+      ...['llms.txt', 'agent.md', 'profile.json', 'robots.txt', 'sitemap.xml'].map(
+        (f) => `${site}/${f}`,
+      ),
+    ]);
+    for (const file of ['llms.txt', 'agent.md', 'profile.json', 'robots.txt', 'sitemap.xml']) {
+      for (const [url] of urlsIn(read(file))) {
+        expect(known.has(url), `${file}: ${url} non esiste nella build`).toBe(true);
+      }
+    }
+  });
+
+  it('stessi progetti e stessi profili in profile.json, llms.txt, agent.md e JSON-LD', () => {
+    const p = profile();
+    const repos = p.projects.map((x) => x.repository).sort();
+    expect(repos.length).toBeGreaterThan(0);
+    for (const file of ['llms.txt', 'agent.md']) {
+      const text = read(file);
+      for (const repo of repos) expect(text, `${file} manca ${repo}`).toContain(repo);
+      for (const link of p.sameAs) expect(text, `${file} manca ${link}`).toContain(link);
+    }
+    for (const { url, html } of pages) {
+      const inPage = graphOf(html)
+        .filter((n) => n['@type'] === 'SoftwareSourceCode')
+        .map((n) => n.codeRepository as string)
+        .sort();
+      expect(inPage, `${url}: progetti nel JSON-LD`).toEqual(repos);
+    }
+  });
+
+  it('il Person del JSON-LD e identico su tutte le pagine e coerente con profile.json', () => {
+    const p = profile();
+    const persons = pages.map(({ url, html }) => {
+      const person = graphOf(html).find((n) => n['@type'] === 'Person');
+      expect(person, `${url}: Person assente`).toBeDefined();
+      return person as Node;
+    });
+    expect(new Set(persons.map((x) => x['@id'])).size).toBe(1);
+    for (const person of persons) {
+      expect(person.name).toBe(p.name);
+      expect(person.email).toBe(p.email);
+      expect(person.sameAs).toEqual(p.sameAs);
+      expect([...(person.knowsAbout as string[])].sort()).toEqual([...p.knowsAbout].sort());
+    }
+  });
+
+  it('ogni pagina: url del JSON-LD = canonical, mainEntity punta al Person del grafo', () => {
+    for (const { url, html } of pages) {
+      const graph = graphOf(html);
+      const page = graph.find((n) => n['@type'] === 'WebPage' || n['@type'] === 'ProfilePage');
+      const person = graph.find((n) => n['@type'] === 'Person');
+      expect(page?.url, `${url}: url`).toBe(`${site}${url}`);
+      expect(html, url).toContain(`<link rel="canonical" href="${site}${url}"`);
+      expect((page?.mainEntity as { '@id': string })['@id'], url).toBe(person?.['@id']);
+    }
+  });
+
+  it('il nome nei file per macchine compare nella vetrina /agent e nel profilo recruiter', () => {
+    const name = profile().name;
+    for (const url of ['/agent/', '/en/agent/', '/recruiter/', '/en/recruiter/']) {
+      expect(pages.find((x) => x.url === url)?.html, url).toContain(name);
+    }
+  });
+});
