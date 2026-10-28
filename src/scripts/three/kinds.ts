@@ -5,7 +5,14 @@ import type { SceneKind } from './capabilities';
  * non si toccano e con reduced-motion restano come fotogramma statico finale.
  * Modulo senza dipendenze, letto sia da Scene.astro (in build) sia dal bootstrap.
  */
-export const microScenes = ['lavori', 'certificazioni', 'avatar'] as const;
+export const microScenes = [
+  'lavori',
+  'certificazioni',
+  'avatar',
+  'sci',
+  'tennis',
+  'pallavolo',
+] as const;
 
 export function sceneKind(name: string): SceneKind {
   return (microScenes as readonly string[]).includes(name) ? 'micro' : 'interactive';

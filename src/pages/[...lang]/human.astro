@@ -60,6 +60,12 @@ const projectsIn = (section: string) =>
   projects
     .filter((p) => p.data.section === section)
     .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
+/** Micro-scena di ogni attivita sportiva (slug del topic -> scena del registro). */
+const sportScenes: Record<string, 'sci' | 'tennis' | 'pallavolo'> = {
+  ski: 'sci',
+  tennis: 'tennis',
+  volleyball: 'pallavolo',
+};
 const topicsIn = (section: string) => topics.filter((t) => t.data.section === section);
 
 /** Barra del tempo: una tappa per sezione, Sport con un sotto-segmento per ogni attivita. */
@@ -420,7 +426,15 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
           {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
             topicsIn(s.id).map(({ slug, data: t }) => (
               <article class="item" id={`${s.id}-${slug}`}>
+                {s.id === 'sport' && sportScenes[slug] && (
+                  <Scene
+                    scene={sportScenes[slug]}
+                    label={page.scenes[sportScenes[slug]]}
+                    accent="sport"
+                  />
+                )}
                 <h3>{t.title}</h3>
+                {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
                 <p>{isTodo(t.text) ? <Todo label={page.todoLabel} hint={t.text.todo} /> : t.text}</p>
                 {t.links.length > 0 && (
                   <ul class="plain inline">

@@ -10,7 +10,16 @@ import {
 
 describe('registro delle scene', () => {
   it('contiene le scene delle sezioni interattive', () => {
-    expect(sceneNames).toEqual(['homelab', 'domotica', 'lavori', 'certificazioni', 'avatar']);
+    expect(sceneNames).toEqual([
+      'homelab',
+      'domotica',
+      'lavori',
+      'certificazioni',
+      'avatar',
+      'sci',
+      'tennis',
+      'pallavolo',
+    ]);
   });
 
   it('riconosce solo nomi registrati', () => {
