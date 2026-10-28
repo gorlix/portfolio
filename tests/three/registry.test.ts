@@ -8,13 +8,14 @@ import {
 } from '../../src/scripts/three/registry';
 
 describe('registro delle scene', () => {
-  it('oggi contiene solo il segnaposto', () => {
-    expect(sceneNames).toEqual(['placeholder']);
+  it('contiene le scene registrate', () => {
+    expect(sceneNames).toEqual(['placeholder', 'domotica']);
   });
 
   it('riconosce solo nomi registrati', () => {
     expect(isSceneName('placeholder')).toBe(true);
-    expect(isSceneName('homelab')).toBe(false);
+    expect(isSceneName('domotica')).toBe(true);
+    expect(isSceneName('casa')).toBe(false);
     expect(isSceneName('toString')).toBe(false);
     expect(isSceneName('')).toBe(false);
     expect(isSceneName(undefined)).toBe(false);
@@ -41,7 +42,15 @@ describe('isolamento di three', () => {
     readFileSync(new URL(`../../src/scripts/three/${file}`, import.meta.url), 'utf8');
   const anyThree = /from\s+['"]three['"]|import\(\s*['"]three['"]\s*\)/;
 
-  for (const file of ['bootstrap.ts', 'capabilities.ts', 'registry.ts', 'tokens.ts', 'types.ts']) {
+  for (const file of [
+    'bootstrap.ts',
+    'capabilities.ts',
+    'registry.ts',
+    'tokens.ts',
+    'types.ts',
+    'panel.ts',
+    'orbit.ts',
+  ]) {
     it(`${file} non importa three`, () => {
       expect(read(file)).not.toMatch(anyThree);
     });

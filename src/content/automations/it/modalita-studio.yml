@@ -1,0 +1,8 @@
+name: Modalità studio sul PC
+room: studio
+rank: 3
+trigger: Si accende il Non disturbare
+conditions: []
+actions:
+  - Attiva la modalità studio sul PC Linux, che chiude le app che mi distraggono
+repo: https://github.com/gorlix/ha-focus-mode-linux

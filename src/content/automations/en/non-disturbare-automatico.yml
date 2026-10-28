@@ -1,0 +1,10 @@
+name: Automatic Do Not Disturb
+room: studio
+rank: 2
+trigger: The phone starts charging in one of my zones, or a "Do Not Disturb" calendar event begins
+conditions:
+  - The phone is not on Wi-Fi (optional)
+actions:
+  - Turns on Android Do Not Disturb, at the chosen level
+  - Sends a notification with buttons to pause it for a while
+repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint

@@ -1,0 +1,9 @@
+name: Backup della rete Zigbee
+room: casa
+rank: 4
+trigger:
+  todo: Quando parte il backup Zigbee (orario o evento)
+conditions:
+  todo: Eventuali condizioni del backup Zigbee
+actions:
+  todo: Cosa salva il backup Zigbee e dove

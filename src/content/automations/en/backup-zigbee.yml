@@ -1,0 +1,9 @@
+name: Zigbee network backup
+room: casa
+rank: 4
+trigger:
+  todo: When the Zigbee backup runs (schedule or event)
+conditions:
+  todo: Any conditions of the Zigbee backup
+actions:
+  todo: What the Zigbee backup saves and where

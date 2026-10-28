@@ -47,6 +47,8 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
   }
   .scene :global(canvas) {
     position: absolute;
+    /* Solo i gesti orizzontali vanno alla scena: lo scroll verticale resta sempre della pagina. */
+    touch-action: pan-y;
     inset: 0;
     display: block;
     width: 100%;
