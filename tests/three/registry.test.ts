@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { microScenes, sceneKind } from '../../src/scripts/three/kinds';
 import {
   isSceneName,
   sceneLoaders,
@@ -9,7 +10,7 @@ import {
 
 describe('registro delle scene', () => {
   it('contiene le scene delle sezioni interattive', () => {
-    expect(sceneNames).toEqual(['homelab', 'domotica']);
+    expect(sceneNames).toEqual(['homelab', 'domotica', 'lavori']);
   });
 
   it('riconosce solo nomi registrati', () => {
@@ -23,6 +24,15 @@ describe('registro delle scene', () => {
 
   it('ogni caricatore e una funzione pigra', () => {
     for (const loader of Object.values(sceneLoaders)) expect(typeof loader).toBe('function');
+  });
+});
+
+describe('tipi di scena', () => {
+  it('le micro-scene sono registrate, le altre sono interattive', () => {
+    for (const name of microScenes) expect(isSceneName(name)).toBe(true);
+    expect(sceneKind('lavori')).toBe('micro');
+    expect(sceneKind('homelab')).toBe('interactive');
+    expect(sceneKind('domotica')).toBe('interactive');
   });
 });
 
@@ -48,6 +58,8 @@ describe('isolamento di three', () => {
     'registry.ts',
     'tokens.ts',
     'types.ts',
+    'kinds.ts',
+    'progress.ts',
     'panel.ts',
     'orbit.ts',
   ]) {

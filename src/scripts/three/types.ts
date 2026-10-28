@@ -20,6 +20,11 @@ export interface SceneInstance {
   stop(): void;
   /** Ridimensiona alla misura del contenitore e, se ferma, ridisegna un fotogramma. */
   resize(width: number, height: number): void;
+  /**
+   * Solo micro-scene: avanzamento richiesto dallo scroll, tra 0 e 1. La scena lo raggiunge con
+   * una breve rincorsa (solo tra start e stop); a livello 'reduced' resta ferma sulla fine.
+   */
+  setProgress?(progress: number): void;
   /** Libera geometrie, materiali e renderer. Dopo dispose l'istanza non e piu utilizzabile. */
   dispose(): void;
 }

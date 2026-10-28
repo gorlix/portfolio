@@ -1,5 +1,6 @@
 ---
 import type { sectionIds } from '../lib/schemas/common';
+import { sceneKind } from '../scripts/three/kinds';
 import type { SceneName } from '../scripts/three/registry';
 
 type SectionId = (typeof sectionIds)[number];
@@ -25,11 +26,12 @@ interface Props {
 }
 
 const { scene, label, accent, data } = Astro.props;
+const kind = sceneKind(scene);
 // `<` escapato: il blocco non puo chiudere lo script ne aprire tag, qualunque sia il testo.
 const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g, '\\u003c');
 ---
 
-<div class="scene" data-scene={scene} data-accent={accent} role="img" aria-label={label}>
+<div class="scene" data-scene={scene} data-kind={kind} data-accent={accent} role="img" aria-label={label}>
   {json && <script is:inline type="application/json" data-scene-data set:html={json} />}
 </div>
 
@@ -42,6 +44,10 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
     margin-inline: auto;
     contain: layout paint;
   }
+  /* Micro-scena: illustrazione piccola dentro la narrazione, non protagonista. */
+  .scene[data-kind='micro'] {
+    max-width: 24rem;
+  }
   .scene[hidden] {
     display: none;
   }
@@ -53,6 +59,10 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
     display: block;
     width: 100%;
     height: 100%;
+  }
+  /* La micro-scena non si tocca: rotella, dita e clic passano sempre alla pagina. */
+  .scene[data-kind='micro'] :global(canvas) {
+    pointer-events: none;
   }
 </style>
 

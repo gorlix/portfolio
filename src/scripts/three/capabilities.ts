@@ -8,6 +8,13 @@
 /** Livello di resa: scena animata, scena statica (un solo fotogramma), solo testo. */
 export type SceneTier = 'full' | 'reduced' | 'text';
 
+/**
+ * Scena interattiva (Homelab, Domotica: protagonista della sezione) o micro-scena narrativa
+ * guidata dallo scroll. Cambia solo la risposta a reduced-motion: la micro-scena resta come
+ * fotogramma statico finale, che non si muove e illustra lo stesso testo.
+ */
+export type SceneKind = 'interactive' | 'micro';
+
 export interface CapabilityInput {
   /** Contesto WebGL ottenibile. */
   webgl: boolean;
@@ -30,10 +37,11 @@ export const WEAK_CORE_COUNT = 2;
 const isWeak = (value: number | undefined, limit: number): boolean =>
   typeof value === 'number' && value > 0 && value <= limit;
 
-export function decideTier(input: CapabilityInput): SceneTier {
-  // Chi chiede meno movimento o meno dati riceve solo il testo, che contiene gia tutto.
-  if (input.reducedMotion || input.saveData) return 'text';
-  if (!input.webgl) return 'text';
+export function decideTier(input: CapabilityInput, kind: SceneKind = 'interactive'): SceneTier {
+  // Chi chiede meno dati o non ha WebGL riceve solo il testo, che contiene gia tutto.
+  if (input.saveData || !input.webgl) return 'text';
+  // Meno movimento: la scena interattiva lascia il posto al testo, la micro-scena si ferma alla fine.
+  if (input.reducedMotion) return kind === 'micro' ? 'reduced' : 'text';
   if (
     input.majorPerformanceCaveat ||
     isWeak(input.deviceMemory, WEAK_DEVICE_MEMORY_GB) ||
