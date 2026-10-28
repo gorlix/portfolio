@@ -37,7 +37,7 @@ scenes:
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
   beneficenza: "A network of dots that slowly move closer and link up around a centre"
   contatti: "A small terminal that switches on, with prompt lines appearing one after another"
-  avatar: "My low-poly avatar: it turns to face you and waves as you scroll"
+  scrivania: "My low-poly desk: a monitor with a terminal, a split keyboard, a 3D printer and a mini server with blinking LEDs"
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
   certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"

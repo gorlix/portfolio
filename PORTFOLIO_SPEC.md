@@ -92,9 +92,9 @@ Valori gzip, controllati a ogni build da `pnpm check:budget` (`scripts/budget.ts
 | `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 140 KB | ~130 KB |
 | ogni scena (Homelab / Domotica / micro-scena Lavori) | 16 KB | 4,9 / 2,1 / 1,3 KB |
 | codice condiviso delle scene (orbit, pannello, token) | 4 KB | 1,0 KB |
-| bootstrap 3D / barra del tempo / terminale | 4 / 2 / 2 KB | 2,0 / 0,7 / 1,3 KB |
+| bootstrap 3D / barra del tempo / terminale | 4,5 / 2 / 2 KB | 4,1 / 0,7 / 1,3 KB |
 
-- `/human`: primo contenuto visibile **prima** del caricamento del 3D, che parte solo dopo il primo gesto dell'utente (scroll, tasto, tocco); ogni scena si scarica solo quando la sua sezione è a circa uno schermo di distanza, si ferma fuori schermo e non parte con riduzione del movimento, risparmio dati o senza WebGL (test e2e).
+- `/human`: primo contenuto visibile **prima** del caricamento del 3D, che parte solo dopo il primo gesto dell'utente (scroll, tasto, tocco), con una sola eccezione: la scrivania della Home (`data-autostart`), che parte da sola a pagina caricata e al primo momento di calma (`requestIdleCallback`, attesa massima 1,5 s), cosi il testo in vetro è già leggibile; ogni altra scena si scarica solo quando la sua sezione è a circa uno schermo di distanza, si ferma fuori schermo e non parte con riduzione del movimento, risparmio dati o senza WebGL (test e2e).
 - **Prestazioni a runtime** (misura manuale, Chrome desktop, fase 4): ~57 fps con frame peggiore ~20 ms per entrambe le scene, anche con CPU rallentata 4× come dispositivo medio; heap JS ~1 MB senza 3D, ~5–6 MB con una scena attiva. Fuori schermo nessun `requestAnimationFrame` (test e2e). Da ripetere su un telefono reale prima del lancio.
 - Lighthouse (`lighthouserc.json`): ≥ 95 su Performance, Accessibilità, Best Practices e SEO per i tre percorsi leggeri; su `/human` al massimo 2 script e 10 KB di JS al primo caricamento.
 
@@ -221,7 +221,7 @@ Root (testo puro, per macchine):
 9. **Contatti**
 
 **Prima schermata (Home dell'Umano)**
-- Saluto, **foto piccola** e badge in sovraimpressione su uno **sfondo 3D d'atmosfera** (scrivania/stanza low-poly), invito a scorrere. **Niente avatar** nella Home: il personaggio low-poly resta solo nella micro-scena della pallavolo (Sport).
+- Saluto, **foto piccola** e badge in sovraimpressione su uno **sfondo 3D d'atmosfera** (scrivania low-poly: monitor col terminale, tastiera split, stampante 3D, mensola con mini-server, finestra con luce calda; camera che respira e, scorrendo, si avvicina al monitor), invito a scorrere. **Niente avatar** nella Home: il personaggio low-poly resta solo nella micro-scena della pallavolo (Sport).
 - **Piccoli badge delle competenze tecniche** (solo nomi per ora, cliccabili verso la sezione dove quella competenza si vede in azione). Quanti badge e se c'è un indicatore di livello: **decisioni rimandate** (§15).
 - La barra laterale è già visibile, così si capisce che si può saltare.
 

@@ -11,13 +11,13 @@ import {
 describe('registro delle scene', () => {
   it('contiene le scene delle sezioni interattive', () => {
     expect(sceneNames).toEqual([
+      'scrivania',
       'homelab',
       'domotica',
       'lavori',
       'certificazioni',
       'beneficenza',
       'contatti',
-      'avatar',
       'interessi',
       'sci',
       'tennis',
