@@ -80,11 +80,21 @@ Le scelte qui sotto sono il **default concordato**. Claude Code può proporre al
 - **Nessuna dipendenza dall'homelab** per servire il sito pubblico: se l'homelab è spento, il sito funziona. Niente collegamenti tra il sito e l'infrastruttura reale.
 - **Analitica:** nessuna oppure Cloudflare Web Analytics (senza cookie). Decisione aperta (§15).
 
-### 3.5 Budget di peso (proposta, da misurare in fase 6)
+### 3.5 Budget di peso (misurati, verificati in CI)
 
-- `/`, `/recruiter`, `/agent`: ordine di **poche decine di KB** ciascuna, zero JS (il terminale può avere un piccolo script facoltativo).
-- `/human`: primo contenuto visibile **prima** del caricamento del 3D; ogni sezione carica i propri asset solo quando l'utente si avvicina.
-- Obiettivi Lighthouse indicativi: ≥ 95 su Performance, Accessibilità, Best Practices e SEO per i tre percorsi leggeri.
+Valori gzip, controllati a ogni build da `pnpm check:budget` (`scripts/budget.ts`): un chunk JS nuovo senza budget fa fallire la CI. Il "primo caricamento" è HTML + CSS + script collegati direttamente; font e immagini esclusi (li misura Lighthouse).
+
+| Cosa | Budget | Misurato (fase 4) |
+|---|---|---|
+| `/`, `/en/` (primo caricamento / di cui JS) | 15 KB / 2 KB | ~6 KB / 1,3 KB |
+| `/recruiter`, `/agent` (primo caricamento / JS) | 15 KB / 0 | ~6 KB / 0 |
+| `/human` primo caricamento, **senza 3D** / JS | 32 KB / 6 KB | ~13 KB / 2,7 KB |
+| `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 140 KB | ~127 KB |
+| ogni scena (Homelab, Domotica) | 16 KB | vedi CI |
+| bootstrap 3D / barra del tempo / terminale | 4 / 2 / 2 KB | 2,0 / 0,7 / 1,3 KB |
+
+- `/human`: primo contenuto visibile **prima** del caricamento del 3D; ogni scena si scarica solo quando la sua sezione è a circa uno schermo di distanza, si ferma fuori schermo e non parte con riduzione del movimento, risparmio dati o senza WebGL (test e2e).
+- Lighthouse (`lighthouserc.json`): ≥ 95 su Performance, Accessibilità, Best Practices e SEO per i tre percorsi leggeri; su `/human` al massimo 2 script e 10 KB di JS al primo caricamento.
 
 ### 3.6 Lingue
 
