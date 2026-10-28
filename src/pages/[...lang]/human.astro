@@ -142,7 +142,10 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               scene="lavori"
               label={page.scenes.lavori}
               accent="lavori"
-              data={{ count: sortedExperiences.length }}
+              data={{
+                count: sortedExperiences.length,
+                ongoing: sortedExperiences.some((e) => e.data.end === null),
+              }}
             />
           )}
 
@@ -388,6 +391,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'certificazioni' && (
             <>
+              <Scene
+                scene="certificazioni"
+                label={page.scenes.certificazioni}
+                accent="certificazioni"
+                data={{ technical: technicalCerts.length, supplementary: supplementaryCerts.length }}
+              />
               <h3>{L.technicalCertifications}</h3>
               <ul class="plain">
                 {technicalCerts.map(({ data: c }) => (

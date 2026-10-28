@@ -49,7 +49,13 @@ export const humanSchema = z.strictObject({
     cv: text,
   }),
   /** Testo alternativo delle scene 3D. */
-  scenes: z.strictObject({ homelab: text, domotica: text, lavori: text, interessi: text }),
+  scenes: z.strictObject({
+    homelab: text,
+    domotica: text,
+    lavori: text,
+    certificazioni: text,
+    interessi: text,
+  }),
   homelab: z.strictObject({
     caption: text,
     simulatedNote: text,
@@ -176,4 +182,5 @@ export const humanTranslatable = [
   'scenes.domotica',
   'scenes.lavori',
   'scenes.interessi',
+  'scenes.certificazioni',
 ];

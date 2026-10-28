@@ -38,6 +38,7 @@ scenes:
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
+  certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
 farewell:
   command: "$ logout"
   message: "Thanks for stopping by. If you want another lap, the door is right here:"
