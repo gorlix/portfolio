@@ -5,6 +5,7 @@ import Scene from '../../components/Scene.astro';
 import Timeline from '../../components/Timeline.astro';
 import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
+import { BEACON_SRC, beaconConfig } from '../../lib/analytics';
 import { getEntries, getSingleton } from '../../lib/data';
 import { domoticaModel } from '../../lib/domotica';
 import { formatDate } from '../../lib/format';
@@ -96,6 +97,7 @@ const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
 const contactChannels = 4 + [profile.links.devto, profile.cv].filter((v) => !isTodo(v)).length;
 
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
+const beacon = beaconConfig(import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN);
 const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type: 'ProfilePage' });
 ---
 
@@ -108,6 +110,13 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   stickyHeader
   theme="mocha"
 >
+  {
+    beacon && (
+      <Fragment slot="head">
+        <script is:inline defer src={BEACON_SRC} data-cf-beacon={beacon} />
+      </Fragment>
+    )
+  }
   <Fragment slot="header">
     <a class="back" href={here('/')}>{page.backToChoice}</a>
     <Timeline label={page.menuLabel} toggleLabel={page.menuToggle} items={timelineItems} />
