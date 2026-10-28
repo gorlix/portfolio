@@ -1,0 +1,4 @@
+name: "Alertmanager"
+kind: technical
+linkedSection: lavori
+group: "Observability"

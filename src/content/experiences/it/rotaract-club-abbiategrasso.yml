@@ -1,0 +1,10 @@
+company: "Rotaract Club Abbiategrasso"
+role: "Segretario, Prefetto e altre cariche"
+summary: "Volontariato"
+start:
+  todo: "Data di inizio (non nel CV)"
+end:
+  todo: "Data di fine (non nel CV)"
+results:
+  todo: "Cosa ha fatto (non nel CV)"
+stack: []

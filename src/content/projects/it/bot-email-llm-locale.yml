@@ -1,0 +1,9 @@
+name: "Bot email con LLM locale"
+language:
+  todo: "Linguaggio principale (non nel CV)"
+method:
+  todo: "a mano / con AI / vibecoded (non nel CV)"
+status: wip
+featured: true
+rank: 5
+description: "Sperimentazione, per l'azienda di famiglia, con un modello open-weight (Gemma 3 4B) ospitato in locale per automatizzare la gestione delle email e fornire un'interfaccia limitata verso il gestionale IBM iSeries (ex AS/400). Motore di inferenza Unsloth, scelto per la possibilità di fine-tuning rapido del modello; progetto ancora in fase molto sperimentale."

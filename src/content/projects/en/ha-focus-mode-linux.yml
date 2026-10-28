@@ -5,7 +5,6 @@ language:
 method: ai-copilot
 status:
   todo: active / wip / archived
-featured: true
-rank: 2
+featured: false
 description: Home Assistant side of the Android Do Not Disturb sync.
 section: domotica

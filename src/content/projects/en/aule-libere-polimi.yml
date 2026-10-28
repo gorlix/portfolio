@@ -5,6 +5,5 @@ language:
 method: ai-copilot
 status:
   todo: active / wip / archived
-featured: true
-rank: 3
+featured: false
 description: Project adopted when the original author left it; runs on the homelab.

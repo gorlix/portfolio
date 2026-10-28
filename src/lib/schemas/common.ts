@@ -21,8 +21,8 @@ export const humanSectionId = z.enum(humanSectionIds);
 
 export const text = z.string().trim().min(1);
 export const url = z.url({ protocol: /^https$/ });
-/** Anno-mese o data completa, sempre tra apici nei YAML (altrimenti il parser produce una Date). */
-export const isoDate = z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/);
+/** Anno, anno-mese o data completa, sempre tra apici nei YAML (altrimenti il parser produce una Date). */
+export const isoDate = z.string().regex(/^\d{4}(-\d{2}(-\d{2})?)?$/);
 
 /**
  * Dato non ancora fornito da Alessandro: `{ todo: "cosa serve e da dove" }`.

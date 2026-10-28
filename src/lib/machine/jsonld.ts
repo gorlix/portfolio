@@ -25,13 +25,15 @@ export function buildJsonLd(m: MachineModel, page: JsonLdPage): Record<string, u
   const { locale } = page;
   const id = personId(m);
   const sameAs = [m.links.github, m.links.linkedin, m.links.devto, m.links.x].filter(Boolean);
-  const credentials = m.certifications.map((c) => ({
-    '@type': 'EducationalOccupationalCredential',
-    name: c.name,
-    ...(c.issuer && { recognizedBy: { '@type': 'Organization', name: c.issuer } }),
-    ...(c.date && { dateCreated: c.date }),
-    ...(c.verifyUrl && { url: c.verifyUrl }),
-  }));
+  const credentials = m.certifications
+    .filter((c) => c.status === 'earned')
+    .map((c) => ({
+      '@type': 'EducationalOccupationalCredential',
+      name: c.name,
+      ...(c.issuer && { recognizedBy: { '@type': 'Organization', name: c.issuer } }),
+      ...(c.date && { dateCreated: c.date }),
+      ...(c.verifyUrl && { url: c.verifyUrl }),
+    }));
 
   const person = {
     '@type': 'Person',
@@ -51,7 +53,7 @@ export function buildJsonLd(m: MachineModel, page: JsonLdPage): Record<string, u
   const projects = m.projects.map((p) => ({
     '@type': 'SoftwareSourceCode',
     name: p.name,
-    codeRepository: p.repo,
+    ...(p.repo && { codeRepository: p.repo }),
     ...(p.description && { description: p.description[locale] }),
     ...(p.language && { programmingLanguage: p.language }),
     author: { '@id': id },

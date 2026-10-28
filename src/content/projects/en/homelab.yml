@@ -8,5 +8,5 @@ status:
   todo: active / wip / archived
 featured: true
 rank: 1
-description: Two-site homelab built on Proxmox VE, Tailscale, OpenTofu and Ansible, documented with ADRs.
+description: "Homelab as code on 3 Proxmox nodes across 2 sites: VM provisioning with OpenTofu, configuration with Ansible, Docker Compose services behind a Traefik reverse proxy, centralized SSO with Authentik, automatic updates with Renovate, 3-2-1 backup strategy. Architectural decisions documented in 8 ADRs. A continuous, hands-on test bed for the same skills used in production at Trimind."
 section: homelab

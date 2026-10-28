@@ -1,11 +1,9 @@
 name: Alessandro Gorla
-role:
-  todo: Job title
-location: Milan
+role: "DevOps / Infrastructure Engineer"
+location: "Abbiategrasso (MI)"
 availability:
   todo: Availability (from Alessandro)
-tagline:
-  todo: Personal line (Alessandro copy)
+tagline: "Infrastructure/DevOps engineer with a solid Linux foundation (personal operating system for 5 years) and a multi-node homelab managed entirely as code (Proxmox, OpenTofu, Ansible, Docker, Traefik). I build and maintain secure self-hosted infrastructure (reverse proxy, zero trust, tested backups) and end-to-end CI/CD pipelines. Full-stack development and LLM integration are a plus that I use to automate and instrument the systems I run."
 email: ale.gorla2002@gmail.com
 links:
   github: https://github.com/gorlix
@@ -13,6 +11,11 @@ links:
   devto:
     todo: URL del profilo dev.to
   x: https://x.com/Goorlix
+languages:
+  - name: "Italian"
+    level: "native"
+  - name: "English"
+    level: "fluent"
 cv: /cv/alessandro-gorla-it.pdf
 photo:
   src: /src/assets/profile.jpg

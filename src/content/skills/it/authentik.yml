@@ -1,0 +1,4 @@
+name: "Authentik SSO"
+kind: technical
+linkedSection: homelab
+group: "Rete e sicurezza"

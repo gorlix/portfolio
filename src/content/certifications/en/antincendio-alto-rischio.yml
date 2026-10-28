@@ -1,0 +1,9 @@
+name: "High-risk fire safety (level 3)"
+issuer:
+  todo: "Issuer (not in CV)"
+date:
+  todo: "Date (not in CV)"
+verifyUrl:
+  todo: "Verification link (not in CV)"
+kind: supplementary
+status: earned

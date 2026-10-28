@@ -7,6 +7,8 @@ export const certificationSchema = z.strictObject({
   date: orTodo(isoDate),
   verifyUrl: orTodo(url),
   kind: orTodo(z.enum(['technical', 'supplementary'])),
+  /** `in-progress` = percorso di studio avviato, non ancora conseguita. */
+  status: z.enum(['earned', 'in-progress']),
 });
 
-export const certificationTranslatable: string[] = [];
+export const certificationTranslatable = ['name'];

@@ -27,11 +27,12 @@ export interface MachineModel {
     issuer?: string | undefined;
     date?: string | undefined;
     verifyUrl?: string | undefined;
+    status: 'earned' | 'in-progress';
   }[];
   projects: {
     slug: string;
     name: string;
-    repo: string;
+    repo?: string | undefined;
     description?: Bilingual | undefined;
     language?: string | undefined;
     method?: string | undefined;
@@ -98,7 +99,13 @@ export async function loadMachineModel(): Promise<MachineModel> {
       const name = known(c.name);
       if (!name) return [];
       return [
-        { name, issuer: known(c.issuer), date: known(c.date), verifyUrl: known(c.verifyUrl) },
+        {
+          name,
+          issuer: known(c.issuer),
+          date: known(c.date),
+          verifyUrl: known(c.verifyUrl),
+          status: c.status,
+        },
       ];
     }),
     projects: projEn.map((p, i) => ({

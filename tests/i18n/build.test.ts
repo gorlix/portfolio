@@ -279,7 +279,7 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
       sameAs: string[];
       knowsAbout: string[];
       pages: Record<string, { it: string; en: string }>;
-      projects: { name: string; repository: string }[];
+      projects: { name: string; repository?: string }[];
     };
 
   type Node = Record<string, unknown> & { '@type': string; '@id'?: string };
@@ -322,7 +322,8 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
 
   it('stessi progetti e stessi profili in profile.json, llms.txt, agent.md e JSON-LD', () => {
     const p = profile();
-    const repos = p.projects.map((x) => x.repository).sort();
+    /** Un progetto senza repository pubblico resta nei file ma non ha un URL da confrontare. */
+    const repos = p.projects.flatMap((x) => (x.repository ? [x.repository] : [])).sort();
     expect(repos.length).toBeGreaterThan(0);
     for (const file of ['llms.txt', 'agent.md']) {
       const text = read(file);
@@ -332,7 +333,7 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
     for (const { url, html } of pages) {
       const inPage = graphOf(html)
         .filter((n) => n['@type'] === 'SoftwareSourceCode')
-        .map((n) => n.codeRepository as string)
+        .flatMap((n) => (n.codeRepository ? [n.codeRepository as string] : []))
         .sort();
       expect(inPage, `${url}: progetti nel JSON-LD`).toEqual(repos);
     }

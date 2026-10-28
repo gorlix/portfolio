@@ -18,8 +18,15 @@ const model: MachineModel = {
   ],
   skills: [{ name: 'Rust', group: { it: 'Linguaggi', en: 'Languages' }, kind: 'technical' }],
   certifications: [
-    { name: 'Cert', issuer: 'Ente', date: '2024-03', verifyUrl: 'https://v.test/c' },
-    { name: 'Solo nome' },
+    {
+      name: 'Cert',
+      issuer: 'Ente',
+      date: '2024-03',
+      verifyUrl: 'https://v.test/c',
+      status: 'earned',
+    },
+    { name: 'Solo nome', status: 'earned' },
+    { name: 'In corso', status: 'in-progress' },
   ],
   projects: [
     {
@@ -48,6 +55,12 @@ describe('JSON-LD', () => {
     expect(JSON.stringify(buildJsonLd(model, { ...page, locale: 'it' }))).toContain(
       '"jobTitle":"Ruolo"',
     );
+  });
+
+  it('non dichiara come credenziale una certificazione ancora in corso', () => {
+    const text = JSON.stringify(buildJsonLd(model, page));
+    expect(text).toContain('"name":"Cert"');
+    expect(text).not.toContain('In corso');
   });
 
   it('omette i dati non noti invece di emettere segnaposto', () => {
