@@ -28,7 +28,20 @@ export interface CapabilityInput {
   deviceMemory?: number | undefined;
   /** Core logici (`navigator.hardwareConcurrency`), se esposti. */
   hardwareConcurrency?: number | undefined;
+  /** Batteria sotto soglia e non in carica (Battery API, dove esiste). */
+  lowBattery?: boolean | undefined;
+  /** Puntatore principale impreciso (telefono, tablet): `(pointer: coarse)`. */
+  coarsePointer?: boolean | undefined;
 }
+
+/** Dettaglio di resa per un livello che disegna qualcosa: pixel ratio massimo e antialias. */
+export interface RenderProfile {
+  maxPixelRatio: number;
+  antialias: boolean;
+}
+
+/** Sotto questa carica (0-1), se non in carica, le scene passano al fotogramma statico. */
+export const LOW_BATTERY_LEVEL = 0.2;
 
 /** Soglia (inclusa) sotto cui il dispositivo e considerato debole. */
 export const WEAK_DEVICE_MEMORY_GB = 2;
@@ -44,6 +57,7 @@ export function decideTier(input: CapabilityInput, kind: SceneKind = 'interactiv
   if (input.reducedMotion) return kind === 'micro' ? 'reduced' : 'text';
   if (
     input.majorPerformanceCaveat ||
+    input.lowBattery === true ||
     isWeak(input.deviceMemory, WEAK_DEVICE_MEMORY_GB) ||
     isWeak(input.hardwareConcurrency, WEAK_CORE_COUNT)
   ) {
@@ -51,6 +65,23 @@ export function decideTier(input: CapabilityInput, kind: SceneKind = 'interactiv
   }
   return 'full';
 }
+
+/**
+ * Dettaglio di resa. Statico: un fotogramma a pixel ratio 1. Animato su schermo tattile
+ * (telefono): pixel ratio 1,5 e niente antialias, per tenere gli fps; altrimenti 2 con antialias.
+ */
+export function renderProfile(
+  tier: Exclude<SceneTier, 'text'>,
+  input: Pick<CapabilityInput, 'coarsePointer'>,
+): RenderProfile {
+  if (tier !== 'full') return { maxPixelRatio: 1, antialias: false };
+  if (input.coarsePointer === true) return { maxPixelRatio: 1.5, antialias: false };
+  return { maxPixelRatio: 2, antialias: true };
+}
+
+/** Pixel ratio da dare al renderer: quello dello schermo, limitato dal profilo. */
+export const pixelRatioFor = (profile: RenderProfile, devicePixelRatio: number): number =>
+  Math.min(devicePixelRatio, profile.maxPixelRatio);
 
 /** Libera subito il contesto di prova, per non occupare uno dei pochi slot WebGL del browser. */
 const release = (gl: WebGLRenderingContext | WebGL2RenderingContext): void => {
@@ -84,18 +115,53 @@ export function probeWebgl(): { webgl: boolean; majorPerformanceCaveat: boolean 
   return { webgl: false, majorPerformanceCaveat: false };
 }
 
+interface BatteryLike {
+  level: number;
+  charging: boolean;
+  addEventListener(type: 'levelchange' | 'chargingchange', listener: () => void): void;
+}
+
 interface NavigatorHints {
   deviceMemory?: number;
   connection?: { saveData?: boolean };
+  getBattery?: () => Promise<BatteryLike>;
+}
+
+let batteryLow = false;
+let watchingBattery = false;
+
+/** Stato batteria letto finora (la Battery API e asincrona e assente su Safari/Firefox). */
+export const isBatteryLow = (): boolean => batteryLow;
+
+/** Avvia una volta sola l'ascolto della batteria; senza API resta `false`. */
+function watchBattery(nav: Navigator & NavigatorHints): void {
+  if (watchingBattery || typeof nav.getBattery !== 'function') return;
+  watchingBattery = true;
+  nav
+    .getBattery()
+    .then((battery) => {
+      const update = (): void => {
+        batteryLow = !battery.charging && battery.level <= LOW_BATTERY_LEVEL;
+      };
+      update();
+      battery.addEventListener('levelchange', update);
+      battery.addEventListener('chargingchange', update);
+    })
+    .catch(() => {
+      // Permesso negato o API bloccata: come se non esistesse.
+    });
 }
 
 export function probeCapabilities(): CapabilityInput {
   const nav = navigator as Navigator & NavigatorHints;
+  watchBattery(nav);
   return {
     ...probeWebgl(),
     reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
     saveData: nav.connection?.saveData === true,
     deviceMemory: nav.deviceMemory,
     hardwareConcurrency: nav.hardwareConcurrency,
+    lowBattery: batteryLow,
+    coarsePointer: matchMedia('(pointer: coarse)').matches,
   };
 }

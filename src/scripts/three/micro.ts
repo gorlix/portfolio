@@ -6,6 +6,7 @@ import {
   Scene,
   WebGLRenderer,
 } from 'three';
+import { pixelRatioFor } from './capabilities';
 import { firstToken } from './tokens';
 import type { SceneContext, SceneInstance } from './types';
 
@@ -37,16 +38,16 @@ export interface MicroScene {
 }
 
 export function mountMicro(
-  { canvas, container, tier }: SceneContext,
+  { canvas, container, tier, profile }: SceneContext,
   build: (tools: MicroTools) => MicroScene,
 ): SceneInstance {
   const renderer = new WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: tier === 'full',
+    antialias: profile.antialias,
     powerPreference: 'low-power',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, tier === 'full' ? 2 : 1));
+  renderer.setPixelRatio(pixelRatioFor(profile, window.devicePixelRatio));
   renderer.setClearAlpha(0);
 
   const owned: { dispose(): void }[] = [];
