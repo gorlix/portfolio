@@ -1,5 +1,4 @@
 section: interessi
 links: []
 title: Rust (learning)
-text:
-  todo: First-person text (Alessandro copy)
+text: "I am learning Rust on the job: the migration of focus-mode-app from Python to Rust/Tauri is under way, and the compiler corrects me more patiently than any colleague."

@@ -36,6 +36,7 @@ labels:
 scenes:
   homelab: "Due piattaforme low-poly, Casa e Produzione, con i nodi dell'homelab e un fascio di luce che le collega"
   domotica: "Casa low-poly vista dall'alto, con le stanze che si illuminano quando parte un'automazione"
+  interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
   lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
 farewell:
   command: "$ logout"

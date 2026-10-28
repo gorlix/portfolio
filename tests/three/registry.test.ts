@@ -10,7 +10,7 @@ import {
 
 describe('registro delle scene', () => {
   it('contiene le scene delle sezioni interattive', () => {
-    expect(sceneNames).toEqual(['homelab', 'domotica', 'lavori']);
+    expect(sceneNames).toEqual(['homelab', 'domotica', 'lavori', 'interessi']);
   });
 
   it('riconosce solo nomi registrati', () => {
@@ -31,6 +31,7 @@ describe('tipi di scena', () => {
   it('le micro-scene sono registrate, le altre sono interattive', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('micro');
+    expect(sceneKind('interessi')).toBe('micro');
     expect(sceneKind('homelab')).toBe('interactive');
     expect(sceneKind('domotica')).toBe('interactive');
   });

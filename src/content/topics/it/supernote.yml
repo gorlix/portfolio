@@ -1,5 +1,4 @@
 section: interessi
 links: []
 title: Supernote
-text:
-  todo: Testo in prima persona (copy di Alessandro)
+text: "Leggo e scrivo su un Supernote Manta, e visto che un e-reader non mi bastava ci ho costruito attorno qualche strumento: sn_make_space, sn-tcp-tunnel (il mio preferito) e SuperFlow, ancora in lavorazione."

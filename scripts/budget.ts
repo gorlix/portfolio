@@ -21,7 +21,11 @@ export const chunkBudgets: ChunkBudget[] = [
   // three intero (tree-shaken), caricato solo quando una scena si avvicina.
   { name: 'three', pattern: /^three\./, maxGzip: 140 * KB },
   // Ogni scena di /human, con i suoi moduli (dati, controlli, metriche).
-  { name: 'scena', pattern: /^(homelab|domotica|lavori|placeholder)\./, maxGzip: 16 * KB },
+  {
+    name: 'scena',
+    pattern: /^(homelab|domotica|lavori|interessi|placeholder)\./,
+    maxGzip: 16 * KB,
+  },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
   { name: 'condiviso scene', pattern: /^(orbit|panel|tokens|micro)\./, maxGzip: 4 * KB },
   { name: 'bootstrap 3D', pattern: /^Scene\.astro_/, maxGzip: 4 * KB },
