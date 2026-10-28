@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { type CapabilityInput, decideTier } from '../../src/scripts/three/capabilities';
+import {
+  type CapabilityInput,
+  decideTier,
+  LOW_BATTERY_LEVEL,
+  pixelRatioFor,
+  renderProfile,
+} from '../../src/scripts/three/capabilities';
 
 const capable: CapabilityInput = {
   webgl: true,
@@ -58,5 +64,55 @@ describe('decideTier', () => {
 
   it('valori non validi (0) non declassano', () => {
     expect(decideTier({ ...capable, deviceMemory: 0, hardwareConcurrency: 0 })).toBe('full');
+  });
+});
+
+describe('batteria bassa', () => {
+  it('batteria scarica e non in carica: scena statica, non testo', () => {
+    expect(decideTier({ ...capable, lowBattery: true })).toBe('reduced');
+    expect(decideTier({ ...capable, lowBattery: true }, 'micro')).toBe('reduced');
+    expect(decideTier({ ...capable, lowBattery: false })).toBe('full');
+  });
+
+  it('il testo vince anche sulla batteria bassa', () => {
+    expect(decideTier({ ...capable, lowBattery: true, saveData: true })).toBe('text');
+    expect(decideTier({ ...capable, lowBattery: true, reducedMotion: true })).toBe('text');
+  });
+
+  it('la soglia e una frazione valida', () => {
+    expect(LOW_BATTERY_LEVEL).toBeGreaterThan(0);
+    expect(LOW_BATTERY_LEVEL).toBeLessThan(0.5);
+  });
+});
+
+describe('renderProfile', () => {
+  it('desktop animato: pixel ratio 2 con antialias', () => {
+    expect(renderProfile('full', { coarsePointer: false })).toEqual({
+      maxPixelRatio: 2,
+      antialias: true,
+    });
+    expect(renderProfile('full', {})).toEqual({ maxPixelRatio: 2, antialias: true });
+  });
+
+  it('telefono animato: pixel ratio 1,5 senza antialias', () => {
+    expect(renderProfile('full', { coarsePointer: true })).toEqual({
+      maxPixelRatio: 1.5,
+      antialias: false,
+    });
+  });
+
+  it('livello statico: pixel ratio 1 senza antialias, anche su desktop', () => {
+    expect(renderProfile('reduced', { coarsePointer: false })).toEqual({
+      maxPixelRatio: 1,
+      antialias: false,
+    });
+    expect(renderProfile('reduced', { coarsePointer: true }).maxPixelRatio).toBe(1);
+  });
+
+  it('pixelRatioFor limita lo schermo al massimo del profilo', () => {
+    const phone = renderProfile('full', { coarsePointer: true });
+    expect(pixelRatioFor(phone, 3)).toBe(1.5);
+    expect(pixelRatioFor(phone, 1)).toBe(1);
+    expect(pixelRatioFor(renderProfile('full', {}), 3)).toBe(2);
   });
 });
