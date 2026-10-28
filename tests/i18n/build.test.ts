@@ -268,6 +268,7 @@ describe('Web Analytics solo su /human (PORT-72)', () => {
       }
     }
   });
+});
 
 describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
   const read = (name: string) => readFileSync(join(outDir, name), 'utf8');
