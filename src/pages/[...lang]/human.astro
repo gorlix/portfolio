@@ -1,5 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
+import domoticaPosterDesktopSrc from '../../assets/human/domotica-poster-desktop.png';
+import domoticaPosterMobileSrc from '../../assets/human/domotica-poster-mobile.png';
 import posterDesktopSrc from '../../assets/human/poster-desktop.png';
 import posterMobileSrc from '../../assets/human/poster-mobile.png';
 import AutomationSteps from '../../components/AutomationSteps.astro';
@@ -16,6 +18,7 @@ import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import { isTodo, type Locale } from '../../lib/schemas/common';
+import { createDomoticaSim, SIM_SEED, sparkPoints } from '../../scripts/three/domotica/sim';
 
 export const getStaticPaths = localeStaticPaths;
 
@@ -44,11 +47,22 @@ const [
   getEntries('automations', locale),
 ]);
 
-/** Poster statici della scrivania: fallback se il 3D non parte (niente WebGL, risparmio dati, JS spento). */
-const [posterDesktop, posterMobile] = await Promise.all([
-  getImage({ src: posterDesktopSrc, format: 'webp', quality: 70 }),
-  getImage({ src: posterMobileSrc, format: 'webp', quality: 70 }),
-]);
+/** Poster statici delle scene immersive: fallback se il 3D non parte (niente WebGL, risparmio dati, JS spento). */
+const poster = (src: ImageMetadata) => getImage({ src, format: 'webp', quality: 70 });
+const [posterDesktop, posterMobile, domoticaPosterDesktop, domoticaPosterMobile] =
+  await Promise.all([
+    poster(posterDesktopSrc),
+    poster(posterMobileSrc),
+    poster(domoticaPosterDesktopSrc),
+    poster(domoticaPosterMobileSrc),
+  ]);
+const posterReasons = ['webgl', 'savedata', 'error', 'nojs'] as const;
+/** Avviso del poster con il soggetto della sezione ("della scrivania", "della casa"). */
+const posterNotice = (subject: string) =>
+  posterReasons.map((reason) => ({
+    reason,
+    text: page.posterNotice[reason].replace('{subject}', subject),
+  }));
 
 const L = page.labels;
 const here = (path: string) => localizedPath(path, locale);
@@ -92,7 +106,7 @@ const period = (start: unknown, end: unknown) => {
   return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
 };
 /** Sezioni col layout immersivo (spec §7.3, PORT-76): per ora solo il pilota Homelab. */
-const immersive = (id: string) => id === 'homelab' || id === 'home';
+const immersive = (id: string) => id === 'homelab' || id === 'home' || id === 'domotica';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -103,6 +117,17 @@ const D = page.domotica;
 const domotica = domoticaModel(D.rooms, automations);
 const automationBySlug = (slug: string) => automations.find((e) => e.slug === slug)?.data;
 const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
+const domoticaRooms = domotica.rooms.filter((r) => r.kind === 'room');
+/** Primo quadro dei sensori simulati: lo stesso seme della scena, che poi lo fa avanzare. */
+const sensors = createDomoticaSim(
+  domoticaRooms.map((r) => r.id),
+  SIM_SEED,
+).snapshot();
+const num = (value: number, digits = 0) =>
+  new Intl.NumberFormat(locale, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(value);
 
 /** Canali mostrati in Contatti (email, GitHub, LinkedIn, X, piu dev.to e CV se presenti). */
 const contactChannels = 4 + [profile.links.devto, profile.cv].filter((v) => !isTodo(v)).length;
@@ -158,6 +183,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
             </div>
           )}
+          {s.id === 'domotica' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={domoticaPosterMobile.src} />
+                <img
+                  src={domoticaPosterDesktop.src}
+                  width={domoticaPosterDesktop.options.width}
+                  height={domoticaPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="domotica" label={page.scenes.domotica} accent="domotica" data={domotica} />
+            </div>
+          )}
           {s.id === 'home' ? (
             <h1 id="h-home">{profile.name}</h1>
           ) : (
@@ -186,10 +227,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </nav>
                   <p class="hint">{page.home.scrollHint}</p>
                   <p class="poster-note" role="status">
-                    <span data-reason="webgl">{page.home.posterNotice.webgl}</span>
-                    <span data-reason="savedata">{page.home.posterNotice.savedata}</span>
-                    <span data-reason="error">{page.home.posterNotice.error}</span>
-                    <span data-reason="nojs">{page.home.posterNotice.nojs}</span>
+                    {posterNotice(page.home.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
                   </p>
                 </div>
               </div>
@@ -418,30 +456,26 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             </>
           )}
 
-          {s.id === 'domotica' &&
-            projectsIn(s.id).map(({ data: p }) => (
-              <article class="item">
-                <h3>{p.name}</h3>
-                <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
-                <p class="meta"><a href={p.repo}>{L.repository}</a></p>
-              </article>
-            ))}
-
           {s.id === 'domotica' && (
             <>
-              <div class="lab">
-                <Scene scene="domotica" label={page.scenes.domotica} accent="domotica" data={domotica} />
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
+                <p class="poster-note" role="status">
+                  {posterNotice(D.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+                </p>
                 <div class="lab-ui" data-panel-ui hidden>
                   <p class="meta">{D.sceneHint}</p>
-                  <ul class="plain lab-items" aria-label={D.roomsLabel}>
-                    {domotica.rooms.map((r) => (
-                      <li>
-                        <button type="button" data-panel-open={r.id} aria-expanded="false" aria-controls="domotica-panel">
-                          {r.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <div class="lab-controls">
+                    <ul class="plain lab-nodes" aria-label={D.roomsLabel}>
+                      {domotica.rooms.map((r) => (
+                        <li>
+                          <button type="button" data-panel-open={r.id} aria-expanded="false" aria-controls="domotica-panel">
+                            {r.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   <div class="lab-panel" id="domotica-panel" data-panel hidden>
                     {domotica.rooms.map((r) => (
                       <div data-panel-item={r.id} hidden>
@@ -458,22 +492,97 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                         )}
                       </div>
                     ))}
-                    <button type="button" data-panel-close>{D.close}</button>
+                    <button type="button" class="lab-close" data-panel-close>{D.close}</button>
                   </div>
                 </div>
               </div>
 
-              {domotica.automations.map(({ slug }) => {
-                const a = automationBySlug(slug);
-                return a && (
-                  <article class="item" data-automation={slug}>
-                    <h3>{a.name} <span class="meta">· {roomName(a.room)}</span></h3>
-                    <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
-                    {a.repo && <p class="meta"><a href={a.repo}>{L.repository}</a></p>}
-                  </article>
-                );
-              })}
-              <p><Todo label={page.todoLabel} hint={D.automationsTodo} /></p>
+              <div class="cards">
+                <article class="card" data-moment="climate">
+                  <h3>{D.climate.title}</h3>
+                  <p>{D.climate.text}</p>
+                  <p class="meta">{D.simulatedNote}</p>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">{D.room}</th>
+                        <th scope="col">{D.climate.temperature}</th>
+                        <th scope="col">{D.climate.humidity}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {domoticaRooms.map((r) => (
+                        <tr>
+                          <th scope="row">{r.name}</th>
+                          <td><span data-sim={`rooms.${r.id}.temperature`} data-digits="1">{num(sensors.rooms[r.id]?.temperature ?? 0, 1)}</span> °C</td>
+                          <td><span data-sim={`rooms.${r.id}.humidity`}>{num(sensors.rooms[r.id]?.humidity ?? 0)}</span> %</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </article>
+
+                {domotica.automations.map(({ slug }) => {
+                  const a = automationBySlug(slug);
+                  return a && (
+                    <article class="card" data-moment={slug} data-automation={slug}>
+                      <h3>{a.name} <span class="meta">· {roomName(a.room)}</span></h3>
+                      <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
+                      {a.repo && <p class="meta"><a href={a.repo}>{L.repository}</a></p>}
+                    </article>
+                  );
+                })}
+
+                <article class="card" data-moment="audio">
+                  <h3>{D.audio.title}</h3>
+                  <p>{D.audio.text}</p>
+                  <p>{D.audio.rooms}</p>
+                  <ul class="tags">{domoticaRooms.map((r) => <li>{r.name}</li>)}</ul>
+                </article>
+
+                <article class="card" data-moment="weather">
+                  <h3>{D.weather.title}</h3>
+                  <p>{D.weather.text}</p>
+                  <p class="meta">{D.simulatedNote}</p>
+                  <h4>{D.weather.air}</h4>
+                  <dl class="lab-gauges">
+                    <div><dt>{D.weather.co2}</dt><dd><span data-sim="air.co2">{num(sensors.air.co2)}</span> ppm</dd></div>
+                    <div><dt>{D.weather.voc}</dt><dd><span data-sim="air.voc">{num(sensors.air.voc)}</span></dd></div>
+                    <div><dt>{D.weather.pm25}</dt><dd><span data-sim="air.pm25" data-digits="1">{num(sensors.air.pm25, 1)}</span> µg/m³</dd></div>
+                  </dl>
+                  <h4>{D.weather.station}</h4>
+                  <dl class="lab-gauges">
+                    <div>
+                      <dt>{D.weather.pressure}</dt>
+                      <dd>
+                        <span data-sim="weather.pressure" data-digits="1">{num(sensors.weather.pressure, 1)}</span> hPa
+                        <svg data-sim-spark viewBox="0 0 60 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><polyline points={sparkPoints(sensors.pressureHistory)} /></svg>
+                      </dd>
+                    </div>
+                    <div><dt>{D.weather.outdoorTemperature}</dt><dd><span data-sim="weather.temperature" data-digits="1">{num(sensors.weather.temperature, 1)}</span> °C</dd></div>
+                    <div><dt>{D.weather.outdoorHumidity}</dt><dd><span data-sim="weather.humidity">{num(sensors.weather.humidity)}</span> %</dd></div>
+                    <div><dt>{D.weather.wind}</dt><dd><span data-sim="weather.wind">{num(sensors.weather.wind)}</span> km/h</dd></div>
+                  </dl>
+                  <h4>{D.weather.trendLabel}</h4>
+                  <p>
+                    {(['falling', 'steady', 'rising'] as const).map((t) => (
+                      <span data-trend={t} hidden={t !== sensors.trend}>{D.weather[t]}</span>
+                    ))}
+                  </p>
+                </article>
+
+                <article class="card" data-moment="projects">
+                  <h3>{D.projects}</h3>
+                  {projectsIn(s.id).map(({ data: p }) => (
+                    <div class="item">
+                      <h4>{p.name}</h4>
+                      <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+                      <p class="meta"><a href={p.repo}>{L.repository}</a></p>
+                    </div>
+                  ))}
+                  <p><Todo label={page.todoLabel} hint={D.automationsTodo} /></p>
+                </article>
+              </div>
             </>
           )}
 
@@ -1019,12 +1128,21 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   .poster-note > span {
     display: none;
   }
-  section[data-section="home"]:has(.scene[data-scene-state="text"], .scene[data-scene-state="error"]) .poster-note {
+  /* Domotica: l'avviso sta sotto l'intro, senza vetro intorno; ha un fondo suo per restare leggibile sul poster. */
+  .hero.lab > .poster-note {
+    max-width: 32rem;
+    margin: 0 0 1rem 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+  }
+  section[data-story]:has(.scene[data-scene-state="text"], .scene[data-scene-state="error"]) .poster-note {
     display: block;
   }
-  section[data-section="home"]:has(.scene[data-scene-reason="webgl"]) .poster-note > [data-reason="webgl"],
-  section[data-section="home"]:has(.scene[data-scene-reason="savedata"]) .poster-note > [data-reason="savedata"],
-  section[data-section="home"]:has(.scene[data-scene-reason="error"]) .poster-note > [data-reason="error"] {
+  section[data-story]:has(.scene[data-scene-reason="webgl"]) .poster-note > [data-reason="webgl"],
+  section[data-story]:has(.scene[data-scene-reason="savedata"]) .poster-note > [data-reason="savedata"],
+  section[data-story]:has(.scene[data-scene-reason="error"]) .poster-note > [data-reason="error"] {
     display: inline;
   }
   @media (scripting: none) {

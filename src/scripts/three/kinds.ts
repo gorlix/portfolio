@@ -21,7 +21,7 @@ export const microScenes = [
  * e guidato dalle schede mentre si scorre. Le altre sezioni restano com'erano finche il loro
  * storyboard non e approvato.
  */
-export const immersiveScenes = ['scrivania', 'homelab'] as const;
+export const immersiveScenes = ['scrivania', 'homelab', 'domotica'] as const;
 
 export function sceneKind(name: string): SceneKind {
   if ((immersiveScenes as readonly string[]).includes(name)) return 'immersive';

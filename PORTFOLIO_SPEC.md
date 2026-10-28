@@ -90,7 +90,7 @@ Valori gzip, controllati a ogni build da `pnpm check:budget` (`scripts/budget.ts
 | `/recruiter`, `/agent` (primo caricamento / JS) | 15 KB / 0 | ~6 KB / 0 |
 | `/human` primo caricamento, **senza 3D** / JS | 32 KB / 6 KB | ~16 KB / 2,8 KB |
 | `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 140 KB | ~130 KB |
-| ogni scena (Homelab / Domotica / micro-scena Lavori) | 16 KB | 4,9 / 2,1 / 1,3 KB |
+| ogni scena (Homelab / Domotica / micro-scena Lavori) | 16 KB | 4,9 / 5,1 / 1,3 KB |
 | codice condiviso delle scene (orbit, pannello, token) | 4 KB | 1,0 KB |
 | bootstrap 3D / barra del tempo / terminale | 4,5 / 2 / 2 KB | 4,1 / 0,7 / 1,3 KB |
 
@@ -334,6 +334,19 @@ Entità principali (campi indicativi):
 - Oggi poco è pubblico: predisporre il modello dati (§8) e popolarlo **quando le automazioni verranno pubblicate**. Nel frattempo, partire dai progetti già pubblici: `focus-mode-app-linux` + `ha-focus-mode-linux` (sincronizzazione con il Non Disturbare di Android via HA) e la strategia di backup Zigbee.
 - `TODO(Alessandro): elenco, anche grezzo, delle automazioni da mostrare.`
 - Equivalente testuale (elenco automazioni) incluso.
+
+**Scena immersiva (PORT-80):** stessa impostazione dell'Homelab (§7.3): la casa e lo sfondo fisso della sezione; nella prima schermata si usa (stanze, pannello automazioni da tastiera), poi ogni scheda guida la camera. Le schede delle automazioni sono generate dai dati (una per automazione, la camera va sulla sua stanza). Sensori simulati con seme (`src/scripts/three/domotica/sim.ts`), etichetta "dati simulati": temperature e umidita domestiche, qualita dell'aria, stazione meteo **sul tetto** (non c'e giardino) con stima del tempo dalla tendenza della pressione. Niente consumi (non monitorati). Poster statico della casa con avviso come la Home; senza JS testo su fondo semplice.
+
+**Storyboard (2026-10-28, ipotesi da confermare sugli screenshot):**
+
+| Momento | Camera/3D | Scheda |
+|---|---|---|
+| Prima schermata | casa intera a 3/4, dimostrazione a turno, orbit | intro, stanze, pannello |
+| Temperature | quasi in pianta, pavimenti colorati dal blu al pesca | tabella stanza → °C, % (simulati) |
+| Automazioni (una per scheda) | zoom sulla stanza, poi si accende il dispositivo; tetto per "tutta la casa" | trigger / condizioni / azioni, repo |
+| Music Assistant | casse in tutte le stanze, onde a tempo, flusso tra le casse | audio multi-room |
+| Aria e meteo | stazione meteo sul tetto in primo piano, dati dai sensori delle stanze | CO₂/VOC/PM2.5, pressione con sparkline, tendenza |
+| Progetti | vista in pianta, tutto spento | link ai repo, TODO elenco automazioni |
 
 ---
 
