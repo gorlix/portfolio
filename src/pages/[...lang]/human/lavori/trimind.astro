@@ -1,4 +1,7 @@
 ---
+import { getImage } from 'astro:assets';
+import posterDesktopSrc from '../../../../assets/human/trimind-poster-desktop.png';
+import posterMobileSrc from '../../../../assets/human/trimind-poster-mobile.png';
 import Scene from '../../../../components/Scene.astro';
 import Base from '../../../../layouts/Base.astro';
 import { BEACON_SRC, beaconConfig } from '../../../../lib/analytics';
@@ -50,6 +53,11 @@ const posterNotice = (['webgl', 'savedata', 'error', 'nojs'] as const).map((reas
   text: page.posterNotice[reason].replace('{subject}', T.posterSubject),
 }));
 
+/** Poster statico della mappa: fallback se il 3D non parte (niente WebGL, risparmio dati, errore). */
+const [posterDesktop, posterMobile] = await Promise.all(
+  [posterDesktopSrc, posterMobileSrc].map((src) => getImage({ src, format: 'webp', quality: 70 })),
+);
+
 const backHref = `${localizedPath('/human', locale)}#lavori`;
 const path = detailPath('trimind');
 const pageTitle = `${profile.name} · ${T.titleSuffix}`;
@@ -80,6 +88,21 @@ const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage'
   <article class="path">
     <section id="trimind" data-section="lavori" data-story aria-labelledby="h-trimind">
       <div class="stage">
+        {
+          posterDesktop && posterMobile && (
+            <picture class="poster" aria-hidden="true">
+              <source media="(max-width: 48rem)" srcset={posterMobile.src} />
+              <img
+                src={posterDesktop.src}
+                width={posterDesktop.options.width}
+                height={posterDesktop.options.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          )
+        }
         <Scene
           scene="trimind"
           label={page.scenes.trimind}
@@ -378,6 +401,21 @@ const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage'
     .stage {
       display: none;
     }
+  }
+  /* Poster della mappa: nascosto (e mai scaricato, e lazy) finche il 3D funziona. */
+  .poster {
+    display: none;
+  }
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  .stage:has(.scene:is([data-scene-state="text"], [data-scene-state="error"])) .poster {
+    display: block;
   }
   .poster-note {
     display: none;

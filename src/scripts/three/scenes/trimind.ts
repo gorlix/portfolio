@@ -509,6 +509,7 @@ export function mount({
     // Le spunte: un'istanza per test, verdi in ordine pseudo-casuale con l'avanzamento.
     const n = figures.tests;
     const { cols, rows } = gridOf(n);
+    // Bianco neutro: il colore vero di ogni spunta arriva dai token, istanza per istanza.
     const tileMat = own(new MeshBasicMaterial({ color: 0xffffff }));
     const tiles = own(new InstancedMesh(cube(0.16, 0.05, 0.16), tileMat, n));
     for (let i = 0; i < n; i += 1) {
