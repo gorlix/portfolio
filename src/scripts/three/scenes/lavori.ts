@@ -7,9 +7,11 @@ import {
   LineSegments,
   Mesh,
   MeshStandardMaterial,
+  TorusGeometry,
   Vector3,
 } from 'three';
 import { mountMicro } from '../micro';
+import { phase } from '../phases';
 import type { SceneContext, SceneInstance } from '../types';
 
 /*
@@ -21,17 +23,15 @@ import type { SceneContext, SceneInstance } from '../types';
 export interface LavoriData {
   /** Numero di esperienze nel testo della sezione (almeno una tappa). */
   count: number;
+  /** Almeno un'esperienza e ancora in corso (il testo la marca come tale). */
+  ongoing?: boolean;
 }
 
 const HEIGHT = 4;
 const STEP_X = 0.7;
 
-/** Avanzamento locale di una fase che occupa [from, to] dell'avanzamento totale. */
-const phase = (progress: number, from: number, to: number): number =>
-  Math.min(1, Math.max(0, (progress - from) / (to - from)));
-
 export function mount(context: SceneContext): SceneInstance {
-  const { count } = (context.data as LavoriData | undefined) ?? { count: 1 };
+  const { count, ongoing = false } = (context.data as LavoriData | undefined) ?? { count: 1 };
   const stops = Math.max(1, Math.min(count, 8));
 
   return mountMicro(context, ({ scene, camera, own, tint }) => {
@@ -64,6 +64,14 @@ export function mount(context: SceneContext): SceneInstance {
       return { marker, material, at: (i + 1) / (stops + 1) };
     });
 
+    // Esperienza in corso: un anello attorno all'ultima tappa, la piu alta della salita.
+    const ring = new Mesh(
+      own(new TorusGeometry(0.46, 0.025, 6, 24)),
+      own(new MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.4 })),
+    );
+    ring.visible = ongoing;
+    markers[markers.length - 1]?.marker.add(ring);
+
     const target = new Vector3(0, 0, 0);
     return {
       update(progress) {
@@ -76,6 +84,7 @@ export function mount(context: SceneContext): SceneInstance {
           material.emissiveIntensity = local * 0.45;
           marker.rotation.set(local * 0.6, local * Math.PI, 0);
         }
+        ring.scale.setScalar(phase(progress, 0.85, 1));
         root.rotation.y = (progress - 0.5) * 0.5;
       },
       fit(aspect) {
