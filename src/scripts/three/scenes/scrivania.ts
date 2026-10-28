@@ -84,6 +84,8 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
     key: tint(['--ctp-surface2', '--border']),
     accent: tint(['--ctp-rosewater', '--sec-home', '--text']),
     printer: tint(['--ctp-mauve', '--sec-home']),
+    trackball: tint(['--ctp-yellow', '--text']),
+    trackballBall: tint(['--ctp-crust', '--bg-deep']),
     filament: tint(['--ctp-peach', '--text']),
     led: tint(['--ctp-green', '--text']),
     ledAlt: tint(['--ctp-sapphire', '--text']),
@@ -204,11 +206,11 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
   const ball = new Group();
   ball.position.set(0, top, 0.55);
   keyboard.add(ball);
-  const hull = new Mesh(own(new CylinderGeometry(0.23, 0.26, 0.09, 8)), lit('body'));
+  const hull = new Mesh(own(new CylinderGeometry(0.23, 0.26, 0.09, 8)), lit('trackball'));
   hull.position.y = 0.045;
   hull.rotation.y = Math.PI / 8;
   ball.add(hull);
-  const sphere = new Mesh(own(new SphereGeometry(0.11, 8, 6)), lit('accent', 0.4));
+  const sphere = new Mesh(own(new SphereGeometry(0.11, 8, 6)), lit('trackballBall', 0.4));
   sphere.position.y = 0.11;
   ball.add(sphere);
   for (const x of [-0.12, 0, 0.12]) box(ball, [0.1, 0.03, 0.07], [x, 0.1, 0.17], lit('key'));
