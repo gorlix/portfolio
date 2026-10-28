@@ -207,7 +207,7 @@ Root (testo puro, per macchine):
 
 ### 7.3 Umano (`/human`) — il percorso immersivo
 
-**Struttura:** una **sequenza di sezioni a schermo pieno**, ognuna con il proprio colore (§4), più una **barra del tempo verticale a sinistra** che fa da menu.
+**Struttura:** una **sequenza di sezioni**, ognuna con il proprio colore (§4), sopra **un unico sfondo 3D a tutto schermo, fisso**, più una **barra del tempo verticale a sinistra** che fa da menu (layout deciso il 2026-10-28, vedi *Layout immersivo* sotto).
 
 **Ordine delle sezioni**
 1. **Home** (prima schermata)
@@ -221,7 +221,7 @@ Root (testo puro, per macchine):
 9. **Contatti**
 
 **Prima schermata (Home dell'Umano)**
-- Saluto, **foto e avatar low-poly** (entrambi: da valutare l'equilibrio), invito a scorrere.
+- Saluto, **foto piccola** e badge in sovraimpressione su uno **sfondo 3D d'atmosfera** (scrivania/stanza low-poly), invito a scorrere. **Niente avatar** nella Home: il personaggio low-poly resta solo nella micro-scena della pallavolo (Sport).
 - **Piccoli badge delle competenze tecniche** (solo nomi per ora, cliccabili verso la sezione dove quella competenza si vede in azione). Quanti badge e se c'è un indicatore di livello: **decisioni rimandate** (§15).
 - La barra laterale è già visibile, così si capisce che si può saltare.
 
@@ -232,10 +232,13 @@ Root (testo puro, per macchine):
 - Esiste anche come **elenco di link HTML puro** (funziona senza JS, per screen reader).
 - Navigabile da tastiera, con focus visibile. Lo stato (`#sezione`) si riflette nell'URL.
 
-**Layout delle sezioni**
-- **Sezioni interattive (Homelab, Domotica):** titolo **in alto a sinistra**, con leggero gradiente dello stesso colore dello sfondo, e al **centro il modello 3D** protagonista.
-- **Sezioni narrative (tutte le altre):** **narrazione in prima persona alternata a micro-scene 3D** brevi (pochi secondi), guidate dallo scroll.
-- **Lo scroll non viene mai bloccato:** l'interazione nelle sezioni interattive è facoltativa e chi vuole può passare oltre.
+**Layout immersivo (schema unico per tutte le sezioni)**
+- **Sfondo condiviso:** un solo canvas 3D a tutto schermo, fisso (`position: sticky/fixed` via CSS). Lo scroll resta **nativo**: mai dirottato, listener passivi, mai `preventDefault`. Al cambio di sezione la scena **sfuma** nella successiva; si renderizza una scena per volta.
+- **Prima schermata di ogni sezione:** titolo grande **in alto a sinistra** (gradiente del colore della sezione), 3D **usabile** (rotazione, click sui nodi). I **comandi stanno solo qui**: colonna a destra su desktop; su mobile barra in basso, e il pannello del nodo è un foglio che sale dal basso.
+- **Scorrendo:** salgono **schede in vetro smerigliato** sopra il 3D (semitrasparenti, `backdrop-filter: blur`, bordo nel colore accento della sezione, contrasto AA misurato, **fallback opaco** dove `backdrop-filter` manca). Ogni scheda dichiara un **momento** (inquadratura della camera + layer visibili) e lo scroll **interpola** tra un momento e il successivo (scrollytelling). Durante le schede il 3D **non è interattivo** e i comandi spariscono; il **titolo resta fisso in alto a sinistra, rimpicciolito**, finché si è nella sezione.
+- La **barra del tempo** resta a sinistra, sopra lo sfondo.
+- Il contenuto di ogni scena (storyboard scheda → inquadratura) lo propone Claude Code e lo approva Alessandro, sezione per sezione, con screenshot. Si parte dal **pilota Homelab** (§12.1); le altre sezioni restano com'erano finché il loro storyboard non è approvato.
+- **Lo scroll non viene mai bloccato:** l'interazione è facoltativa e chi vuole passa oltre.
 
 ---
 
@@ -271,13 +274,14 @@ Entità principali (campi indicativi):
 **Accessibilità (target WCAG 2.2 AA)**
 - Tutto navigabile da **tastiera**, focus visibile, link "salta al contenuto".
 - **Screen reader:** HTML semantico, landmark, testi alternativi; ogni sezione 3D ha un **equivalente testuale** con gli stessi contenuti.
-- **`prefers-reduced-motion`:** niente animazioni non essenziali, niente effetto di scrittura nel terminale, scene 3D sostituite da versioni statiche.
+- **`prefers-reduced-motion`:** niente animazioni non essenziali, niente effetto di scrittura nel terminale; nell'Umano lo sfondo 3D diventa un **fotogramma statico per momento** (cambia scheda per scheda, senza interpolazione né dissolvenze).
+- **JavaScript disattivato (Umano):** stesse schede e stesso testo completo, su **sfondo semplice** (nessun canvas).
 - Contrasto verificato, testo ridimensionabile, nessuna informazione solo a colori.
 - Audio: **nessun suono automatico**. Eventuale ambient solo se l'utente lo attiva (decisione aperta, §15).
 
 **Performance**
 - Ingresso, recruiter, agent: **leggeri** (nessun JS, immagini ottimizzate, font self-hosted).
-- Umano: caricamento **pigro per sezione**; le scene si **mettono in pausa fuori schermo**.
+- Umano: il 3D si carica **al primo gesto** e ogni scena in modo **pigro**; **una sola scena renderizzata per volta**, nessun ciclo di disegno a riposo, pausa quando la pagina non è visibile. Budget di §3.5 e Lighthouse invariati.
 - **Fallback 3D:** rilevare WebGL assente, dispositivo debole, risparmio dati o batteria bassa e passare a una versione ridotta (meno oggetti, animazioni semplici) o a quella testuale.
 - **Mobile:** le scene interattive restano ma con meno dettaglio e controlli tattili semplici.
 - `TODO` Definire budget di peso per percorso in fase di implementazione e misurarli.
@@ -301,8 +305,8 @@ Entità principali (campi indicativi):
 
 **Fonte reale (riassunto):** 3 nodi Proxmox VE su **due siti**; Tailscale come overlay tra i siti; Cloudflare Tunnel e Traefik per ogni sito; OpenTofu + Ansible; Docker Compose versionato con Renovate e deploy automatico; AdGuard Home in alta disponibilità con Keepalived; Authentik (SSO), Nextcloud, Frigate, monitoring; backup Home Assistant 3-2-1 (Cloudflare R2, Google Drive, copia locale); secret management con 1Password Connect e Infisical; documentazione con ADR; Kubernetes + Flux in corso (WIP).
 
-**Scena 3D (centro schermo):**
-- **Due piattaforme low-poly** (*Casa* e *Produzione*) collegate da un fascio di luce (overlay).
+**Scena 3D (sfondo della sezione, pilota del layout immersivo §7.3):**
+- **Due piattaforme low-poly** (*Casa* e *Produzione*) collegate da un fascio di luce (overlay). Modello **procedurale** più ricco, flat-shaded, colori dai token: rack e server veri, LED, cavi, piattaforme curate.
 - **Click su un nodo:** pannello con i servizi ospitati.
 - **Metriche e log simulati ma credibili:** CPU, RAM, rete con andamenti giornalieri realistici; log che scorrono.
 - **Gesto interattivo:** un pulsante per **provocare un failover DNS** (l'IP virtuale passa da primario a backup). `TODO(Alessandro): confermare che il gesto piace`.
@@ -310,6 +314,18 @@ Entità principali (campi indicativi):
 - **Layer "Decisioni":** click su un nodo → ADR collegato, riassunto di due righe e link al repo.
 - **Elementi non ancora completati** (K8s/Flux, CI) mostrati come strutture **trasparenti "in costruzione"**: onestà sul lavoro in corso.
 - **Equivalente testuale** completo (tabella dei nodi e dei servizi) per accessibilità e crawler.
+
+**Storyboard (approvato il 2026-10-28):**
+
+| Momento | Camera/3D | Scheda |
+|---|---|---|
+| Prima schermata | vista d'insieme Casa + Produzione + fascio, rotazione libera | comandi nodi/layer/failover |
+| Nodi | panoramica lenta lungo i nodi | tabella nodi → servizi |
+| Decisioni | zoom sui nodi con ADR illuminati | elenco ADR con link |
+| Failover DNS | il primario "cade", il VIP passa al backup | spiegazione del failover |
+| Backup 3-2-1 | vista allargata, frecce verso le 3 destinazioni | destinazioni |
+| Lavori in corso | strutture trasparenti "in costruzione" | K8s/Flux, CI |
+| Progetti | ritorno alla vista d'insieme, dissolvenza verso Domotica | link ai repo |
 
 ### 12.2 Domotica (Home Assistant)
 
@@ -323,7 +339,7 @@ Entità principali (campi indicativi):
 
 ## 13. Sezioni narrative in dettaglio
 
-Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui dettagli: "smanetto, rompo cose e poi le rimetto insieme meglio di prima"), micro-scene brevi.
+Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui dettagli: "smanetto, rompo cose e poi le rimetto insieme meglio di prima"), micro-scene brevi. Con il layout immersivo (§7.3) le micro-scene diventano momenti dello sfondo condiviso, ciascuno guidato da una scheda; la migrazione avviene sezione per sezione con storyboard approvato.
 
 - **Lavori:** timeline verticale; ogni esperienza è una micro-scena con ruolo, periodo, uno o due risultati. `TODO(Alessandro): dati da LinkedIn` (il profilo non è leggibile automaticamente: servono screenshot o testo).
 - **Certificazioni:** **tecniche** = badge 3D grandi che si materializzano uno alla volta, con ente, data e link di verifica. **Accessorie** (BLSD, idrogeologico e simili) = fila di badge piccoli più sotto, titolo "Altro che ho imparato". Le tecniche compaiono **anche come piccoli badge nella prima schermata** dell'Umano e in evidenza nel recruiter.
@@ -354,7 +370,7 @@ Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui
 
 1. Ordine esatto delle tre scelte nel terminale (Umano per primo o AI Agent / Recruiter / Umano).
 2. Copy del saluto: proposte di Claude Code o scritto da Alessandro.
-3. Foto + avatar: equilibrio nelle varie pagine (foto sul recruiter, avatar sull'Umano suggerito).
+3. ~~Foto + avatar: equilibrio nelle varie pagine.~~ **Deciso (2026-10-28):** nessun avatar nella Home dell'Umano (foto piccola su sfondo d'atmosfera); il personaggio low-poly resta solo per la pallavolo.
 4. Badge competenze nella prima schermata Umano: **quanti** e **se mostrare un livello** (rimandato).
 5. Variante Latte (chiara) oppure solo Mocha.
 6. Audio ambient opzionale (default: nessun audio).
