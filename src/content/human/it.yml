@@ -60,6 +60,16 @@ homelab:
   layersLabel: "Livelli"
   close: "Chiudi"
   noAdrs: "Nessuna decisione documentata per questo nodo, per ora."
+  metrics: "Metriche (dati simulati)"
+  cpu: "CPU (%)"
+  ram: "RAM (%)"
+  net: "Rete (Mbit/s)"
+  logs: "Log (simulati)"
+  failoverStart: "Provoca un failover DNS"
+  failoverStop: "Ripristina il DNS primario"
+  failoverNormal: "Il VIP del DNS è su {node}: risponde il primario."
+  failoverActive: "Il primario è giù: il VIP è passato a {node} e risponde il backup."
+  failoverText: "Failover DNS: due AdGuard Home condividono un IP virtuale (VIP). Se il primario smette di rispondere, Keepalived sposta il VIP sul backup in pochi secondi; quando il primario torna, il VIP rientra. Nella scena lo puoi provocare tu."
 domotica:
   projects: Progetti pubblici
   automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)

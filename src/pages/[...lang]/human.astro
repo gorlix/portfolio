@@ -175,14 +175,14 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             <>
               <div class="lab">
                 <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
-                <div class="lab-ui" data-homelab-ui hidden>
+                <div class="lab-ui" data-panel-ui hidden>
                   <p class="meta">{H.sceneHint}</p>
                   <div class="lab-controls">
                     <ul class="plain lab-nodes" aria-label={H.nodesLabel}>
                       {homelab.regions.flatMap((r) =>
                         r.nodes.map((n) => (
                           <li>
-                            <button type="button" data-node-button={n.id} aria-expanded="false" aria-controls="homelab-panel">
+                            <button type="button" data-panel-open={n.id} aria-expanded="false" aria-controls="homelab-panel">
                               {n.name} <span class="meta">· {r.name}</span>
                             </button>
                           </li>
@@ -191,15 +191,41 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                     </ul>
                     <div class="lab-layers" role="group" aria-label={H.layersLabel}>
                       <button type="button" data-layer="decisions" aria-pressed="false">{H.decisions}</button>
+                      <button type="button" data-layer="backup" aria-pressed="false">{H.backup}</button>
+                      <button type="button" data-layer="wip" aria-pressed="true">{H.wip}</button>
                     </div>
                   </div>
+                  {homelab.failover && (
+                    <div class="lab-failover">
+                      <button type="button" data-failover data-start={H.failoverStart} data-stop={H.failoverStop}>
+                        {H.failoverStart}
+                      </button>
+                      <p class="meta" role="status" data-failover-status data-normal={H.failoverNormal} data-active={H.failoverActive}></p>
+                    </div>
+                  )}
                   <div class="lab-panel" id="homelab-panel" data-panel hidden>
                     {homelab.regions.flatMap((r) =>
                       r.nodes.map((n) => (
-                        <div data-panel-node={n.id} hidden>
+                        <div data-panel-item={n.id} hidden>
                           <h3 tabindex="-1" data-panel-heading>{n.name} <span class="meta">· {r.name}</span></h3>
                           <h4>{H.services}</h4>
                           <ul class="plain">{n.services.map((svc) => <li>{svc.name}</li>)}</ul>
+                          <div class="lab-metrics">
+                            <h4>{H.metrics}</h4>
+                            <dl class="lab-gauges">
+                              {(['cpu', 'ram', 'net'] as const).map((k) => (
+                                <div>
+                                  <dt>{H[k]}</dt>
+                                  <dd>
+                                    <span data-metric={k}>–</span>
+                                    <svg data-spark={k} viewBox="0 0 60 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><polyline points="" /></svg>
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                            <h4>{H.logs}</h4>
+                            <ol class="plain lab-log" data-log></ol>
+                          </div>
                           <div data-panel-adrs hidden>
                             <h4>{H.decisions}</h4>
                             {n.adrs.length === 0 ? (
@@ -268,6 +294,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </li>
                 ))}
               </ul>
+
+              {homelab.failover && <p>{H.failoverText}</p>}
 
               <h3>{H.wip}</h3>
               <ul class="plain">
@@ -509,6 +537,47 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   }
   .lab-panel li {
     margin-top: 0.25rem;
+  }
+  .lab-failover {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+  .lab-gauges {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+  }
+  .lab-gauges dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .lab-gauges dd {
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+  .lab-gauges svg {
+    display: block;
+    width: 100%;
+    height: 1rem;
+  }
+  .lab-gauges polyline {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .lab .lab-log {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .lab .lab-log li {
+    margin-top: 0.125rem;
+    overflow-wrap: anywhere;
   }
   .lab-panel p {
     margin: 0.125rem 0 0.5rem;

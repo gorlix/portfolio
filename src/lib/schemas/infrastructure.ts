@@ -2,6 +2,8 @@ import { z } from 'astro/zod';
 import { text, url } from './common';
 
 const id = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+/** Riga di log simulata: servizio che la emette e messaggio. */
+const logLine = z.strictObject({ service: id, message: text });
 
 /**
  * Infrastruttura SIMULATA della scena Homelab (spec §12.1, §11). Nomi e disposizione sono generici
@@ -44,6 +46,15 @@ export const infrastructureSchema = z
     }),
     /** Lavori in corso, mostrati come strutture trasparenti "in costruzione". */
     wip: z.array(z.strictObject({ id, name: text, summary: text, region: id })),
+    /**
+     * Metriche e log della scena, generati nel browser con un seme (src/scripts/three/homelab/
+     * metrics.ts). Messaggi tecnici, identici nelle due lingue, mai copiati da log veri.
+     */
+    simulation: z.strictObject({
+      seed: z.number().int().nonnegative(),
+      logs: z.array(logLine).min(1),
+      failover: z.strictObject({ down: z.array(logLine).min(1), up: z.array(logLine).min(1) }),
+    }),
   })
   .superRefine((infra, ctx) => {
     const regionIds = new Set(infra.regions.map((r) => r.id));
@@ -80,6 +91,9 @@ export const infrastructureSchema = z
       fail('backup: serve almeno una copia fuori sede (3-2-1)');
     for (const w of infra.wip)
       if (!regionIds.has(w.region)) fail(`wip ${w.id}: region inesistente`);
+    const { logs, failover } = infra.simulation;
+    for (const line of [...logs, ...failover.down, ...failover.up])
+      if (!serviceIds.has(line.service)) fail(`log: servizio ${line.service} inesistente`);
   });
 
 export type Infrastructure = z.infer<typeof infrastructureSchema>;

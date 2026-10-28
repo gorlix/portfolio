@@ -60,6 +60,16 @@ homelab:
   layersLabel: "Layers"
   close: "Close"
   noAdrs: "No documented decisions for this node, yet."
+  metrics: "Metrics (simulated data)"
+  cpu: "CPU (%)"
+  ram: "RAM (%)"
+  net: "Network (Mbit/s)"
+  logs: "Logs (simulated)"
+  failoverStart: "Trigger a DNS failover"
+  failoverStop: "Restore the primary DNS"
+  failoverNormal: "The DNS VIP is on {node}: the primary is answering."
+  failoverActive: "The primary is down: the VIP moved to {node} and the backup is answering."
+  failoverText: "DNS failover: two AdGuard Home instances share a virtual IP (VIP). If the primary stops answering, Keepalived moves the VIP to the backup within seconds; when the primary is back, the VIP returns. In the scene you get to cause it."
 domotica:
   projects: Public projects
   automationsTodo: List of automations to show (even a rough one)

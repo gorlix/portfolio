@@ -30,10 +30,10 @@ for (const route of ['/human/', '/en/human/']) {
     await page.goto(route);
     await nearScene(page);
     await expect.poll(() => state(page)).toMatch(/running|paused|static/);
-    const ui = page.locator('[data-homelab-ui]');
+    const ui = page.locator('#homelab [data-panel-ui]');
     await expect(ui).toBeVisible();
 
-    const node = ui.locator('[data-node-button]').first();
+    const node = ui.locator('[data-panel-open]').first();
     const panel = ui.locator('[data-panel]');
     await node.focus();
     await page.keyboard.press('Enter');
@@ -56,6 +56,47 @@ for (const route of ['/human/', '/en/human/']) {
     await expect(node).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test(`${route}: failover DNS, layer e metriche simulate`, async ({ page }) => {
+    await page.goto(route);
+    await nearScene(page);
+    await page.evaluate(() => document.querySelector('[data-scene]')?.scrollIntoView());
+    await expect.poll(() => state(page)).toBe('running');
+    // Da qui in poi la scena e caricata: metriche e log non devono chiedere niente alla rete.
+    const requests: string[] = [];
+    page.on('request', (r) => requests.push(r.url()));
+    const ui = page.locator('#homelab [data-panel-ui]');
+
+    // Gesto da tastiera, stato annunciato, pulsante che diventa "ripristina".
+    const status = ui.locator('[data-failover-status]');
+    await expect(status).toHaveAttribute('role', 'status');
+    const before = await status.textContent();
+    const failover = ui.locator('[data-failover]');
+    await failover.focus();
+    await page.keyboard.press('Enter');
+    await expect(status).not.toHaveText(before ?? '');
+    await expect(failover).toHaveText((await failover.getAttribute('data-stop')) ?? '');
+    await page.keyboard.press('Enter');
+    await expect(status).toHaveText(before ?? '');
+
+    // Layer: backup spento all'inizio, lavori in corso acceso; si invertono da HTML.
+    for (const [layer, initial] of [
+      ['backup', 'false'],
+      ['wip', 'true'],
+    ] as const) {
+      const button = ui.locator(`[data-layer="${layer}"]`);
+      await expect(button).toHaveAttribute('aria-pressed', initial);
+      await button.click();
+      await expect(button).toHaveAttribute('aria-pressed', initial === 'true' ? 'false' : 'true');
+    }
+
+    // Metriche e log del nodo: valori numerici, righe che arrivano, nessuna richiesta di rete.
+    await ui.locator('[data-panel-open]').first().click();
+    const item = ui.locator('[data-panel-item]:visible');
+    await expect(item.locator('[data-metric="cpu"]')).toHaveText(/^\d+\.\d$/);
+    await expect(item.locator('[data-log] li').first()).toBeVisible({ timeout: 15_000 });
+    expect(requests).toEqual([]);
+  });
+
   for (const colorScheme of ['dark', 'light'] as const) {
     test(`${route}: controlli della scena aperti, axe WCAG 2.2 AA (${colorScheme})`, async ({
       browser,
@@ -64,12 +105,12 @@ for (const route of ['/human/', '/en/human/']) {
       const page = await context.newPage();
       await page.goto(route);
       await nearScene(page);
-      const ui = page.locator('[data-homelab-ui]');
+      const ui = page.locator('#homelab [data-panel-ui]');
       await expect(ui).toBeVisible();
       await ui.locator('[data-layer="decisions"]').click();
-      await ui.locator('[data-node-button]').first().click();
+      await ui.locator('[data-panel-open]').first().click();
       const { violations } = await new AxeBuilder({ page })
-        .include('[data-homelab-ui]')
+        .include('#homelab [data-panel-ui]')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .analyze();
       expect(violations, violations.map((v) => `${v.id}: ${v.help}`).join('\n')).toEqual([]);
@@ -147,7 +188,7 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(() => state(page)).toBe('text');
     await expect(scene(page)).toBeHidden();
     await expect(page.locator('#homelab table')).toBeVisible();
-    await expect(page.locator('[data-homelab-ui]')).toBeHidden();
+    await expect(page.locator('#homelab [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-automation]').first()).toBeVisible();
     expect(urls.filter(isThree)).toEqual([]);
