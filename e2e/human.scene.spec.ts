@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|sci|tennis|pallavolo|figure)\./.test(
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|figure|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
     url,
   );
 const scene = (page: Page) => page.locator('[data-scene="homelab"]');
@@ -166,9 +166,18 @@ for (const route of ['/human/', '/en/human/']) {
     await page.evaluate(() => document.querySelector('[data-scene="homelab"]')?.scrollIntoView());
     await expect.poll(() => state(page)).toBe('running');
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // In cima (la scena Contatti, in fondo, sarebbe attiva e chiederebbe fotogrammi). Li c'e
+    // l'avatar: la sua breve rincorsa verso l'avanzamento deve finire, poi zero fotogrammi.
+    await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => state(page)).toBe('paused');
     const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
+    await expect
+      .poll(async () => {
+        const before = await frames();
+        await page.waitForTimeout(300);
+        return (await frames()) === before;
+      })
+      .toBe(true);
     const before = await frames();
     await page.waitForTimeout(500);
     expect(await frames()).toBe(before);
@@ -220,7 +229,34 @@ for (const route of ['/human/', '/en/human/']) {
       await page.waitForTimeout(200);
       expect(await lavori.getAttribute('data-scene-state')).toBe('static');
       expect(await lavori.getAttribute('data-scene-progress')).toBeNull();
+
+      // Interessi (PORT-63): stessa regola, fotogramma finale con tutti gli oggetti.
+      const interessi = page.locator('[data-scene="interessi"]');
+      await interessi.scrollIntoViewIfNeeded();
+      await expect.poll(() => interessi.getAttribute('data-scene-state')).toBe('static');
+      await expect(interessi.locator('canvas')).toBeAttached();
+      expect(await interessi.getAttribute('data-scene-progress')).toBeNull();
     });
+  });
+
+  test(`${route}: la micro-scena Interessi avanza con lo scroll`, async ({ page }) => {
+    await page.goto(route);
+    const scene = page.locator('[data-scene="interessi"]');
+    const at = (f: number) =>
+      scene.evaluate((el, fr) => {
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo(0, top - window.innerHeight * fr);
+      }, f);
+    const value = async () =>
+      Number((await scene.getAttribute('data-scene-progress')) ?? Number.NaN);
+    // Non sul bordo: la scena Sport subito sopra sarebbe piu centrata e resterebbe lei l'attiva.
+    await at(0.65);
+    await expect.poll(() => scene.getAttribute('data-scene-state')).toBe('running');
+    const start = await value();
+    await at(0.35);
+    await expect.poll(value).toBeGreaterThan(start);
+    await at(0.1);
+    await expect.poll(value).toBe(1);
   });
 
   // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato.
@@ -390,6 +426,61 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(() => certs(page).getAttribute('data-scene-state')).toBe('static');
     expect(await certs(page).getAttribute('data-scene-progress')).toBeNull();
     await context.close();
+  });
+
+  // Micro-scene sobrie (PORT-64): Beneficenza e Contatti, stesso contratto di Lavori.
+  for (const name of ['beneficenza', 'contatti']) {
+    const box = (page: Page) => page.locator(`[data-scene="${name}"]`);
+    const place = (page: Page, fraction: number) =>
+      box(page).evaluate((el, f) => {
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo(0, top - window.innerHeight * f);
+      }, fraction);
+    const value = async (page: Page) =>
+      Number((await box(page).getAttribute('data-scene-progress')) ?? Number.NaN);
+
+    test(`${route}: micro-scena ${name} avanza con lo scroll e torna indietro`, async ({
+      page,
+    }) => {
+      await page.goto(route);
+      await place(page, 0.65);
+      await expect.poll(() => box(page).getAttribute('data-scene-state')).toBe('running');
+      await expect(box(page).locator('canvas')).toBeAttached();
+      const start = await value(page);
+      await place(page, 0.3);
+      await expect.poll(() => value(page)).toBeGreaterThan(start);
+      const later = await value(page);
+      await place(page, 0.7);
+      await expect.poll(() => value(page)).toBeLessThan(later);
+    });
+
+    test.describe(`reduced motion ${name}`, () => {
+      test.use({ reducedMotion: 'reduce' });
+      test(`${route}: micro-scena ${name} statica sul fotogramma finale`, async ({ page }) => {
+        await page.goto(route);
+        await box(page).scrollIntoViewIfNeeded();
+        await expect.poll(() => box(page).getAttribute('data-scene-state')).toBe('static');
+        await expect(box(page).locator('canvas')).toBeAttached();
+        await page.mouse.wheel(0, 300);
+        await page.waitForTimeout(200);
+        expect(await box(page).getAttribute('data-scene-state')).toBe('static');
+        expect(await box(page).getAttribute('data-scene-progress')).toBeNull();
+      });
+    });
+  }
+
+  test(`${route}: dai contatti il ritorno alla scelta si raggiunge da tastiera`, async ({
+    page,
+  }) => {
+    await page.goto(route);
+    const back = page.locator('#contatti .farewell a');
+    await page.locator('#contatti a[href^="https://github.com"]').focus();
+    for (let i = 0; i < 8 && !(await back.evaluate((el) => el === document.activeElement)); i++) {
+      await page.keyboard.press('Tab');
+    }
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(route.startsWith('/en') ? /\/en\/$/ : /\/$/);
   });
 
   // Micro-scene Sport (PORT-62): tre scene vicine, una sola attiva per volta.

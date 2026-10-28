@@ -1,5 +1,4 @@
 section: interessi
 links: []
 title: Rust (in apprendimento)
-text:
-  todo: Testo in prima persona (copy di Alessandro)
+text: "Sto imparando Rust sul campo: la migrazione di focus-mode-app da Python a Rust/Tauri è in corso, e il compilatore mi corregge con più pazienza di qualsiasi collega."

@@ -23,7 +23,8 @@ export const chunkBudgets: ChunkBudget[] = [
   // Ogni scena di /human, con i suoi moduli (dati, controlli, metriche).
   {
     name: 'scena',
-    pattern: /^(homelab|domotica|lavori|certificazioni|avatar|sci|tennis|pallavolo|placeholder)\./,
+    pattern:
+      /^(homelab|domotica|lavori|certificazioni|avatar|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
     maxGzip: 16 * KB,
   },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.

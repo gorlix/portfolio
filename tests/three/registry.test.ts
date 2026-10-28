@@ -15,7 +15,10 @@ describe('registro delle scene', () => {
       'domotica',
       'lavori',
       'certificazioni',
+      'beneficenza',
+      'contatti',
       'avatar',
+      'interessi',
       'sci',
       'tennis',
       'pallavolo',
@@ -41,6 +44,7 @@ describe('tipi di scena', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('micro');
     expect(sceneKind('certificazioni')).toBe('micro');
+    expect(sceneKind('interessi')).toBe('micro');
     expect(sceneKind('homelab')).toBe('interactive');
     expect(sceneKind('domotica')).toBe('interactive');
   });
