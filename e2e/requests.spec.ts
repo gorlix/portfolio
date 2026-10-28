@@ -7,7 +7,7 @@ const forbidden = [
   /\.(glb|gltf|ktx2|basis|hdr|exr)(\?|$)/i,
   /draco|meshopt|webgl/i,
   // Bootstrap e chunk delle scene 3D (src/scripts/three): solo /human.
-  /\/_astro\/(Scene\.astro|placeholder|domotica)[^/]*\.js/i,
+  /\/_astro\/(Scene\.astro|homelab|domotica)[^/]*\.js/i,
   /cloudflareinsights/i,
 ];
 

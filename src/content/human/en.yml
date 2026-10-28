@@ -34,7 +34,7 @@ labels:
   profiles: Profiles
   cv: Résumé (PDF)
 scenes:
-  placeholder: Placeholder low-poly cube awaiting the 3D scene
+  homelab: "Two low-poly platforms, Home and Production, with the homelab nodes and a beam of light joining them"
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
 farewell:
   command: "$ logout"
@@ -54,6 +54,12 @@ homelab:
   offsite: "off-site"
   onsite: "on-site"
   wip: "Work in progress"
+  explore: "Explore the scene"
+  sceneHint: "Drag sideways to turn it, pick a node to see what it runs."
+  nodesLabel: "Nodes"
+  layersLabel: "Layers"
+  close: "Close"
+  noAdrs: "No documented decisions for this node, yet."
 domotica:
   projects: Public projects
   automationsTodo: List of automations to show (even a rough one)

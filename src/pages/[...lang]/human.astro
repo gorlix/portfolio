@@ -79,6 +79,7 @@ const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
 const nodeName = (id: string) => infra.nodes.find((n) => n.id === id)?.name ?? id;
+const adrById = (id: string) => homelab.adrs.find((a) => a.id === id);
 
 const D = page.domotica;
 const domotica = domoticaModel(D.rooms, automations);
@@ -172,7 +173,55 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'homelab' && (
             <>
-              <Scene scene="placeholder" label={page.scenes.placeholder} accent="homelab" data={homelab} />
+              <div class="lab">
+                <Scene scene="homelab" label={page.scenes.homelab} accent="homelab" data={homelab} />
+                <div class="lab-ui" data-homelab-ui hidden>
+                  <p class="meta">{H.sceneHint}</p>
+                  <div class="lab-controls">
+                    <ul class="plain lab-nodes" aria-label={H.nodesLabel}>
+                      {homelab.regions.flatMap((r) =>
+                        r.nodes.map((n) => (
+                          <li>
+                            <button type="button" data-node-button={n.id} aria-expanded="false" aria-controls="homelab-panel">
+                              {n.name} <span class="meta">· {r.name}</span>
+                            </button>
+                          </li>
+                        )),
+                      )}
+                    </ul>
+                    <div class="lab-layers" role="group" aria-label={H.layersLabel}>
+                      <button type="button" data-layer="decisions" aria-pressed="false">{H.decisions}</button>
+                    </div>
+                  </div>
+                  <div class="lab-panel" id="homelab-panel" data-panel hidden>
+                    {homelab.regions.flatMap((r) =>
+                      r.nodes.map((n) => (
+                        <div data-panel-node={n.id} hidden>
+                          <h3 tabindex="-1" data-panel-heading>{n.name} <span class="meta">· {r.name}</span></h3>
+                          <h4>{H.services}</h4>
+                          <ul class="plain">{n.services.map((svc) => <li>{svc.name}</li>)}</ul>
+                          <div data-panel-adrs hidden>
+                            <h4>{H.decisions}</h4>
+                            {n.adrs.length === 0 ? (
+                              <p class="meta">{H.noAdrs}</p>
+                            ) : (
+                              <ul class="plain">
+                                {n.adrs.map((id) => adrById(id)).map((a) => a && (
+                                  <li>
+                                    <a href={a.url}>{a.title}</a>
+                                    <p>{a.summary}</p>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      )),
+                    )}
+                    <button type="button" class="lab-close" data-panel-close>{H.close}</button>
+                  </div>
+                </div>
+              </div>
               <p class="meta">{page.homelab.simulatedNote}</p>
               <table>
                 <caption>{H.caption}</caption>
@@ -443,13 +492,47 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     display: grid;
     gap: 0.75rem;
   }
+  .lab-controls,
+  .lab-nodes,
+  .lab-layers,
   .lab-items {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+  .lab-controls {
+    justify-content: space-between;
+  }
+  .lab .lab-nodes li,
   .lab .lab-items li {
     margin-top: 0;
+  }
+  .lab-panel li {
+    margin-top: 0.25rem;
+  }
+  .lab-panel p {
+    margin: 0.125rem 0 0.5rem;
+  }
+  /* Schermi larghi: la scena al centro, controlli e pannello accanto, senza spingerla giu. */
+  @media (min-width: 72rem) {
+    section[id] > .lab {
+      max-width: 76rem;
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      align-items: start;
+    }
+    .lab-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .lab-nodes,
+    .lab-items {
+      flex-direction: column;
+    }
+    .lab-nodes button,
+    .lab-items button {
+      width: 100%;
+      text-align: left;
+    }
   }
   .lab button {
     min-height: 2.75rem;
@@ -478,20 +561,6 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   }
   .lab-panel a {
     color: var(--link);
-  }
-  @media (min-width: 72rem) {
-    section[id] > .lab {
-      max-width: 76rem;
-      grid-template-columns: minmax(0, 1fr) 22rem;
-      align-items: start;
-    }
-    .lab-items {
-      flex-direction: column;
-    }
-    .lab-items button {
-      width: 100%;
-      text-align: left;
-    }
   }
   h1,
   h2 {
