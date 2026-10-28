@@ -22,6 +22,17 @@ if (nav && 'IntersectionObserver' in window) {
   const sections = [...document.querySelectorAll<HTMLElement>('main section[id]')];
   const inMiddle = new Set<string>();
   let lastHash: string | undefined;
+  // Deep link (`/human#homelab`): finche l'utente non ha scrollato davvero, l'URL non si riscrive.
+  // Il primo calcolo dell'osservatore arriva a pagina ancora in cima, prima che il browser raggiunga
+  // l'ancora, e cancellerebbe l'hash.
+  let userMoved = !location.hash;
+  const markMoved = (): void => {
+    userMoved = true;
+  };
+  for (const type of ['wheel', 'keydown', 'pointerdown', 'touchstart'])
+    addEventListener(type, markMoved, { capture: true, passive: true, once: true });
+  // Un click sulla barra o il tasto Indietro cambiano ancora: da li in poi l'URL segue la pagina.
+  addEventListener('hashchange', markMoved);
 
   const sync = (): void => {
     // Ultima sezione che attraversa la mezzeria (le sezioni sono in ordine di pagina).
@@ -39,6 +50,7 @@ if (nav && 'IntersectionObserver' in window) {
     mark(ids);
     // URL: `#sezione`, oppure nessun hash sulla Home; replaceState non crea voci di cronologia.
     const hash = current.id === sections[0]?.id ? '' : `#${current.id}`;
+    if (!userMoved) return;
     if (hash !== lastHash && hash !== location.hash) {
       history.replaceState(null, '', `${location.pathname}${location.search}${hash}`);
     }
@@ -57,6 +69,25 @@ if (nav && 'IntersectionObserver' in window) {
   );
   for (const s of sections) observer.observe(s);
   addEventListener('scroll', sync, { passive: true });
+
+  // Atterraggio sull'ancora iniziale quando il layout e stabile (font e immagini cambiano le altezze,
+  // e il browser puo aver scrollato prima). Scroll normale, nessun blocco; ci si ferma al primo gesto.
+  const initial = location.hash
+    ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
+    : null;
+  if (initial) {
+    const land = (): void => {
+      if (userMoved || Math.abs(initial.getBoundingClientRect().top) < 2) return;
+      initial.scrollIntoView({ block: 'start', behavior: 'instant' });
+    };
+    land();
+    const settle = (): void => {
+      land();
+      void document.fonts?.ready.then(land);
+    };
+    if (document.readyState === 'complete') settle();
+    else addEventListener('load', settle, { once: true });
+  }
 
   // Menu su mobile: il pulsante apre l'elenco; Escape e un click su una tappa lo chiudono.
   const toggle = nav.querySelector<HTMLButtonElement>('.toggle');

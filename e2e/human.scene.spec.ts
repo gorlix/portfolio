@@ -293,9 +293,11 @@ for (const route of ['/human/', '/en/human/']) {
     const avatar = page.locator('#home .avatar [data-scene="avatar"]');
     await expect(avatar).toHaveAttribute('data-scene-state', 'idle');
     await expect(avatar).toHaveAttribute('role', 'img');
-    const box = await page.locator('#home .avatar').boundingBox();
-    expect(box?.width).toBe(160);
-    expect(box?.height).toBe(160);
+    // Prima del montaggio il riquadro non occupa spazio ne mostra bordo o sfondo (nessuna scatola vuota).
+    await expect(page.locator('#home .avatar')).toBeHidden();
+    expect(
+      await page.locator('#home .avatar').evaluate((el) => getComputedStyle(el).position),
+    ).toBe('absolute');
     expect(urls.filter(isThree)).toEqual([]);
   });
 

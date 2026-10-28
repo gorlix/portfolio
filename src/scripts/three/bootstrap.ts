@@ -268,6 +268,19 @@ async function mountScene(el: HTMLElement): Promise<void> {
   update();
 }
 
+/** L'URL punta a una sezione che contiene una scena (o a una scena stessa). */
+function hashHasScene(): boolean {
+  if (!location.hash) return false;
+  let id: string;
+  try {
+    id = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return false;
+  }
+  const target = document.getElementById(id);
+  return !!target && (target.matches('[data-scene]') || !!target.querySelector('[data-scene]'));
+}
+
 function init(): void {
   for (const section of document.querySelectorAll<HTMLElement>('[data-story]')) {
     const moments = [...section.querySelectorAll<HTMLElement>('[data-moment]')];
@@ -299,8 +312,10 @@ function init(): void {
     for (const type of ENGAGE_EVENTS) removeEventListener(type, engage, true);
     for (const el of containers) if (el.dataset.sceneState === 'idle') near.observe(el);
   };
-  // Pagina gia scorsa (ricarica, ancora #sezione): l'utente e gia dentro.
-  if (window.scrollY > 0) engage();
+  // Pagina gia scorsa (ricarica) o aperta su una sezione con la sua scena (`/human#homelab`):
+  // l'utente e gia dentro e non ha motivo di fare un gesto per vedere il 3D. Senza hash, il 3D
+  // aspetta ancora il primo gesto.
+  if (window.scrollY > 0 || hashHasScene()) engage();
   else
     for (const type of ENGAGE_EVENTS)
       addEventListener(type, engage, { capture: true, passive: true });
