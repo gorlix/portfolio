@@ -311,9 +311,11 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
       const graph = graphOf(html);
       const page = graph.find((n) => n['@type'] === 'WebPage' || n['@type'] === 'ProfilePage');
       const person = graph.find((n) => n['@type'] === 'Person');
+      expect(page, `${url}: nodo pagina assente`).toBeDefined();
       expect(page?.url, `${url}: url`).toBe(`${site}${url}`);
       expect(html, url).toContain(`<link rel="canonical" href="${site}${url}"`);
-      expect((page?.mainEntity as { '@id': string })['@id'], url).toBe(person?.['@id']);
+      const entity = page?.mainEntity as { '@id': string } | undefined;
+      expect(entity?.['@id'], url).toBe(person?.['@id']);
     }
   });
 
