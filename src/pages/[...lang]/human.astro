@@ -691,7 +691,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   h2 {
     margin: 0 0 0.5rem;
     color: var(--accent-ink);
-    font-size: 2rem;
+    /* A 320 px "~/Certificazioni" in mono non deve sforare (reflow WCAG 1.4.10). */
+    font-size: clamp(1.5rem, 8vw, 2rem);
+    overflow-wrap: anywhere;
   }
   h2::before {
     content: "~/" / "";
@@ -734,6 +736,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   /* Senza WebGL la scena si nasconde e con lei il riquadro: resta il ritratto. */
   .avatar:has(.scene[hidden]) {
     display: none;
+  }
+  /* Senza JavaScript il 3D non arriva mai: la cornice resterebbe vuota, quindi sparisce. */
+  @media (scripting: none) {
+    .avatar {
+      display: none;
+    }
   }
   .badges {
     display: flex;
