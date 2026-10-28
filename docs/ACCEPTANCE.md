@@ -1,0 +1,35 @@
+# Criteri di accettazione minimi (spec §16) e come si verificano
+
+Ogni criterio rimanda al test che lo verifica in CI (check obbligatori su `main`) o, dove serve una persona, alla verifica manuale da fare e documentare qui sotto.
+
+| Criterio (§16)                                                                  | Verifica automatica                                                                                                                                                                                                                  | Dove                                                                                                                          |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `/`, `/recruiter` e `/agent` si leggono e funzionano con JavaScript disattivato | Suite Playwright con JS spento: struttura, selettore lingua, "salta al contenuto"; terminale d'ingresso senza JS                                                                                                                     | `e2e/light-routes.nojs.spec.ts`, `e2e/entrance.nojs.spec.ts`, `e2e/recruiter.nojs.spec.ts`, `e2e/agent.nojs.spec.ts`          |
+| Zero script su recruiter e agent, uno solo (facoltativo) in ingresso            | Conteggio script nella build; richieste di rete reali; CSP per percorso (`script-src 'none'`)                                                                                                                                        | `tests/i18n/build.test.ts`, `e2e/requests.spec.ts`, `tests/headers/headers.test.ts`                                           |
+| Nessun asset 3D scaricato fuori da `/human`                                     | Nessun tag `script`/`link` con three, scene o formati 3D nelle pagine non-Umano; richieste di rete reali sui percorsi leggeri; un solo chunk `three`                                                                                 | `tests/i18n/build.test.ts` (§16 PORT-73), `e2e/requests.spec.ts`; peso: `pnpm check:budget`                                   |
+| Tutte le sezioni dell'Umano hanno un equivalente testuale                       | Nove sezioni nell'ordine della spec con testo reale (> 80 caratteri fuori dalla scena); ogni scena ha `role="img"` e nome accessibile; Homelab/Domotica con tabella; senza WebGL, con risparmio dati o reduced-motion resta il testo | `tests/i18n/build.test.ts`, `e2e/human.nojs.spec.ts`, `e2e/human.scene.spec.ts`, `e2e/human.fallback.spec.ts`                 |
+| Nessun IP, dominio o identificativo reale in nessun file pubblicato             | Scansione di tutti i file di testo della build (IP privati, hostname `.lan`/`.internal`/`home.arpa`; solo il dominio del sito è ammesso); dati dell'infrastruttura inventati e validati; gitleaks sulla storia                       | `pnpm check:machine` (CI), `tests/i18n/build.test.ts`, `tests/data/homelab.test.ts`, `e2e/human.nojs.spec.ts`, job "Gitleaks" |
+| Ogni contenuto IT ha il suo corrispettivo EN                                    | Parità di struttura dei dati YAML IT/EN; ogni pagina ha la gemella, canonical e hreflang reciproci, stesse sezioni                                                                                                                   | `tests/data/content.test.ts`, `tests/data/parity.test.ts`, `tests/i18n/build.test.ts`                                         |
+| I file nella root sono validi e coerenti con la pagina `/agent`                 | Validazione di forma di `llms.txt`, `agent.md`, `profile.json`, `robots.txt`, `sitemap.xml` e del JSON-LD; `/agent` mostra i file byte per byte; stesse pagine, progetti e profili ovunque; Person identico su ogni pagina           | `pnpm check:machine`, `tests/machine/*`, `tests/i18n/build.test.ts` ("vetrina /agent", "coerenza file per macchine")          |
+
+## Altri requisiti della fase 6 (§10) con verifica automatica
+
+| Requisito                                                                            | Verifica                                                         |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Accessibilità WCAG 2.2 AA (axe, Mocha e Latte, anche con scene 3D montate)           | `e2e/a11y.spec.ts`                                               |
+| Tastiera, focus visibile, "salta al contenuto", reflow a 320 px                      | `e2e/a11y-keyboard.spec.ts`                                      |
+| Lighthouse ≥ 95 sui percorsi leggeri, limiti di script su `/human`, a ogni PR        | Check "Lighthouse" (`lighthouserc.json`)                         |
+| Budget di peso (spec §3.5)                                                           | `pnpm check:budget`                                              |
+| Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion) | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts` |
+| Analitica solo su `/human`, solo con token valido                                    | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`        |
+| Colori solo come token, contrasto                                                    | `pnpm check:theme`                                               |
+
+## Verifiche manuali (le fa Alessandro; esito da annotare qui)
+
+| Verifica                                 | Procedura                                                                                   | Esito   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- | ------- |
+| Screen reader (PORT-67)                  | Checklist NVDA/VoiceOver su tutte le pagine IT/EN                                           | da fare |
+| Fluidità su telefono reale (PORT-69)     | Checklist fps su un telefono di fascia media                                                | da fare |
+| Rich Results Test (PORT-71)              | URL di anteprima di `/human`, `/recruiter`, `/agent` su search.google.com/test/rich-results | da fare |
+| Beacon analitica in produzione (PORT-72) | Token in Cloudflare Pages, poi controllare che compaia solo su `/human`                     | da fare |
+| Dominio e DNS (PORT-48)                  | Fuori da questa verifica; i file per macchine puntano già al dominio previsto               | da fare |
