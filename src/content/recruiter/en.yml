@@ -25,6 +25,8 @@ labels:
   location: Location
   availability: Availability
   ongoing: present
+  paused: paused (for work)
+  languages: Languages
   results: Results
   stack: Stack
   issuer: Issuer

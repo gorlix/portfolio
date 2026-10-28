@@ -1,0 +1,4 @@
+name: "GitLab CI (runner self-hosted)"
+kind: technical
+linkedSection: lavori
+group: "CI/CD"

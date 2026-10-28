@@ -1,0 +1,11 @@
+company: "Rotaract Distretto 2050"
+role: "IT Delegate"
+summary: "Volunteer role"
+start: "2026-01"
+end: null
+results:
+  - "In charge of the IT infrastructure and websites of the District and the Multidistrict."
+  - "Automated build and deploy pipeline via GitHub Actions for both sites."
+  - "Autonomous management of hosting, DNS and maintenance, without a dedicated IT team."
+stack:
+  - "GitHub Actions"

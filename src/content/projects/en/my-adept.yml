@@ -5,6 +5,5 @@ language:
 method: by-hand
 status:
   todo: active / wip / archived
-featured: true
-rank: 4
+featured: false
 description: Firmware for the Ploopy Adept trackball.

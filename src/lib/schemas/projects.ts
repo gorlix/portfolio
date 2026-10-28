@@ -6,7 +6,8 @@ export const projectMethods = ['by-hand', 'ai-copilot', 'vibecoded'] as const;
 export const projectSchema = z.strictObject({
   name: text,
   description: orTodo(text),
-  repo: url,
+  /** Assente se il progetto non ha un repository pubblico. */
+  repo: url.optional(),
   language: orTodo(text),
   method: orTodo(z.enum(projectMethods)),
   status: orTodo(z.enum(['active', 'wip', 'archived'])),
@@ -17,4 +18,4 @@ export const projectSchema = z.strictObject({
   section: sectionId.optional(),
 });
 
-export const projectTranslatable = ['description'];
+export const projectTranslatable = ['name', 'description'];

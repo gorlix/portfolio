@@ -1,0 +1,11 @@
+name: "claude-multi-view"
+repo: https://github.com/gorlix/claude-multi-view
+language:
+  todo: "Main language (not in CV)"
+method:
+  todo: "by hand / with AI / vibecoded (not in CV)"
+status:
+  todo: "active / wip / archived (not in CV)"
+featured: true
+rank: 4
+description: "Plugin that monitors and coordinates multiple chats and sub-agents in tmux (status, usage limits, active tasks, notifications); a multi-agent approach to managing parallel sessions."

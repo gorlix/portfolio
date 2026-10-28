@@ -58,8 +58,9 @@ export function renderLlmsTxt(m: MachineModel): string {
   for (const [file, note] of rootFiles) out.push(`- [${file}](${site(m)}/${file}): ${note}`);
 
   out.push('', '## Projects', '');
+  // llms.txt elenca solo voci con link: un progetto senza repository pubblico sta in agent.md e profile.json.
   for (const p of m.projects)
-    out.push(`- [${p.name}](${p.repo})${p.description ? `: ${p.description.en}` : ''}`);
+    if (p.repo) out.push(`- [${p.name}](${p.repo})${p.description ? `: ${p.description.en}` : ''}`);
 
   out.push('', '## Optional', '');
   out.push(`- [GitHub](${m.links.github})`, `- [LinkedIn](${m.links.linkedin})`);
@@ -96,7 +97,8 @@ export function renderAgentMd(m: MachineModel): string {
       p.method && `method: ${p.method}`,
       p.status && `status: ${p.status}`,
     ].filter(Boolean);
-    out.push(`### ${p.name}`, '', `- Repository: ${p.repo}`);
+    out.push(`### ${p.name}`, '');
+    if (p.repo) out.push(`- Repository: ${p.repo}`);
     if (facts.length) out.push(`- ${facts.join('; ')}`);
     if (p.description) out.push('', p.description.en, '', `_it:_ ${p.description.it}`);
     out.push('');
@@ -127,7 +129,7 @@ export function renderProfileJson(m: MachineModel): string {
     pages: Object.fromEntries(m.pages.map((p) => [p.id, p.urls])),
     projects: m.projects.map((p) => ({
       name: p.name,
-      repository: p.repo,
+      ...(p.repo && { repository: p.repo }),
       ...(p.description && { description: p.description }),
       ...(p.language && { language: p.language }),
       ...(p.method && { method: p.method }),

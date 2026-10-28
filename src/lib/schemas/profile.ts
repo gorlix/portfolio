@@ -7,6 +7,8 @@ export const profileSchema = z.strictObject({
   location: text,
   availability: orTodo(text),
   tagline: orTodo(text),
+  /** Lingue parlate, nell'ordine in cui compaiono. */
+  languages: z.array(z.strictObject({ name: text, level: text })).min(1),
   /** Unico punto dati per mailto e file per macchine. */
   email: z.email(),
   links: z.strictObject({
@@ -28,4 +30,6 @@ export const profileTranslatable = [
   'tagline',
   'cv',
   'photo.alt',
+  'languages.*.name',
+  'languages.*.level',
 ];

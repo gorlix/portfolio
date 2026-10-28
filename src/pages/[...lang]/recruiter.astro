@@ -48,9 +48,10 @@ const featuredProjects = projects
   .filter((p) => p.data.featured)
   .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
 
-const period = (start: unknown, end: unknown) => {
+const period = (start: unknown, end: unknown, paused = false) => {
   if (isTodo(start) || isTodo(end)) return null;
-  return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
+  const to = end === null ? (paused ? L.paused : L.ongoing) : formatDate(end as string, locale);
+  return start === undefined ? to : `${formatDate(start as string, locale)} – ${to}`;
 };
 
 const profiles = [
@@ -138,16 +139,18 @@ const jsonLd = await loadJsonLd({
 
     <section id="competenze" aria-labelledby="h-competenze">
       <h2 id="h-competenze">{sectionTitle('competenze')}</h2>
-      {
-        skillGroups.map(([group, items]) => (
-          <div class="skill-group">
-            <h3>{group}</h3>
-            <ul class="tags">
-              {items.map((s) => <li>{s.data.name}</li>)}
-            </ul>
-          </div>
-        ))
-      }
+      <div class="skill-groups">
+        {
+          skillGroups.map(([group, items]) => (
+            <div class="skill-group">
+              <h3>{group}</h3>
+              <ul class="tags">
+                {items.map((s) => <li>{s.data.name}</li>)}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
     </section>
 
     <section id="esperienze" aria-labelledby="h-esperienze">
@@ -163,6 +166,7 @@ const jsonLd = await loadJsonLd({
                 {isTodo(e.company) ? <Todo label={page.todoLabel} hint={e.company.todo} /> : e.company}
               </h3>
               <p class="meta">
+                {e.summary && <>{e.summary}<br /></>}
                 {
                   when ?? (
                     <Todo
@@ -180,12 +184,19 @@ const jsonLd = await loadJsonLd({
                   <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
                 )
               }
-              <h4>{L.stack}</h4>
               {
                 isTodo(e.stack) ? (
-                  <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
+                  <>
+                    <h4>{L.stack}</h4>
+                    <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
+                  </>
                 ) : (
-                  <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
+                  e.stack.length > 0 && (
+                    <>
+                      <h4>{L.stack}</h4>
+                      <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
+                    </>
+                  )
                 )
               }
             </article>
@@ -203,9 +214,17 @@ const jsonLd = await loadJsonLd({
             <li>
               <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
               <span class="meta">
-                {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
-                {' · '}
-                {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+                {
+                  c.status === 'in-progress' ? (
+                    <>{L.ongoing}{!isTodo(c.issuer) && ` · ${L.issuer}: ${c.issuer}`}</>
+                  ) : (
+                    <>
+                      {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                      {' · '}
+                      {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+                    </>
+                  )
+                }
               </span>
               {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
             </li>
@@ -239,8 +258,7 @@ const jsonLd = await loadJsonLd({
             <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
             <p class="meta">
               {L.language}: {isTodo(p.language) ? <Todo label={page.todoLabel} hint={p.language.todo} /> : p.language}
-              {' · '}
-              <a href={p.repo}>{L.repository}</a>
+              {p.repo && <>{' · '}<a href={p.repo}>{L.repository}</a></>}
             </p>
             <p class="meta">
               {page.projects.methodLabel}:{' '}
@@ -255,7 +273,7 @@ const jsonLd = await loadJsonLd({
       <h2 id="h-formazione">{sectionTitle('formazione')}</h2>
       {
         education.map(({ data: ed }) => {
-          const when = period(ed.start, ed.end);
+          const when = period(ed.start, ed.end, ed.paused);
           return (
             <article class="item">
               <h3>{isTodo(ed.degree) ? <Todo label={page.todoLabel} hint={ed.degree.todo} /> : ed.degree}</h3>
@@ -283,6 +301,10 @@ const jsonLd = await loadJsonLd({
         <div>
           <dt>{L.email}</dt>
           <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+        </div>
+        <div>
+          <dt>{L.languages}</dt>
+          <dd>{profile.languages.map((l) => `${l.name}: ${l.level}`).join(' · ')}</dd>
         </div>
         <div>
           <dt>{L.profiles}</dt>
@@ -477,7 +499,7 @@ const jsonLd = await loadJsonLd({
   /* Stampa / PDF: base Latte (theme.css), niente navigazione, URL dei link, pagine A4 compatte. */
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 11mm;
   }
   @media print {
     :global(.skip),
@@ -487,7 +509,7 @@ const jsonLd = await loadJsonLd({
       display: none;
     }
     :global(body) {
-      font-size: 9.5pt;
+      font-size: 9pt;
     }
     .page {
       max-width: none;
@@ -495,7 +517,7 @@ const jsonLd = await loadJsonLd({
       line-height: 1.3;
     }
     section[id] {
-      margin-top: 0.75rem;
+      margin-top: 0.6rem;
     }
     h1 {
       margin-top: 0;
@@ -515,8 +537,9 @@ const jsonLd = await loadJsonLd({
     h4 {
       break-after: avoid;
     }
-    .item,
-    .skill-group {
+    .skill-group,
+    #progetti .item,
+    #formazione .item {
       break-inside: avoid;
     }
     .item {
@@ -525,17 +548,42 @@ const jsonLd = await loadJsonLd({
     .plain li {
       margin-top: 0.3rem;
     }
-    /* Competenze e progetti su due colonne: la stampa resta entro 2 pagine A4. */
-    #competenze,
-    #progetti {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 1.5rem;
+    /* Competenze: una riga per gruppo; progetti: metadati su una riga. Serve a restare entro 2 pagine A4. */
+    .skill-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
     }
-    #competenze > h2,
-    #progetti > h2,
-    #progetti > .meta {
-      grid-column: 1 / -1;
+    .skill-group h3 {
+      flex: 0 0 6.5rem;
+      margin: 0.15rem 0;
+      font-size: 0.85rem;
+    }
+    /* Le etichette "Risultati" e "Stack" si deducono dal contenuto: in stampa si omettono. */
+    .item > h4 {
+      display: none;
+    }
+    #contatti .facts {
+      grid-template-columns: repeat(3, auto);
+      justify-content: space-between;
+      margin-top: 0;
+    }
+    #certificazioni .plain.small {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 1.25rem;
+    }
+    #formazione .item {
+      margin-top: 0.2rem;
+    }
+    #progetti .item p {
+      margin: 0;
+    }
+    #progetti .item .meta {
+      display: inline;
+    }
+    #progetti .item .meta + .meta::before {
+      content: " · ";
     }
     .tags {
       gap: 0.25rem;
@@ -555,8 +603,9 @@ const jsonLd = await loadJsonLd({
       color: var(--text-muted);
       overflow-wrap: anywhere;
     }
+    /* L'indirizzo e gia il testo del link: niente "mailto:" ripetuto. */
     .page a[href^="mailto:"]::after {
-      content: " (" attr(href) ")";
+      content: none;
     }
   }
 </style>

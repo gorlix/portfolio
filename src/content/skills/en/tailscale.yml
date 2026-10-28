@@ -1,4 +1,4 @@
 name: Tailscale
 kind: technical
 linkedSection: homelab
-group: Networking
+group: "Networking and security"

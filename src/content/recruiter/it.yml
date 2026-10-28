@@ -25,6 +25,8 @@ labels:
   location: Sede
   availability: Disponibilità
   ongoing: in corso
+  paused: in pausa (per lavoro)
+  languages: Lingue
   results: Risultati
   stack: Stack
   issuer: Ente

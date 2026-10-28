@@ -28,7 +28,7 @@ const profileJsonSchema = z.strictObject({
   projects: z.array(
     z.strictObject({
       name: z.string().min(1),
-      repository: https,
+      repository: https.optional(),
       description: bilingual.optional(),
       language: z.string().min(1).optional(),
       method: z.string().min(1).optional(),
@@ -79,7 +79,7 @@ const jsonLdNode = z.discriminatedUnion('@type', [
   z.strictObject({
     '@type': z.literal('SoftwareSourceCode'),
     name: str,
-    codeRepository: https,
+    codeRepository: https.optional(),
     description: str.optional(),
     programmingLanguage: str.optional(),
     author: ref,

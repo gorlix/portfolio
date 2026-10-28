@@ -1,4 +1,11 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
+
+const skillsDir = join(import.meta.dirname, '../src/content/skills/it');
+const technicalSkills = readdirSync(skillsDir).filter((f) =>
+  /^kind: technical$/m.test(readFileSync(join(skillsDir, f), 'utf8')),
+).length;
 
 const sectionIds = [
   'home',
@@ -60,7 +67,8 @@ for (const [route, lang] of [
       // Senza JS la cornice dell'avatar resterebbe vuota: si nasconde (media `scripting: none`).
       await expect(home.locator('.avatar')).toBeHidden();
       const badges = home.locator('nav[aria-label] a[href^="#"]');
-      await expect(badges).toHaveCount(8);
+      // Un badge per competenza tecnica (dati YAML).
+      await expect(badges).toHaveCount(technicalSkills);
       for (const href of await badges.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
         await expect(page.locator(`section${href}`)).toBeAttached();
       }

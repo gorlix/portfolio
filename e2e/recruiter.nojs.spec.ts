@@ -32,13 +32,14 @@ for (const [route, lang] of [
       }
     });
 
-    test('progetti: 4 in evidenza, homelab per primo, con nota sul metodo', async ({ page }) => {
+    test('progetti: 5 in evidenza, homelab per primo, con nota sul metodo', async ({ page }) => {
       await page.goto(route);
       const projects = page.locator('#progetti article');
-      await expect(projects).toHaveCount(4);
+      await expect(projects).toHaveCount(5);
       await expect(projects.first().getByRole('heading', { level: 3 })).toHaveText('homelab');
-      await expect(page.locator('#progetti article', { hasText: 'my-adept' })).toContainText(
-        lang === 'en' ? 'Method: Written by hand.' : 'Metodo: Scritto a mano.',
+      // Il metodo dei progetti del CV non e dichiarato: segnaposto finche Alessandro non lo fornisce.
+      await expect(page.locator('#progetti article', { hasText: 'Paca' })).toContainText(
+        lang === 'en' ? 'Method: TODO(Alessandro)' : 'Metodo: TODO(Alessandro)',
       );
     });
 
