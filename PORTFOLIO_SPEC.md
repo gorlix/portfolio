@@ -223,7 +223,7 @@ Root (testo puro, per macchine):
 9. **Contatti**
 
 **Prima schermata (Home dell'Umano)**
-- Saluto, **foto piccola** e badge in sovraimpressione su uno **sfondo 3D d'atmosfera** (scrivania low-poly: monitor col terminale, tastiera split, stampante 3D, mensola con mini-server, finestra con luce calda; camera che respira e, scorrendo, si avvicina al monitor), invito a scorrere. **Niente avatar** nella Home: il personaggio low-poly resta solo nella micro-scena della pallavolo (Sport).
+- Saluto, **foto piccola** e badge in sovraimpressione su uno **sfondo 3D d'atmosfera** (scrivania low-poly: monitor col terminale, tastiera split, stampante 3D, mensola con mini-server, finestra con luce calda; camera che respira e, scorrendo, si avvicina al monitor), invito a scorrere. **Niente avatar** nella Home: il personaggio (pinguino low-poly) resta solo nelle micro-scene Sport (pallavolo, sci).
 - **Piccoli badge delle competenze tecniche** (solo nomi per ora, cliccabili verso la sezione dove quella competenza si vede in azione). Quanti badge e se c'è un indicatore di livello: **decisioni rimandate** (§15).
 - La barra laterale è già visibile, così si capisce che si può saltare.
 
@@ -361,9 +361,9 @@ Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui
 - **Approfondimento Trimind (`/human/lavori/trimind/`, PORT-82):** una mappa low-poly in cinque momenti, solo con i fatti del CV: 1) **Infrastruttura**: VPS chiusa senza porte aperte con ~20 container, un solo tunnel verso una nuvola con scudo Zero Trust; 2) **Backup**: snapshot verso un bucket, quelli oltre 15 giorni sfumano (GDPR art. 17); 3) **CI/CD**: nastro da 4 repository a un runner self-hosted, slot blu/verde che si scambiano; 4) **Osservabilità e multi-provider**: pannelli con grafici simulati (etichettati come tali) e un task che si divide in tre fasci verso tre provider e torna con barre qualità/costo/latenza; 5) **Qualità**: motore di scoring a stadi e ~490 spunte che diventano verdi. Nessun dato reale d'infrastruttura (nomi, domini, IP, repository privati). Fallback: poster con avviso; senza JS testo sul fondo semplice.
 - **Certificazioni:** **tecniche** = badge 3D grandi che si materializzano uno alla volta, con ente, data e link di verifica. **Accessorie** (BLSD, idrogeologico e simili) = fila di badge piccoli più sotto, titolo "Altro che ho imparato". Le tecniche compaiono **anche come piccoli badge nella prima schermata** dell'Umano e in evidenza nel recruiter.
 - **Sport:** tre micro-scene, ciascuna con una frase sua:
-  - **Sci:** montagna 3D, una linea che scende ("la curva perfetta").
+  - **Sci:** montagna 3D, una linea che scende ("la curva perfetta") con un pinguino sugli sci in testa alla traccia.
   - **Tennis:** la pallina segna la riga, solleva la terra rossa e arriva verso lo schermo.
-  - **Pallavolo:** due personaggi low-poly e un bagher ("passato da pallavolista").
+  - **Pallavolo:** due pinguini low-poly e un bagher ("passato da pallavolista").
 - **Interessi** *(una sola sezione)*: stampa 3D, tastiera **ZSA Moonlander** con layout personalizzato (layer gaming e layout ibrido US/IT, link Oryx), ebook reader **Supernote** e relativi tool, **Obsidian**, **Rust** (in apprendimento), e **il cibo / i posti dove si mangia bene** (con una battuta; link già presente nel README). La sezione Umano "deve essere Alessandro a pieno": più dettagli personali che omissioni.
 - **Beneficenza:** tono più sobrio, meno movimento. **Rotaract Abbiategrasso**; il sito del **primo multidistretto italiano** (`MDIO-website`) come progetto concreto. Una battuta leggera al massimo.
 - **Contatti (chiusura):** scena finale tranquilla; ritorno al terminale con un saluto; email dedicata, LinkedIn, GitHub, dev.to, X, pulsante CV.

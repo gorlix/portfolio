@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|scrivania|figure|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|scrivania|penguin|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
     url,
   );
 // Scene che aspettano il gesto o la vicinanza: tutte tranne la scrivania della Home, che parte da
