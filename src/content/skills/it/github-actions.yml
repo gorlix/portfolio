@@ -2,3 +2,4 @@ name: "GitHub Actions"
 kind: technical
 linkedSection: lavori
 group: "CI/CD"
+badge: true

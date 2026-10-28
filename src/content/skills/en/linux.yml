@@ -2,3 +2,4 @@ name: "Linux"
 kind: technical
 linkedSection: homelab
 group: "Systems"
+badge: true

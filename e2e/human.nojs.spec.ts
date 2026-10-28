@@ -3,9 +3,10 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 
 const skillsDir = join(import.meta.dirname, '../src/content/skills/it');
-const technicalSkills = readdirSync(skillsDir).filter((f) =>
-  /^kind: technical$/m.test(readFileSync(join(skillsDir, f), 'utf8')),
-).length;
+const badgeSkills = readdirSync(skillsDir).filter((f) => {
+  const src = readFileSync(join(skillsDir, f), 'utf8');
+  return /^kind: technical$/m.test(src) && /^badge: true$/m.test(src);
+}).length;
 
 const sectionIds = [
   'home',
@@ -67,8 +68,10 @@ for (const [route, lang] of [
       // Senza JS la cornice dell'avatar resterebbe vuota: si nasconde (media `scripting: none`).
       await expect(home.locator('.avatar')).toBeHidden();
       const badges = home.locator('nav[aria-label] a[href^="#"]');
-      // Un badge per competenza tecnica (dati YAML).
-      await expect(badges).toHaveCount(technicalSkills);
+      // Solo le competenze con `badge: true` nei dati (6-8).
+      await expect(badges).toHaveCount(badgeSkills);
+      expect(badgeSkills).toBeGreaterThanOrEqual(6);
+      expect(badgeSkills).toBeLessThanOrEqual(8);
       for (const href of await badges.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
         await expect(page.locator(`section${href}`)).toBeAttached();
       }
