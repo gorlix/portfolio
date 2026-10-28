@@ -1,4 +1,4 @@
-import type { SceneTier } from './capabilities';
+import type { RenderProfile, SceneTier } from './capabilities';
 
 /** Contratto tra il bootstrap e ogni modulo di scena (caricato sempre con `import()`). */
 
@@ -9,6 +9,8 @@ export interface SceneContext {
   container: HTMLElement;
   /** 'full' anima, 'reduced' disegna un solo fotogramma statico. */
   tier: Exclude<SceneTier, 'text'>;
+  /** Dettaglio di resa (pixel ratio massimo, antialias) deciso da `renderProfile`. */
+  profile: RenderProfile;
   /** Dati del blocco JSON `[data-scene-data]` del contenitore, se presente (vedi Scene.astro). */
   data?: unknown;
 }

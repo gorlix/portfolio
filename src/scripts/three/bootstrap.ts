@@ -1,7 +1,9 @@
 import {
   type CapabilityInput,
   decideTier,
+  isBatteryLow,
   probeCapabilities,
+  renderProfile,
   type SceneTier,
 } from './capabilities';
 import { sceneKind } from './kinds';
@@ -32,7 +34,8 @@ let capabilities: CapabilityInput | undefined;
 /** Le capacita si misurano una volta sola, al primo avvicinamento di una scena. */
 const tierFor = (name: string): SceneTier => {
   capabilities ??= probeCapabilities();
-  return decideTier(capabilities, sceneKind(name));
+  // La batteria cambia nel tempo e la sua API risponde in ritardo: si rilegge a ogni decisione.
+  return decideTier({ ...capabilities, lowBattery: isBatteryLow() }, sceneKind(name));
 };
 
 const setState = (el: HTMLElement, state: SceneState): void => {
@@ -128,7 +131,9 @@ async function mountScene(el: HTMLElement): Promise<void> {
       return;
     }
     el.append(canvas);
-    instance = module.mount({ canvas, container: el, tier: level, data: readData(el) });
+    const profile = renderProfile(level, capabilities ?? {});
+    el.dataset.sceneDetail = profile.antialias ? 'high' : 'low';
+    instance = module.mount({ canvas, container: el, tier: level, profile, data: readData(el) });
   } catch {
     canvas.remove();
     setState(el, 'error');

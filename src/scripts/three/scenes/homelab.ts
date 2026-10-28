@@ -26,6 +26,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import type { HomelabModel } from '../../../lib/homelab';
+import { pixelRatioFor } from '../capabilities';
 import { createSimulator, type LogLine } from '../homelab/metrics';
 import { bindHomelabUi } from '../homelab/ui';
 import { attachOrbit } from '../orbit';
@@ -63,7 +64,7 @@ const SIM_START_MINUTE = 19 * 60;
 const VIP_SPEED = 3;
 const UP = new Vector3(0, 1, 0);
 
-export function mount({ canvas, container, tier, data }: SceneContext): SceneInstance {
+export function mount({ canvas, container, tier, profile, data }: SceneContext): SceneInstance {
   const model = data as HomelabModel | undefined;
   // Senza dati non c'e niente da disegnare: il bootstrap ripiega sul testo.
   if (!model?.regions?.length) throw new Error('homelab: dati della scena assenti');
@@ -71,10 +72,10 @@ export function mount({ canvas, container, tier, data }: SceneContext): SceneIns
   const renderer = new WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: tier === 'full',
+    antialias: profile.antialias,
     powerPreference: 'low-power',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, tier === 'full' ? 2 : 1));
+  renderer.setPixelRatio(pixelRatioFor(profile, window.devicePixelRatio));
   renderer.setClearAlpha(0);
 
   const scene = new Scene();
