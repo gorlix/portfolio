@@ -16,7 +16,7 @@ posterNotice:
   nojs: "JavaScript è disattivato: al posto del 3D vedi un'immagine {subject}."
 intros:
   home: Benvenuto nel percorso umano.
-  lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.
+  lavori: Dove ho lavorato e cosa ho combinato, dall'ultimo in giù.
   homelab: Tre nodi, due siti e la tentazione costante di "ottimizzare ancora un po'". Quello che vedi qui è una versione inventata, non l'infrastruttura vera.
   domotica: Una casa che si accende da sola, più o meno quando voglio io. Home Assistant è il mio compagno di giochi.
   certificazioni: Pezzi di carta che dimostrano che qualcosa l'ho studiato davvero.

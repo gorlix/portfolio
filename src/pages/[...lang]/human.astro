@@ -84,9 +84,14 @@ const sections = [{ id: 'home' as const, title: page.homeTitle }, ...theme.secti
 /** Badge: 6–8 badge scelti nei dati (badge: true), senza livello, ciascuno verso la sezione collegata. */
 const badges = skills.filter((k) => k.data.kind === 'technical' && k.data.badge === true);
 
-/** Albero dei Lavori (PORT-81): dal basso la piu vecchia, una foglia per esperienza, lati alternati. */
+/**
+ * Albero dei Lavori (PORT-81): dal basso la piu vecchia, una foglia per esperienza, lati alternati.
+ * Le schede partono dall'alto (la piu recente) e scendono lungo il tronco (deciso da Alessandro).
+ */
 const work = chronological(experiences.map((e) => ({ ...e, start: e.data.start })));
 const tree = workTree(work.map((e) => ({ slug: e.slug, ...e.data })));
+const newestFirst = [...work].reverse();
+const leafOf = (slug: string) => tree.leaves.find((l) => l.slug === slug);
 const W = page.work;
 /** Punti del CV nella scheda: fino a tre; con una pagina di approfondimento due, il resto sta li. */
 const highlights = (detail: boolean) => (detail ? 2 : 3);
@@ -284,9 +289,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               </div>
 
               <div class="cards">
-                {work.map(({ slug, data: e }, i) => {
+                {newestFirst.map(({ slug, data: e }) => {
                   const when = period(e.start, e.end);
-                  const leaf = tree.leaves[i];
+                  const leaf = leafOf(slug);
                   const volunteer = e.kind === 'volunteer';
                   const company = isTodo(e.company) ? null : e.company;
                   return (

@@ -47,11 +47,12 @@ for (const [route, detail] of [
     expect(names[0]).toBe('overview');
     expect(names.at(-1)).toBe('exit');
     expect(names).toHaveLength(count + 2);
+    // Lati alternati: due schede vicine non stanno mai dallo stesso lato.
     const sides = await cards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.side));
-    sides.forEach((side, i) => {
-      expect(side).toBe(i % 2 === 0 ? 'left' : 'right');
+    sides.slice(1).forEach((side, i) => {
+      expect(side).not.toBe(sides[i]);
     });
-    // La scena riceve le stesse foglie, nello stesso ordine delle schede.
+    // La scena riceve le stesse foglie, dal basso (la piu vecchia); le schede partono dall'alto.
     const leaves = await page
       .locator('[data-scene="lavori"] script[data-scene-data]')
       .evaluate((el) =>
@@ -59,7 +60,7 @@ for (const [route, detail] of [
           (l) => l.slug,
         ),
       );
-    expect(leaves).toEqual(names.slice(1, -1));
+    expect([...leaves].reverse()).toEqual(names.slice(1, -1));
   });
 
   test(`${route}: "Approfondisci" solo sulle esperienze con pagina dedicata`, async ({ page }) => {

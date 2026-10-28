@@ -16,7 +16,7 @@ posterNotice:
   nojs: "JavaScript is off: you see a picture {subject} instead of the 3D scene."
 intros:
   home: Welcome to the human path.
-  lavori: Where I have worked and what I got up to, in order of appearance.
+  lavori: Where I have worked and what I got up to, from the latest down.
   homelab: Three nodes, two sites and a constant urge to "optimise just a bit more". What you see here is an invented version, not the real infrastructure.
   domotica: A house that switches things on by itself, more or less when I want it to. Home Assistant is my playmate.
   certificazioni: Pieces of paper proving I really did study something.
