@@ -13,6 +13,8 @@ export interface SceneContext {
   profile: RenderProfile;
   /** Dati del blocco JSON `[data-scene-data]` del contenitore, se presente (vedi Scene.astro). */
   data?: unknown;
+  /** Solo scene immersive: nomi dei momenti nell'ordine di pagina (prima schermata, poi schede). */
+  moments?: readonly string[];
 }
 
 export interface SceneInstance {
@@ -27,6 +29,12 @@ export interface SceneInstance {
    * una breve rincorsa (solo tra start e stop); a livello 'reduced' resta ferma sulla fine.
    */
   setProgress?(progress: number): void;
+  /**
+   * Solo scene immersive: posizione del racconto (0 = prima schermata, i = scheda i al centro,
+   * valori intermedi tra una scheda e l'altra; vedi ../story.ts). A livello 'reduced' arriva gia
+   * arrotondata a un momento. Con `interactive` falso la scena ignora i gesti.
+   */
+  setStory?(position: number, interactive: boolean): void;
   /** Libera geometrie, materiali e renderer. Dopo dispose l'istanza non e piu utilizzabile. */
   dispose(): void;
 }

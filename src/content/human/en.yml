@@ -78,6 +78,8 @@ homelab:
   failoverNormal: "The DNS VIP is on {node}: the primary is answering."
   failoverActive: "The primary is down: the VIP moved to {node} and the backup is answering."
   failoverText: "DNS failover: two AdGuard Home instances share a virtual IP (VIP). If the primary stops answering, Keepalived moves the VIP to the backup within seconds; when the primary is back, the VIP returns. In the scene you get to cause it."
+  failoverTitle: "DNS failover"
+  projects: "Projects"
 domotica:
   projects: Public projects
   automationsTodo: List of automations to show (even a rough one)

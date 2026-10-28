@@ -78,6 +78,8 @@ homelab:
   failoverNormal: "Il VIP del DNS è su {node}: risponde il primario."
   failoverActive: "Il primario è giù: il VIP è passato a {node} e risponde il backup."
   failoverText: "Failover DNS: due AdGuard Home condividono un IP virtuale (VIP). Se il primario smette di rispondere, Keepalived sposta il VIP sul backup in pochi secondi; quando il primario torna, il VIP rientra. Nella scena lo puoi provocare tu."
+  failoverTitle: "Failover DNS"
+  projects: "Progetti"
 domotica:
   projects: Progetti pubblici
   automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)

@@ -96,6 +96,25 @@ for (const [route, lang] of [
       await expect(page.locator(`#contatti .farewell a[href="${home}"]`)).toBeFocused();
     });
 
+    test('Homelab immersiva: stesse schede su sfondo semplice, senza sfondo fisso ne comandi', async ({
+      page,
+    }) => {
+      await page.goto(`${route}#homelab`);
+      const cards = page.locator('#homelab .card');
+      await expect(cards).toHaveCount(6);
+      for (const card of await cards.all()) await expect(card).toBeVisible();
+      // Senza JS non c'e scena: lo sfondo fisso sparisce e i comandi restano nascosti.
+      await expect(page.locator('#homelab .stage')).toBeHidden();
+      await expect(page.locator('#homelab [data-panel-ui]')).toBeHidden();
+      await expect(page.locator('#homelab')).not.toHaveAttribute('data-phase', /.+/);
+      // Schede ravvicinate: niente schermi vuoti pensati per lo scrollytelling.
+      const gap = await cards.evaluateAll((els) => {
+        const [a, b] = els.map((e) => e.getBoundingClientRect());
+        return (b?.top ?? 0) - (a?.bottom ?? 0);
+      });
+      expect(gap).toBeLessThan(100);
+    });
+
     test('nessun IP o hostname reale nel testo', async ({ page }) => {
       await page.goto(route);
       const body = await page.locator('main').textContent();

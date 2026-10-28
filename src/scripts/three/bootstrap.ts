@@ -9,6 +9,7 @@ import {
 import { sceneKind } from './kinds';
 import { type Box, isOnScreen, pickActive, scrollProgress } from './progress';
 import { isSceneName, type SceneState, sceneLoaders, shouldAnimate } from './registry';
+import { isInteractive, snapPosition, stageOpacity, storyPosition } from './story';
 import type { SceneInstance } from './types';
 
 /*
@@ -20,6 +21,11 @@ import type { SceneInstance } from './types';
  *
  * Micro-scene (./kinds.ts): avanzano con la posizione del riquadro nel viewport, letta su `scroll`
  * passivo. Lo scroll non viene mai bloccato ne spostato; una sola micro-scena attiva per volta.
+ *
+ * Sezioni immersive (`[data-story]`, PORT-76): sfondo fisso con la scena, prima schermata e schede
+ * (`[data-moment]`). Sullo stesso scroll passivo si calcola la posizione del racconto (./story.ts):
+ * la sezione riceve `data-phase` (hero | cards) e `--stage-opacity` anche prima che il 3D arrivi,
+ * e la scena montata riceve la posizione per guidare camera e layer.
  */
 
 /** Margine di anticipo: si carica quando la sezione e a circa uno schermo di distanza. */
@@ -93,12 +99,59 @@ const syncMicros = (): void => {
   });
 };
 
-/** Un solo calcolo per fotogramma, e solo se qualche micro-scena e a schermo. */
+// --- Sezioni immersive guidate dalle schede -------------------------------------------------------
+
+interface Story {
+  section: HTMLElement;
+  moments: HTMLElement[];
+  /** Scena montata nello sfondo, con il suo livello; assente finche non arriva (o se e solo testo). */
+  scene?: { instance: SceneInstance; level: SceneTier };
+}
+const stories: Story[] = [];
+
+const centre = (el: HTMLElement): number => {
+  const rect = el.getBoundingClientRect();
+  return rect.top + rect.height / 2;
+};
+
+/** Posizione del racconto di ogni sezione immersiva vicina al viewport, verso CSS e scena. */
+const syncStories = (): void => {
+  const viewport = window.innerHeight;
+  for (const story of stories) {
+    const rect = story.section.getBoundingClientRect();
+    // Lontana dallo schermo: niente da aggiornare (e niente letture di layout inutili).
+    if (rect.bottom < -viewport || rect.top > viewport * 2) continue;
+    const position = storyPosition(story.moments.map(centre), viewport / 2);
+    const interactive = isInteractive(position);
+    const level = story.scene?.level;
+    story.section.dataset.phase = interactive ? 'hero' : 'cards';
+    story.section.dataset.moment = story.moments[snapPosition(position)]?.dataset.moment ?? '';
+    // Statico (reduced-motion, deboli): niente dissolvenze, lo sfondo resta pieno.
+    const opacity = level === 'reduced' ? 1 : stageOpacity(rect.top, rect.bottom, viewport);
+    story.section.style.setProperty('--stage-opacity', opacity.toFixed(3));
+    if (story.scene)
+      story.scene.instance.setStory?.(
+        level === 'full' ? position : snapPosition(position),
+        interactive,
+      );
+  }
+};
+
+const syncAll = (): void => {
+  syncMicros();
+  syncStories();
+};
+
+/** Un solo calcolo per fotogramma, e solo se c'e qualcosa da aggiornare. */
 const scheduleSync = (): void => {
   if (syncFrame) return;
+  if (stories.length > 0) {
+    syncFrame = requestAnimationFrame(syncAll);
+    return;
+  }
   for (const entry of micros.values()) {
     if (entry.visible) {
-      syncFrame = requestAnimationFrame(syncMicros);
+      syncFrame = requestAnimationFrame(syncAll);
       return;
     }
   }
@@ -118,6 +171,7 @@ async function mountScene(el: HTMLElement): Promise<void> {
     return;
   }
   const micro = sceneKind(name) === 'micro' && level === 'full';
+  const story = stories.find((s) => s.section.contains(el));
 
   setState(el, 'loading');
   let instance: SceneInstance;
@@ -133,7 +187,15 @@ async function mountScene(el: HTMLElement): Promise<void> {
     el.append(canvas);
     const profile = renderProfile(level, capabilities ?? {});
     el.dataset.sceneDetail = profile.antialias ? 'high' : 'low';
-    instance = module.mount({ canvas, container: el, tier: level, profile, data: readData(el) });
+    const moments = story?.moments.map((m) => m.dataset.moment ?? '');
+    instance = module.mount({
+      canvas,
+      container: el,
+      tier: level,
+      profile,
+      data: readData(el),
+      ...(moments && { moments }),
+    });
   } catch {
     canvas.remove();
     setState(el, 'error');
@@ -180,6 +242,10 @@ async function mountScene(el: HTMLElement): Promise<void> {
   const onVisibility = (): void => update();
   document.addEventListener('visibilitychange', onVisibility);
   if (micro) micros.set(el, { instance, visible });
+  if (story) {
+    story.scene = { instance, level };
+    syncStories();
+  }
 
   const dispose = (): void => {
     view.disconnect();
@@ -187,6 +253,7 @@ async function mountScene(el: HTMLElement): Promise<void> {
     document.removeEventListener('visibilitychange', onVisibility);
     canvas.removeEventListener('webglcontextlost', onContextLost);
     micros.delete(el);
+    if (story?.scene?.instance === instance) delete story.scene;
     instance.dispose();
     canvas.remove();
     mounted.delete(el);
@@ -202,6 +269,12 @@ async function mountScene(el: HTMLElement): Promise<void> {
 }
 
 function init(): void {
+  for (const section of document.querySelectorAll<HTMLElement>('[data-story]')) {
+    const moments = [...section.querySelectorAll<HTMLElement>('[data-moment]')];
+    if (moments.length > 0) stories.push({ section, moments });
+  }
+  // Fase e opacita gia giuste al primo disegno (anche ricaricando a meta pagina).
+  syncStories();
   const containers = [...document.querySelectorAll<HTMLElement>('[data-scene]')];
   if (containers.length === 0) return;
   if (!('IntersectionObserver' in window) || !('ResizeObserver' in window)) {

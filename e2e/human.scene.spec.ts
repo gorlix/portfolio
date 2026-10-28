@@ -210,15 +210,18 @@ for (const route of ['/human/', '/en/human/']) {
 
   test.describe('reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: scene interattive solo testo, micro-scene ferme sulla fine`, async ({
-      page,
-    }) => {
+    test(`${route}: Domotica solo testo, Homelab e micro-scene ferme`, async ({ page }) => {
       const urls: string[] = [];
       page.on('request', (r) => urls.push(r.url()));
       await page.goto(route, { waitUntil: 'networkidle' });
       await nearScene(page);
-      await expect.poll(() => state(page)).toBe('text');
-      expect(urls.filter((u) => /\/_astro\/(homelab|domotica)\./.test(u))).toEqual([]);
+      // Homelab immersiva (PORT-76): un fotogramma statico per momento, mai un ciclo di animazione.
+      await expect.poll(() => state(page)).toBe('static');
+      await expect(scene(page).locator('canvas')).toBeAttached();
+      const domotica = page.locator('[data-scene="domotica"]');
+      await domotica.scrollIntoViewIfNeeded();
+      await expect.poll(() => domotica.getAttribute('data-scene-state')).toBe('text');
+      expect(urls.filter((u) => /\/_astro\/domotica\./.test(u))).toEqual([]);
 
       const lavori = page.locator('[data-scene="lavori"]');
       await lavori.scrollIntoViewIfNeeded();
