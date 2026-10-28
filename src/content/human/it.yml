@@ -39,6 +39,7 @@ scenes:
   beneficenza: "Una rete di punti che si avvicinano piano e si collegano al centro"
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
   lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
+  certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
 farewell:
   command: "$ logout"
   message: "Grazie di essere passato. Se vuoi rifare il giro, la porta è qui:"

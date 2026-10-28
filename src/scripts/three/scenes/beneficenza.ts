@@ -7,6 +7,7 @@ import {
   Vector3,
 } from 'three';
 import { mountMicro } from '../micro';
+import { phase } from '../phases';
 import type { SceneContext, SceneInstance } from '../types';
 
 /*
@@ -22,10 +23,6 @@ export interface BeneficenzaData {
 
 const FAR = 1.7;
 const NEAR = 1.2;
-
-/** Avanzamento locale di una fase che occupa [from, to] dell'avanzamento totale. */
-const phase = (progress: number, from: number, to: number): number =>
-  Math.min(1, Math.max(0, (progress - from) / (to - from)));
 
 export function mount(context: SceneContext): SceneInstance {
   const { count } = (context.data as BeneficenzaData | undefined) ?? { count: 3 };

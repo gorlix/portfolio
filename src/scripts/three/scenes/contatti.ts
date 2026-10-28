@@ -1,5 +1,6 @@
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { mountMicro } from '../micro';
+import { phase } from '../phases';
 import type { SceneContext, SceneInstance } from '../types';
 
 /*
@@ -17,10 +18,6 @@ export interface ContattiData {
 const WIDTH = 3;
 const HEIGHT = 2.2;
 const LINE_X = -1.05;
-
-/** Avanzamento locale di una fase che occupa [from, to] dell'avanzamento totale. */
-const phase = (progress: number, from: number, to: number): number =>
-  Math.min(1, Math.max(0, (progress - from) / (to - from)));
 
 export function mount(context: SceneContext): SceneInstance {
   const { count } = (context.data as ContattiData | undefined) ?? { count: 3 };

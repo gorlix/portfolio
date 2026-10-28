@@ -9,6 +9,7 @@ export const sceneLoaders = {
   homelab: () => import('./scenes/homelab'),
   domotica: () => import('./scenes/domotica'),
   lavori: () => import('./scenes/lavori'),
+  certificazioni: () => import('./scenes/certificazioni'),
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),
 } satisfies Record<string, () => Promise<SceneModule>>;
