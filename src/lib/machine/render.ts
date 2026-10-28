@@ -11,6 +11,7 @@ const pageNotes: Record<string, string> = {
   recruiter: 'Formal one-page profile: skills, experience, projects, contacts',
   agent: 'Terminal-style showcase of the machine-readable files',
   human: 'Immersive 3D experience (JavaScript, WebGL)',
+  trimind: 'Deep dive on the Trimind engagement, in five 3D moments (JavaScript, WebGL)',
 };
 
 const pageTitles: Record<string, string> = {
@@ -18,6 +19,7 @@ const pageTitles: Record<string, string> = {
   recruiter: 'Recruiter profile',
   agent: 'Agent view',
   human: 'Human experience',
+  trimind: 'Trimind deep dive',
 };
 
 const rootFiles = [

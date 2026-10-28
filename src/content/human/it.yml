@@ -16,7 +16,7 @@ posterNotice:
   nojs: "JavaScript è disattivato: al posto del 3D vedi un'immagine {subject}."
 intros:
   home: Benvenuto nel percorso umano.
-  lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.
+  lavori: Dove ho lavorato e cosa ho combinato, dall'ultimo in giù.
   homelab: Tre nodi, due siti e la tentazione costante di "ottimizzare ancora un po'". Quello che vedi qui è una versione inventata, non l'infrastruttura vera.
   domotica: Una casa che si accende da sola, più o meno quando voglio io. Home Assistant è il mio compagno di giochi.
   certificazioni: Pezzi di carta che dimostrano che qualcosa l'ho studiato davvero.
@@ -45,7 +45,8 @@ scenes:
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
   scrivania: "La mia scrivania low-poly: monitor col terminale, tastiera split, stampante 3D e mini-server con le spie che lampeggiano"
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
-  lavori: "Una linea del tempo che sale mentre scorri, con una tappa che si accende per ogni esperienza"
+  lavori: "Un albero low-poly: il tronco è la linea del tempo e da lì spuntano le esperienze, una foglia a destra e una a sinistra"
+  trimind: "La mappa low-poly di Trimind: un server chiuso con i suoi container e un solo tunnel verso la nuvola, i backup che scadono, la pipeline, i pannelli di monitoraggio e i test che diventano verdi"
   certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
   sci: "Una montagna low-poly con una linea che scende disegnando curve mentre scorri"
   tennis: "Una pallina che segna la riga di un campo in terra rossa, solleva la terra e arriva verso di te"
@@ -140,3 +141,47 @@ domotica:
     falling: "Pressione in calo: probabile peggioramento."
     steady: "Pressione stabile: il tempo non dovrebbe cambiare."
     rising: "Pressione in aumento: probabile miglioramento."
+work:
+  deeper: "Approfondisci"
+  deeperLabel: "Approfondisci: {company}"
+  volunteer: "volontariato"
+  highlights: "In breve"
+  posterSubject: "dell'albero dei lavori"
+trimind:
+  titleSuffix: "Trimind, nel dettaglio"
+  metaDescription: "Il mio lavoro per Trimind in cinque momenti: infrastruttura, backup, CI/CD, osservabilità e multi-provider, qualità."
+  eyebrow: "Approfondimento"
+  intro: "Ecco cosa c'è sotto il cofano, un pezzo alla volta. Scorri e la mappa si smonta."
+  back: "← torna ai lavori"
+  scrollHint: "Scorri per il primo pezzo."
+  posterSubject: "della mappa di Trimind"
+  simulatedNote: "Grafici e valori dei pannelli sono dati simulati, non le metriche vere."
+  step: "{n} di {total}"
+  moments:
+    - id: infra
+      title: "Infrastruttura"
+      lead: "Regola della casa: da internet non si entra. Si passa solo dal tunnel."
+      results: [0]
+    - id: backup
+      title: "Backup e conformità"
+      lead: "I dati restano quanto serve, poi se ne vanno. Lo chiede anche il GDPR."
+      results: [1]
+    - id: cicd
+      title: "CI/CD"
+      lead: "Quattro repository, un runner tutto mio e rilasci a due colori."
+      results: [2]
+    - id: observability
+      title: "Osservabilità e multi-provider"
+      lead: "Se qualcosa si rompe voglio essere il primo a saperlo. E voglio sapere quale LLM risponde meglio, e a che prezzo."
+      results: [3, 4]
+    - id: quality
+      title: "Qualità"
+      lead: "I punteggi li calcola il codice, sempre allo stesso modo. I test sono lì a ricordarglielo."
+      results: [5, 6]
+      stack: true
+  figures:
+    services: 20
+    repositories: 4
+    retentionDays: 15
+    tests: 490
+    providers: 3

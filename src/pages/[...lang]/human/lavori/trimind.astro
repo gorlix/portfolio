@@ -1,0 +1,445 @@
+---
+import { getImage } from 'astro:assets';
+import posterDesktopSrc from '../../../../assets/human/trimind-poster-desktop.png';
+import posterMobileSrc from '../../../../assets/human/trimind-poster-mobile.png';
+import Scene from '../../../../components/Scene.astro';
+import Base from '../../../../layouts/Base.astro';
+import { BEACON_SRC, beaconConfig } from '../../../../lib/analytics';
+import { getEntries, getSingleton } from '../../../../lib/data';
+import { formatDate } from '../../../../lib/format';
+import { localeStaticPaths, localizedPath } from '../../../../lib/i18n';
+import { loadJsonLd } from '../../../../lib/machine/page-jsonld';
+import { isTodo, type Locale } from '../../../../lib/schemas/common';
+import { detailPath, splitResult } from '../../../../lib/work';
+
+/*
+ * Approfondimento Trimind (spec §5, §7.3, PORT-82): una sezione immersiva sola, come quelle di
+ * /human. La mappa 3D parte da sola (la pagina si apre in cima, come la Home) e ogni scheda e un
+ * momento: infrastruttura, backup, CI/CD, osservabilita e multi-provider, qualita.
+ * I fatti sono i punti del CV di Trimind; i connettivi stanno nei dati della pagina.
+ */
+
+export const getStaticPaths = localeStaticPaths;
+
+const { locale } = Astro.props as { locale: Locale };
+const [page, profile, experiences] = await Promise.all([
+  getSingleton('human', locale),
+  getSingleton('profile', locale),
+  getEntries('experiences', locale),
+]);
+
+const job = experiences.find((e) => e.data.detail === 'trimind')?.data;
+if (!job || isTodo(job.results) || isTodo(job.stack) || isTodo(job.company) || isTodo(job.role)) {
+  throw new Error('trimind: esperienza con `detail: trimind` assente o incompleta');
+}
+const { results, stack } = job;
+
+const T = page.trimind;
+const L = page.labels;
+// Ogni punto del CV raccontato esattamente una volta, nell'ordine delle schede.
+const told = T.moments.flatMap((m) => m.results);
+if (told.some((i) => i >= results.length) || new Set(told).size !== results.length) {
+  throw new Error('trimind: le schede devono usare tutti i punti del CV, una volta sola');
+}
+
+const period =
+  isTodo(job.start) || isTodo(job.end)
+    ? null
+    : `${formatDate(job.start, locale)} – ${job.end === null ? L.ongoing : formatDate(job.end, locale)}`;
+const step = (n: number) =>
+  T.step.replace('{n}', String(n)).replace('{total}', String(T.moments.length));
+const posterNotice = (['webgl', 'savedata', 'error', 'nojs'] as const).map((reason) => ({
+  reason,
+  text: page.posterNotice[reason].replace('{subject}', T.posterSubject),
+}));
+
+/** Poster statico della mappa: fallback se il 3D non parte (niente WebGL, risparmio dati, errore). */
+const [posterDesktop, posterMobile] = await Promise.all(
+  [posterDesktopSrc, posterMobileSrc].map((src) => getImage({ src, format: 'webp', quality: 70 })),
+);
+
+const backHref = `${localizedPath('/human', locale)}#lavori`;
+const path = detailPath('trimind');
+const pageTitle = `${profile.name} · ${T.titleSuffix}`;
+const beacon = beaconConfig(import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN);
+const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage' });
+---
+
+<Base
+  locale={locale}
+  path={path}
+  title={pageTitle}
+  description={T.metaDescription}
+  jsonLd={jsonLd}
+  stickyHeader
+  theme="mocha"
+>
+  {
+    beacon && (
+      <Fragment slot="head">
+        <script is:inline defer src={BEACON_SRC} data-cf-beacon={beacon} />
+      </Fragment>
+    )
+  }
+  <Fragment slot="header">
+    <a class="back" href={backHref}>{T.back}</a>
+  </Fragment>
+
+  <article class="path">
+    <section id="trimind" data-section="lavori" data-story aria-labelledby="h-trimind">
+      <div class="stage">
+        {
+          posterDesktop && posterMobile && (
+            <picture class="poster" aria-hidden="true">
+              <source media="(max-width: 48rem)" srcset={posterMobile.src} />
+              <img
+                src={posterDesktop.src}
+                width={posterDesktop.options.width}
+                height={posterDesktop.options.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          )
+        }
+        <Scene
+          scene="trimind"
+          label={page.scenes.trimind}
+          accent="lavori"
+          data={{ figures: T.figures }}
+          autostart
+        />
+      </div>
+      <h1 id="h-trimind">{job.company}</h1>
+
+      <div class="hero" data-moment="overview">
+        <div class="glass">
+          <p class="eyebrow">{T.eyebrow}</p>
+          <p class="role"><strong>{job.role}</strong>{period && <span class="meta"> · {period}</span>}</p>
+          {job.summary && <p>{job.summary}</p>}
+          <p>{T.intro}</p>
+          <p class="hint">{T.scrollHint}</p>
+          <p class="poster-note" role="status">
+            {posterNotice.map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+          </p>
+        </div>
+      </div>
+
+      <div class="cards">
+        {
+          T.moments.map((m, i) => (
+            <article class="card" data-moment={m.id} aria-labelledby={`h-${m.id}`}>
+              <p class="step">{step(i + 1)}</p>
+              <h2 id={`h-${m.id}`}>{m.title}</h2>
+              <p class="lead">{m.lead}</p>
+              <ul>
+                {m.results
+                  .map((index) => splitResult(results[index] as string))
+                  .map((r) => (
+                    <li>
+                      {r.label && <strong>{r.label}: </strong>}
+                      {r.text}
+                    </li>
+                  ))}
+              </ul>
+              {m.id === 'observability' && <p class="meta">{T.simulatedNote}</p>}
+              {m.stack && (
+                <>
+                  <h3>{L.stack}</h3>
+                  <ul class="tags">
+                    {stack.map((t) => (
+                      <li>{t}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </article>
+          ))
+        }
+      </div>
+
+      <p class="outro">
+        <a class="button" href={backHref}>{T.back}</a>
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  /*
+   * Stesse regole delle sezioni immersive di /human (src/pages/[...lang]/human.astro, PORT-76):
+   * sfondo fisso con la scena, titolo fisso in alto a sinistra, schede in vetro che scorrono.
+   * Copiate qui (e non condivise) perche gli stili di /human sono locali alla sua pagina.
+   */
+  .back,
+  .path a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .path {
+    line-height: 1.6;
+  }
+  section[data-story] {
+    --accent: var(--sec-lavori);
+    --accent-ink: var(--sec-lavori-ink);
+    --pad-l: 1rem;
+    --head: 0rem;
+    position: relative;
+    z-index: 0;
+    box-sizing: border-box;
+    min-height: 100svh;
+    padding: var(--head) 1rem 0;
+    border-left: 0.375rem solid var(--accent);
+    background: var(--bg);
+  }
+  @media (min-width: 48rem) {
+    section[data-story] {
+      --pad-l: 4rem;
+      --head: 2.375rem;
+      padding-left: 4rem;
+    }
+  }
+  .stage {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+    height: 100svh;
+    margin: calc(-1 * var(--head)) -1rem calc(var(--head) - 100svh) calc(-1 * var(--pad-l));
+    opacity: var(--stage-opacity, 1);
+    background: radial-gradient(ellipse at 60% 45%, color-mix(in srgb, var(--accent) 10%, var(--bg)), var(--bg) 70%);
+    pointer-events: none;
+  }
+  .stage :global(.scene) {
+    margin: 0;
+  }
+  section[data-phase="hero"] .stage :global(canvas) {
+    pointer-events: auto;
+  }
+  h1 {
+    position: sticky;
+    top: var(--head);
+    z-index: 2;
+    display: block;
+    width: fit-content;
+    margin: 0;
+    padding: 1.25rem 2.5rem 0.5rem 0.5rem;
+    color: var(--accent-ink);
+    font-size: clamp(1.75rem, 6vw, 3.25rem);
+    overflow-wrap: anywhere;
+    transform-origin: left top;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+    pointer-events: none;
+  }
+  h1::before {
+    content: "~/lavori/" / "";
+    color: var(--text-muted);
+  }
+  section[data-phase="cards"] > h1 {
+    transform: scale(0.6);
+    border-radius: 0 0 0.5rem 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+  .hero {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin: 0;
+    pointer-events: none;
+  }
+  .hero > * {
+    pointer-events: auto;
+  }
+  @media (scripting: enabled) {
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      box-sizing: border-box;
+      min-height: calc(100svh - 6rem);
+    }
+  }
+  @media (min-width: 72rem) {
+    .hero {
+      align-items: center;
+    }
+  }
+  .glass,
+  .card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 34rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass,
+    .card {
+      background: var(--bg-alt);
+    }
+  }
+  .glass {
+    transition: opacity 0.3s ease;
+  }
+  section[data-phase="cards"] .glass {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .glass p {
+    margin: 0.5rem 0 0;
+  }
+  .glass .eyebrow,
+  .card .step {
+    margin: 0;
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .glass .role {
+    font-size: 1.125rem;
+  }
+  .cards {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    padding-block: 2rem 4rem;
+  }
+  @media (scripting: enabled) {
+    section[data-story]:not(:has(.scene[data-scene-state="text"])) .cards {
+      gap: 70svh;
+      padding-block: 30svh 75svh;
+    }
+  }
+  .card h2 {
+    margin: 0.25rem 0 0.5rem;
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+  }
+  .card .lead {
+    margin: 0 0 0.75rem;
+    font-style: italic;
+  }
+  .card ul:not(.tags) {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .card li + li {
+    margin-top: 0.5rem;
+  }
+  .card h3 {
+    margin: 0.75rem 0 0.25rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  .card .meta {
+    margin-top: 0.75rem;
+  }
+  .meta,
+  .hint {
+    color: var(--text-muted);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tags li {
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  @media (max-width: 48rem) {
+    .glass {
+      padding: 0.75rem;
+    }
+  }
+  @media (max-width: 30rem) {
+    .card {
+      padding: 1rem 0.75rem;
+    }
+  }
+  .outro {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding-bottom: 4rem;
+  }
+  .path a.button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.25rem;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-mono);
+    text-decoration: none;
+  }
+  .path a.button:hover {
+    background: var(--surface-hi);
+  }
+  /* Senza JavaScript non c'e scena: le schede restano sul fondo semplice, il poster resta fermo. */
+  @media (scripting: none) {
+    .stage {
+      display: none;
+    }
+  }
+  /* Poster della mappa: nascosto (e mai scaricato, e lazy) finche il 3D funziona. */
+  .poster {
+    display: none;
+  }
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  .stage:has(.scene:is([data-scene-state="text"], [data-scene-state="error"])) .poster {
+    display: block;
+  }
+  .poster-note {
+    display: none;
+    margin: 0.75rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  .poster-note > span {
+    display: none;
+  }
+  section[data-story]:has(.scene[data-scene-state="text"], .scene[data-scene-state="error"]) .poster-note {
+    display: block;
+  }
+  section[data-story]:has(.scene[data-scene-reason="webgl"]) .poster-note > [data-reason="webgl"],
+  section[data-story]:has(.scene[data-scene-reason="savedata"]) .poster-note > [data-reason="savedata"],
+  section[data-story]:has(.scene[data-scene-reason="error"]) .poster-note > [data-reason="error"] {
+    display: inline;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    h1,
+    .glass {
+      transition: none;
+    }
+  }
+</style>

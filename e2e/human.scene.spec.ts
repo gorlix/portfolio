@@ -245,6 +245,10 @@ for (const route of ['/human/', '/en/human/']) {
     await expect(page.locator('#homelab [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-panel-ui]')).toBeHidden();
     await expect(page.locator('#domotica [data-automation]').first()).toBeVisible();
+    // Lavori (PORT-81): poster dell'albero e avviso col motivo, al posto del 3D.
+    await page.locator('#lavori').scrollIntoViewIfNeeded();
+    await expect(page.locator('#lavori .poster img')).toBeVisible();
+    await expect(page.locator('#lavori .poster-note [data-reason="webgl"]')).toBeVisible();
     // Domotica (PORT-80): poster della casa e avviso col motivo, al posto del 3D.
     await page.locator('#domotica').scrollIntoViewIfNeeded();
     await expect(page.locator('#domotica .poster img')).toBeVisible();
@@ -268,15 +272,21 @@ for (const route of ['/human/', '/en/human/']) {
       await expect(domotica.locator('canvas')).toBeAttached();
       await expect(page.locator('#domotica .poster img')).toBeHidden();
 
+      // Lavori ad albero (PORT-81): immersiva, un fotogramma statico per momento.
       const lavori = page.locator('[data-scene="lavori"]');
       await lavori.scrollIntoViewIfNeeded();
       await expect.poll(() => lavori.getAttribute('data-scene-state')).toBe('static');
       await expect(lavori.locator('canvas')).toBeAttached();
+
+      const certificazioni = page.locator('[data-scene="certificazioni"]');
+      await certificazioni.scrollIntoViewIfNeeded();
+      await expect.poll(() => certificazioni.getAttribute('data-scene-state')).toBe('static');
+      await expect(certificazioni.locator('canvas')).toBeAttached();
       // Statica: nessun avanzamento legato allo scroll.
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(200);
-      expect(await lavori.getAttribute('data-scene-state')).toBe('static');
-      expect(await lavori.getAttribute('data-scene-progress')).toBeNull();
+      expect(await certificazioni.getAttribute('data-scene-state')).toBe('static');
+      expect(await certificazioni.getAttribute('data-scene-progress')).toBeNull();
 
       // Interessi (PORT-63): stessa regola, fotogramma finale con tutti gli oggetti.
       const interessi = page.locator('[data-scene="interessi"]');
@@ -307,8 +317,9 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(value).toBe(1);
   });
 
-  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato.
-  const micro = (page: Page) => page.locator('[data-scene="lavori"]');
+  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
+  // Certificazioni (Lavori e diventata immersiva con PORT-81).
+  const micro = (page: Page) => page.locator('[data-scene="certificazioni"]');
   const progress = async (page: Page) =>
     Number((await micro(page).getAttribute('data-scene-progress')) ?? Number.NaN);
   /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
@@ -445,8 +456,9 @@ for (const route of ['/human/', '/en/human/']) {
         timeout: 15_000,
       })
       .not.toMatch(/^(idle|loading)$/);
-    // La scrivania della Home anima di continuo: si nasconde, qui conta solo la micro-scena.
-    await page.addStyleTag({ content: '#home .stage { display: none; }' });
+    // Le scene immersive (scrivania, albero, casa) animano di continuo mentre sono visibili: si
+    // nascondono, qui conta solo la micro-scena.
+    await page.addStyleTag({ content: '[data-story] .stage { display: none; }' });
     await placeMicro(page, 0.5);
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     // Ferma sullo scroll: la rincorsa si assesta e non chiede altri fotogrammi.

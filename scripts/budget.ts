@@ -18,13 +18,14 @@ export interface PageBudget {
 const KB = 1024;
 
 export const chunkBudgets: ChunkBudget[] = [
-  // three intero (tree-shaken), caricato solo quando una scena si avvicina.
-  { name: 'three', pattern: /^three\./, maxGzip: 140 * KB },
+  // three intero (tree-shaken), caricato solo quando una scena si avvicina. 144 KB (deciso da
+  // Alessandro, PORT-81): main era gia a 140,0 KB esatti, ogni scena nuova sforava di pochi byte.
+  { name: 'three', pattern: /^three\./, maxGzip: 144 * KB },
   // Ogni scena di /human, con i suoi moduli (dati, controlli, metriche).
   {
     name: 'scena',
     pattern:
-      /^(homelab|domotica|lavori|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
+      /^(homelab|domotica|lavori|trimind|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
     maxGzip: 16 * KB,
   },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
@@ -48,7 +49,13 @@ export const pageBudgets: PageBudget[] = [
     maxScriptGzip: 0,
   },
   // Il 3D non conta: arriva dopo, solo vicino alle scene.
-  { name: 'umano', pattern: /^\/(en\/)?human\/$/, maxTotalGzip: 32 * KB, maxScriptGzip: 6 * KB },
+  // Pagine di approfondimento dei lavori (`/human/lavori/<slug>/`, PORT-82): stessi limiti.
+  {
+    name: 'umano',
+    pattern: /^\/(en\/)?human\/(lavori\/[a-z0-9-]+\/)?$/,
+    maxTotalGzip: 32 * KB,
+    maxScriptGzip: 6 * KB,
+  },
 ];
 
 export interface Measured {

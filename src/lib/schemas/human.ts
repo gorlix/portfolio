@@ -71,6 +71,59 @@ export const humanSchema = z.strictObject({
     pallavolo: text,
     scrivania: text,
     interessi: text,
+    trimind: text,
+  }),
+  /** Sezione Lavori ad albero (PORT-81): schede in stile CV, una per foglia. */
+  work: z.strictObject({
+    /** Pulsante verso la pagina di approfondimento; `{company}` nel nome accessibile. */
+    deeper: text,
+    deeperLabel: text,
+    /** Marca delle esperienze di volontariato. */
+    volunteer: text,
+    /** Titolo dei 2-3 punti del CV mostrati nella scheda. */
+    highlights: text,
+    posterSubject: text,
+  }),
+  /** Pagina di approfondimento Trimind (PORT-82): connettivi provvisori, i fatti stanno nel CV. */
+  trimind: z.strictObject({
+    titleSuffix: text,
+    metaDescription: text,
+    /** Sopra il titolo della prima schermata. */
+    eyebrow: text,
+    intro: text,
+    /** Link di ritorno all'albero dei Lavori (intestazione e fine pagina). */
+    back: text,
+    scrollHint: text,
+    posterSubject: text,
+    simulatedNote: text,
+    /** `{n}` e `{total}`: indicatore del momento nella scheda. */
+    step: text,
+    /**
+     * Una scheda per momento della scena: `results` sono gli indici (da 0) dei punti del CV di
+     * Trimind raccontati nella scheda; `stack` aggiunge lo stack dell'esperienza.
+     */
+    moments: z
+      .array(
+        z.strictObject({
+          id: z.enum(['infra', 'backup', 'cicd', 'observability', 'quality']),
+          title: text,
+          lead: text,
+          results: z.array(z.number().int().min(0)).min(1),
+          stack: z.boolean().default(false),
+        }),
+      )
+      .length(5),
+    /**
+     * Quantita del CV che la scena disegna (servizi, repository, giorni di retention, test,
+     * provider LLM): forme generiche, nessun nome o dato reale dell'infrastruttura.
+     */
+    figures: z.strictObject({
+      services: z.number().int().positive(),
+      repositories: z.number().int().positive(),
+      retentionDays: z.number().int().positive(),
+      tests: z.number().int().positive(),
+      providers: z.number().int().positive(),
+    }),
   }),
   homelab: z.strictObject({
     caption: text,
@@ -186,6 +239,23 @@ export const humanTranslatable = [
   'labels.profiles',
   'labels.cv',
   'scenes.homelab',
+  'scenes.trimind',
+  'work.deeper',
+  'work.deeperLabel',
+  'work.volunteer',
+  'work.highlights',
+  'work.posterSubject',
+  'trimind.titleSuffix',
+  'trimind.metaDescription',
+  'trimind.eyebrow',
+  'trimind.intro',
+  'trimind.back',
+  'trimind.scrollHint',
+  'trimind.posterSubject',
+  'trimind.simulatedNote',
+  'trimind.step',
+  'trimind.moments.*.title',
+  'trimind.moments.*.lead',
   'farewell.message',
   'homelab.caption',
   'homelab.simulatedNote',

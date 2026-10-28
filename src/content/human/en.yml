@@ -16,7 +16,7 @@ posterNotice:
   nojs: "JavaScript is off: you see a picture {subject} instead of the 3D scene."
 intros:
   home: Welcome to the human path.
-  lavori: Where I have worked and what I got up to, in order of appearance.
+  lavori: Where I have worked and what I got up to, from the latest down.
   homelab: Three nodes, two sites and a constant urge to "optimise just a bit more". What you see here is an invented version, not the real infrastructure.
   domotica: A house that switches things on by itself, more or less when I want it to. Home Assistant is my playmate.
   certificazioni: Pieces of paper proving I really did study something.
@@ -45,7 +45,8 @@ scenes:
   contatti: "A small terminal that switches on, with prompt lines appearing one after another"
   scrivania: "My low-poly desk: a monitor with a terminal, a split keyboard, a 3D printer and a mini server with blinking LEDs"
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
-  lavori: "A timeline that climbs as you scroll, with a stop lighting up for each job"
+  lavori: "A low-poly tree: the trunk is the timeline and the jobs sprout from it, one leaf to the right and one to the left"
+  trimind: "The low-poly map of Trimind: a closed server with its containers and a single tunnel to the cloud, expiring backups, the pipeline, monitoring panels and tests turning green"
   certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
   sci: "A low-poly mountain with a line that carves down in turns as you scroll"
   tennis: "A ball that hits the line of a clay court, kicks up the clay and flies towards you"
@@ -140,3 +141,47 @@ domotica:
     falling: "Pressure falling: weather likely to get worse."
     steady: "Pressure steady: the weather should hold."
     rising: "Pressure rising: weather likely to improve."
+work:
+  deeper: "Dig deeper"
+  deeperLabel: "Dig deeper: {company}"
+  volunteer: "volunteering"
+  highlights: "In short"
+  posterSubject: "of the work tree"
+trimind:
+  titleSuffix: "Trimind, in depth"
+  metaDescription: "My work for Trimind in five moments: infrastructure, backups, CI/CD, observability and multi-provider, quality."
+  eyebrow: "Deep dive"
+  intro: "Here is what sits under the hood, one piece at a time. Scroll and the map comes apart."
+  back: "← back to work"
+  scrollHint: "Scroll for the first piece."
+  posterSubject: "of the Trimind map"
+  simulatedNote: "Charts and values on the panels are simulated data, not the real metrics."
+  step: "{n} of {total}"
+  moments:
+    - id: infra
+      title: "Infrastructure"
+      lead: "House rule: nobody walks in from the internet. The tunnel is the only way in."
+      results: [0]
+    - id: backup
+      title: "Backups and compliance"
+      lead: "Data stays as long as it is needed, then it goes. The GDPR asks for that too."
+      results: [1]
+    - id: cicd
+      title: "CI/CD"
+      lead: "Four repositories, a runner of my own and two-colour releases."
+      results: [2]
+    - id: observability
+      title: "Observability and multi-provider"
+      lead: "If something breaks I want to be the first to know. And I want to know which LLM answers best, and at what price."
+      results: [3, 4]
+    - id: quality
+      title: "Quality"
+      lead: "Scores are computed by code, the same way every time. The tests are there to remind it."
+      results: [5, 6]
+      stack: true
+  figures:
+    services: 20
+    repositories: 4
+    retentionDays: 15
+    tests: 490
+    providers: 3

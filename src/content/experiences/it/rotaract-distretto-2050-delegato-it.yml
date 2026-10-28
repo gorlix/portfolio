@@ -9,3 +9,4 @@ results:
   - "Gestione autonoma di hosting, DNS e manutenzione, senza supporto di un team IT dedicato."
 stack:
   - "GitHub Actions"
+kind: volunteer
