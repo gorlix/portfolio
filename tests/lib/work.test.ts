@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { chronological, detailPath, sideAt, splitResult, workTree } from '../../src/lib/work';
+import {
+  chronological,
+  defaultObstacles,
+  detailPath,
+  splitResult,
+  workCourse,
+} from '../../src/lib/work';
 
 const todo = { todo: 'data mancante' };
 
-describe('albero dei lavori', () => {
+describe('percorso dei lavori', () => {
   it('ordina dal piu vecchio, con le date ignote in fondo all albero', () => {
     const items = [
       { slug: 'b', start: '2026-04' },
@@ -21,20 +27,41 @@ describe('albero dei lavori', () => {
     expect(chronological(items).map((e) => e.slug)).toEqual(['m', 'z']);
   });
 
-  it('alterna i lati partendo da sinistra', () => {
-    expect([0, 1, 2, 3].map(sideAt)).toEqual(['left', 'right', 'left', 'right']);
-  });
-
-  it('una foglia per esperienza, con in corso, volontariato e approfondimento', () => {
-    const tree = workTree([
-      { slug: 'trimind', start: '2026-04', end: null, kind: 'work', detail: 'trimind' },
+  it('un livello per esperienza, dalla piu recente, con gli ostacoli dei dati o un default', () => {
+    const course = workCourse([
+      {
+        slug: 'trimind',
+        start: '2026-04',
+        end: null,
+        kind: 'work',
+        detail: 'trimind',
+        obstacles: ['container', 'flag'],
+      },
       { slug: 'club', start: todo, end: todo, kind: 'volunteer' },
-      { slug: 'distretto', start: '2026-01', end: '2026-06', kind: 'volunteer' },
+      { slug: 'distretto', start: '2026-01', end: '2026-06', kind: 'work' },
     ]);
-    expect(tree.leaves).toEqual([
-      { slug: 'club', side: 'left', ongoing: false, volunteer: true, detail: false },
-      { slug: 'distretto', side: 'right', ongoing: false, volunteer: true, detail: false },
-      { slug: 'trimind', side: 'left', ongoing: true, volunteer: false, detail: true },
+    expect(course.levels).toEqual([
+      {
+        slug: 'trimind',
+        ongoing: true,
+        volunteer: false,
+        detail: true,
+        obstacles: ['container', 'flag'],
+      },
+      {
+        slug: 'distretto',
+        ongoing: false,
+        volunteer: false,
+        detail: false,
+        obstacles: defaultObstacles('work'),
+      },
+      {
+        slug: 'club',
+        ongoing: false,
+        volunteer: true,
+        detail: false,
+        obstacles: defaultObstacles('volunteer'),
+      },
     ]);
   });
 

@@ -10,3 +10,4 @@ results:
 stack:
   - "GitHub Actions"
 kind: volunteer
+obstacles: ["site", "bridge", "site"]

@@ -1,73 +1,56 @@
 import {
-  AdditiveBlending,
   AmbientLight,
-  BufferAttribute,
-  BufferGeometry,
+  BoxGeometry,
   Color,
+  ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
-  DoubleSide,
   Group,
   IcosahedronGeometry,
+  type Material,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
-  type Object3D,
   PerspectiveCamera,
-  QuadraticBezierCurve3,
   Scene,
-  Vector3,
+  SphereGeometry,
   WebGLRenderer,
 } from 'three';
-import type { WorkTree } from '../../../lib/work';
+import type { WorkCourse } from '../../../lib/work';
 import { pixelRatioFor } from '../capabilities';
-import {
-  cardFraming,
-  fitDistance,
-  LEAF_LENGTH,
-  layoutTree,
-  leafIndex,
-  type Side,
-  trunkOffset,
-} from '../lavori/tree';
-import { attachOrbit } from '../orbit';
+import { type Block, buildCourse, cardFraming, fitDistance, runnerAt } from '../lavori/course';
+import { createPenguin } from '../penguin';
 import { blendAt } from '../story';
 import { firstToken } from '../tokens';
 import type { SceneContext, SceneInstance } from '../types';
 
 /*
- * Scena Lavori (spec §13), immersiva (PORT-81): un albero low-poly. Il tronco e la linea del
- * tempo, i rami spuntano alternati a destra e a sinistra e portano una foglia per esperienza
- * (la piu vecchia in basso). Nella prima schermata si vede l'albero intero; ogni scheda e una
- * foglia: la camera sale lungo il tronco, la foglia si accende e le altre restano attenuate.
- * Le foglie di volontariato hanno un altro colore, quella in corso un anello, quelle con
- * approfondimento un bocciolo. Solo forme generiche, tutto procedurale, colori dai token.
+ * Scena Lavori (spec §13), immersiva (PORT-83): un percorso a piattaforme visto di lato. Un
+ * livello per esperienza, nell'ordine delle schede, costruito dagli ostacoli indicati nei dati
+ * (../lavori/course.ts). Il pinguino corre, salta, viaggia sul nastro e alla fine saluta da solo:
+ * nessun comando, la sua posizione e una funzione pura dello scroll, avanti e indietro. La camera
+ * lo segue di lato. Solo forme generiche, tutto procedurale, colori dai token.
  * Senza racconto (nessun `setStory`) resta ferma sulla prima schermata.
  */
 
-const MAX_YAW = 0.7;
-/** Ondeggio delle foglie (solo livello 'full'): ampiezza in radianti e velocita. */
-const SWAY = { amplitude: 0.07, speed: 0.9 };
-/** Rincorsa della camera verso la posizione chiesta dallo scroll (1/s). */
-const STORY_CATCH_UP = 5;
-/** Secondi della salita lenta d'apertura nella prima schermata. */
-const INTRO_SECONDS = 7;
-/** Luce delle foglie: tutte a meta nella vista d'insieme, solo l'attiva su una scheda. */
-const LIT = { overview: 0.62, active: 1, dimmed: 0.1 };
+/** Rincorsa del racconto verso la posizione chiesta dallo scroll (1/s); poi nessun fotogramma. */
+const STORY_CATCH_UP = 4;
+const EPSILON = 0.0005;
+/** Profondita del percorso (Z) e spessore del terreno sotto il piano. */
+const DEPTH = 1.5;
+const SOIL = 0.6;
+/** Passo delle strisce sul nastro. */
+const STRIPE = 0.5;
 
-interface Pose {
-  target: Vector3;
-  yaw: number;
-  elevation: number;
-  distance: number;
+interface Framing {
+  /** Punto inquadrato rispetto al pinguino (X) e larghezza da tenere in vista (unita). */
+  lead: number;
+  span: number;
   shift: number;
   lift: number;
-  /** Per foglia (ordine cronologico): luce 0..1. */
-  lit: number[];
 }
-type Weight = Exclude<keyof Pose, 'target' | 'lit'>;
 
 const mix = (a: number, b: number, t: number): number => a + (b - a) * t;
+const clamp01 = (v: number): number => Math.min(1, Math.max(0, v));
 
 export function mount({
   canvas,
@@ -77,9 +60,9 @@ export function mount({
   data,
   moments = [],
 }: SceneContext): SceneInstance {
-  const tree = data as WorkTree | undefined;
-  const leaves = tree?.leaves ?? [];
-  if (leaves.length === 0) throw new Error('lavori: dati della scena assenti');
+  const levels = (data as WorkCourse | undefined)?.levels ?? [];
+  if (levels.length === 0) throw new Error('lavori: dati della scena assenti');
+  const course = buildCourse(levels);
 
   const renderer = new WebGLRenderer({
     canvas,
@@ -91,7 +74,7 @@ export function mount({
   renderer.setClearAlpha(0);
 
   const scene = new Scene();
-  const camera = new PerspectiveCamera(35, 1, 0.1, 120);
+  const camera = new PerspectiveCamera(35, 1, 0.1, 160);
 
   const owned: { dispose(): void }[] = [];
   const own = <T extends { dispose(): void }>(resource: T): T => {
@@ -100,308 +83,277 @@ export function mount({
   };
   const tint = (names: readonly `--${string}`[]) => new Color(firstToken(container, names));
   const surface = tint(['--surface', '--bg-alt']);
-  const colors = {
-    wood: tint(['--surface-hi', '--surface'])
-      .lerp(tint(['--sec-domotica-alt', '--sec-lavori', '--text']), 0.3)
-      .lerp(tint(['--text']), 0.12),
-    ground: surface.clone().lerp(tint(['--bg-alt', '--surface']), 0.5),
-    work: tint(['--sec-lavori', '--text']),
-    volunteer: tint(['--sec-beneficenza', '--sec-lavori', '--text']),
-    light: tint(['--text']),
-  };
-
-  const layout = layoutTree(leaves.map((l) => l.side as Side));
-  const { height } = layout;
-
-  const root = new Group();
-  scene.add(root);
-
-  // Legno: superficie chiara con un tocco caldo e un po' di testo, per staccarsi dallo sfondo.
-  const woodMaterial = own(
-    new MeshStandardMaterial({ color: colors.wood, flatShading: true, roughness: 0.9 }),
-  );
-  const up = new Vector3(0, 1, 0);
-  const direction = new Vector3();
-  /** Tratto di legno rastremato da `from` a `to` (raggi in basso e in alto). */
-  const segment = (from: Vector3, to: Vector3, bottom: number, top: number, sides = 6): Mesh => {
-    const geometry = own(new CylinderGeometry(top, bottom, 1, sides, 1).translate(0, 0.5, 0));
-    const mesh = new Mesh(geometry, woodMaterial);
-    mesh.position.copy(from);
-    mesh.quaternion.setFromUnitVectors(up, direction.subVectors(to, from).normalize());
-    mesh.scale.set(1, from.distanceTo(to), 1);
-    root.add(mesh);
-    return mesh;
-  };
-
-  // Tronco: catena di tratti che si assottigliano verso l'alto, con una lieve curva.
-  const TRUNK = { bottom: 0.27, top: 0.07 };
-  const pieces = Math.max(4, Math.round(height / 0.9));
-  const trunkAt = (k: number): Vector3 => {
-    const y = (height * k) / pieces;
-    return new Vector3(trunkOffset(y), y, trunkOffset(y * 1.3 + 2) * 0.6);
-  };
-  for (let k = 0; k < pieces; k += 1) {
-    const r = (f: number) => mix(TRUNK.bottom, TRUNK.top, f);
-    segment(trunkAt(k), trunkAt(k + 1), r(k / pieces), r((k + 1) / pieces), 7);
-  }
-  // Radici: quattro contrafforti che escono dal piede e scendono nel terreno.
-  for (let k = 0; k < 5; k += 1) {
-    const angle = (k / 5) * Math.PI * 2 + 0.4;
-    const out = new Vector3(Math.cos(angle) * 0.62, -0.02, Math.sin(angle) * 0.62);
-    segment(new Vector3(Math.cos(angle) * 0.08, 0.4, Math.sin(angle) * 0.08), out, 0.1, 0.03, 5);
-  }
-
-  // Foglia: mandorla bassa e piegata lungo la nervatura, due faccette per lato; si apre lungo +X.
-  const leafGeometry = own(
-    (() => {
-      const steps = 6;
-      const half = 0.31;
-      const fold = 0.32;
-      const positions: number[] = [];
-      const row = (k: number) => {
-        const t = k / steps;
-        const w = Math.sin(Math.PI * t ** 0.78) ** 0.9 * half;
-        return { x: t * LEAF_LENGTH, w };
-      };
-      for (let k = 0; k < steps; k += 1) {
-        const a = row(k);
-        const b = row(k + 1);
-        // Nervatura (y = 0) e due bordi rialzati: ogni tratto ha due quadrilateri, uno per lato.
-        const mA = [a.x, 0, 0];
-        const mB = [b.x, 0, 0];
-        for (const sign of [1, -1]) {
-          const lA = [a.x, a.w * fold, sign * a.w];
-          const lB = [b.x, b.w * fold, sign * b.w];
-          positions.push(...mA, ...lA, ...lB, ...mA, ...lB, ...mB);
-        }
-      }
-      return new BufferGeometry().setAttribute(
-        'position',
-        new BufferAttribute(new Float32Array(positions), 3),
-      );
-    })(),
-  );
-  leafGeometry.computeVertexNormals();
-  const budGeometry = own(new IcosahedronGeometry(0.1, 0));
-  const leafMaterial = (color: Color, emissive: Color) =>
+  const text = tint(['--text']);
+  const work = tint(['--sec-lavori', '--text']);
+  const volunteer = tint(['--ctp-teal', '--sec-beneficenza', '--text']);
+  const red = tint(['--ctp-red', '--danger', '--text']);
+  const paint = (color: Color, emissive = 0): MeshStandardMaterial =>
     own(
       new MeshStandardMaterial({
         color,
-        emissive,
-        emissiveIntensity: 0,
+        emissive: color,
+        emissiveIntensity: emissive,
         flatShading: true,
-        roughness: 0.8,
-        side: DoubleSide,
+        roughness: 0.85,
       }),
     );
-  // Foglie decorative (spente) lungo i rami e in cima: stesso materiale, nessun costo in piu.
-  const filler = surface.clone().lerp(colors.work, 0.38);
-  const fillerMaterial = leafMaterial(filler, filler);
-  const tuft = (parent: Object3D, at: Vector3, yaw: number, tilt: number, scale: number): void => {
-    const mesh = new Mesh(leafGeometry, fillerMaterial);
-    mesh.position.copy(at);
-    mesh.rotation.set(0.9, yaw, tilt);
-    mesh.scale.setScalar(scale);
-    parent.add(mesh);
+  const soft = (color: Color, amount: number) => surface.clone().lerp(color, amount);
+  const m = {
+    soil: paint(soft(tint(['--surface-hi', '--surface']), 0.6)),
+    neutral: paint(soft(text, 0.35)),
+    snow: paint(soft(text, 0.85)),
+    dark: paint(tint(['--bg-deep', '--bg'])),
+    wall: paint(red.clone().lerp(surface, 0.25)),
+    mortar: paint(soft(red, 0.35)),
+    flower: paint(tint(['--ctp-peach', '--text'])),
+    leaf: paint(soft(tint(['--ctp-green', '--text']), 0.7)),
+    far: paint(soft(text, 0.14)),
   };
-  const curve = new QuadraticBezierCurve3(new Vector3(), new Vector3(), new Vector3());
+  /** Materiali per livello: accento pieno, accento tenue, luce (finestre, bandiera, strisce). */
+  const levelPaint = levels.map((level) => {
+    const accent = level.volunteer ? volunteer : work;
+    return {
+      full: paint(accent.clone(), 0.12),
+      muted: paint(soft(accent, 0.55)),
+      glow: paint(accent.clone(), 0.6),
+    };
+  });
+  const startPaint = { full: m.neutral, muted: m.soil, glow: m.snow };
+  const paintOf = (level: number) => levelPaint[level] ?? startPaint;
 
-  interface LeafView {
-    slug: string;
-    pivot: Group;
-    material: MeshStandardMaterial;
-    dim: Color;
-    bright: Color;
-    halo: MeshBasicMaterial | null;
-    phase: number;
-  }
-  const views: LeafView[] = leaves.map((leaf, i) => {
-    const { base, tip, side } = layout.branches[i] as (typeof layout.branches)[number];
-    const sign = side === 'right' ? 1 : -1;
-    const from = new Vector3(base.x + trunkOffset(base.y), base.y, base.z);
-    const to = new Vector3(tip.x + trunkOffset(base.y), tip.y, tip.z);
-    // Ramo: esce quasi in orizzontale e si piega verso l'alto sotto la foglia.
-    curve.v0.copy(from);
-    curve.v1.set(mix(from.x, to.x, 0.75), mix(from.y, to.y, 0.1), mix(from.z, to.z, 0.5));
-    curve.v2.copy(to);
-    const points = [0, 1 / 3, 2 / 3, 1].map((t) => curve.getPoint(t));
-    for (let k = 0; k < 3; k += 1) {
-      const r = (f: number) => mix(0.085, 0.03, f);
-      segment(points[k] as Vector3, points[k + 1] as Vector3, r(k / 3), r((k + 1) / 3), 5);
-    }
-    // Due foglioline spente sul ramo, una sopra e una sotto.
-    tuft(root, curve.getPoint(0.45), sign > 0 ? 0.5 : Math.PI - 0.5, 0.7, 0.4);
-    tuft(root, curve.getPoint(0.72), sign > 0 ? -0.6 : Math.PI + 0.6, 0.5, 0.34);
+  const cube = own(new BoxGeometry(1, 1, 1));
+  const root = new Group();
+  scene.add(root);
+  /** Parallelepipedo da (x0, y0) a (x1, y1), centrato in `z` con profondita `depth`. */
+  const box = (
+    material: Material,
+    x0: number,
+    x1: number,
+    y0: number,
+    y1: number,
+    z = 0,
+    depth = DEPTH,
+  ): Mesh => {
+    const mesh = new Mesh(cube, material);
+    mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, z);
+    mesh.scale.set(x1 - x0, y1 - y0, depth);
+    root.add(mesh);
+    return mesh;
+  };
+  const rock = own(new IcosahedronGeometry(0.5, 0));
+  const blob = (material: Material, x: number, y: number, z: number, s: number, sy = s): void => {
+    const mesh = new Mesh(rock, material);
+    mesh.position.set(x, y, z);
+    mesh.scale.set(s, sy, s);
+    root.add(mesh);
+  };
 
-    const bright = (leaf.volunteer ? colors.volunteer : colors.work).clone();
-    const dim = bright.clone().lerp(surface, 0.7);
-    const material = leafMaterial(dim, bright);
-    // La foglia ondeggia attorno all'attacco del ramo: il pivot sta sulla punta.
-    const pivot = new Group();
-    pivot.position.copy(to);
-    const blade = new Group();
-    blade.rotation.set(0.85, sign > 0 ? 0 : Math.PI, 0.3);
-    const leafMesh = new Mesh(leafGeometry, material);
-    blade.add(leafMesh);
-    if (leaf.detail) {
-      const bud = new Mesh(budGeometry, material);
-      bud.position.set(0.05, 0.1, 0);
-      blade.add(bud);
-    }
-    // In corso: alone morbido, una copia piu grande della foglia, additiva, che pulsa piano.
-    let halo: MeshBasicMaterial | null = null;
-    if (leaf.ongoing) {
-      halo = own(
-        new MeshBasicMaterial({
-          color: bright,
-          transparent: true,
-          opacity: 0,
-          blending: AdditiveBlending,
-          depthWrite: false,
-          side: DoubleSide,
-        }),
+  // --- Blocchi ----------------------------------------------------------------------------------
+  /** Parti mobili, aggiornate a ogni fotogramma dal punto del pinguino. */
+  const flags: { mesh: Mesh; x: number; top: number }[] = [];
+  const belts: { stripes: Mesh[]; x0: number; x1: number }[] = [];
+  const drawers: Record<Block['kind'], (b: Block) => void> = {
+    ground(b) {
+      box(m.soil, b.x0, b.x1, -SOIL, 0);
+      // Bordo del piano nel colore del livello: si vede dove inizia e finisce ogni esperienza.
+      box(paintOf(b.level).muted, b.x0, b.x1, -0.08, 0.02, DEPTH / 2 - 0.04, 0.1);
+    },
+    step(b) {
+      box(paintOf(b.level).muted, b.x0, b.x1, 0, b.top, 0, DEPTH * 0.8);
+    },
+    crate(b) {
+      // Container: uno o due impilati, con le nervature verticali sul fronte.
+      const p = paintOf(b.level);
+      const rows = b.top > 0.6 ? 2 : 1;
+      for (let k = 0; k < rows; k += 1) {
+        const y0 = (b.top / rows) * k;
+        const y1 = (b.top / rows) * (k + 1);
+        box(k % 2 ? p.muted : p.full, b.x0, b.x1, y0, y1 - 0.02, 0, DEPTH * 0.75);
+        for (let x = b.x0 + 0.17; x < b.x1 - 0.1; x += 0.2) {
+          box(m.dark, x, x + 0.03, y0 + 0.07, y1 - 0.09, DEPTH * 0.375, 0.03);
+        }
+      }
+    },
+    wall(b) {
+      // Firewall: muro di mattoni con le righe di malta e il coronamento.
+      box(m.wall, b.x0, b.x1, 0, b.top, 0, DEPTH * 0.9);
+      for (let y = 0.24; y < b.top; y += 0.24) {
+        box(m.mortar, b.x0 - 0.01, b.x1 + 0.01, y - 0.015, y + 0.015, 0, DEPTH * 0.9 + 0.02);
+      }
+      box(m.mortar, b.x0 - 0.03, b.x1 + 0.03, b.top - 0.02, b.top + 0.06, 0, DEPTH * 0.95);
+    },
+    belt(b) {
+      // Nastro CI/CD: piano con rulli alle estremita e strisce che scorrono sotto il pinguino.
+      box(m.neutral, b.x0 + 0.1, b.x1 - 0.1, 0, b.top - 0.12, 0, DEPTH * 0.6);
+      box(m.dark, b.x0, b.x1, b.top - 0.12, b.top, 0, DEPTH * 0.7);
+      const roller = own(new CylinderGeometry(0.14, 0.14, DEPTH * 0.72, 8).rotateX(Math.PI / 2));
+      for (const x of [b.x0 + 0.1, b.x1 - 0.1]) {
+        const mesh = new Mesh(roller, m.neutral);
+        mesh.position.set(x, b.top - 0.12, 0);
+        root.add(mesh);
+      }
+      const glow = paintOf(b.level).glow;
+      const stripes: Mesh[] = [];
+      for (let x = b.x0; x < b.x1 - STRIPE / 2; x += STRIPE) {
+        stripes.push(box(glow, x, x + 0.14, b.top - 0.01, b.top + 0.01, 0, DEPTH * 0.66));
+      }
+      belts.push({ stripes, x0: b.x0, x1: b.x1 });
+    },
+    pole(b) {
+      box(m.snow, b.x0, b.x1, 0, b.top, -0.3, 0.1);
+      blob(m.snow, (b.x0 + b.x1) / 2, b.top + 0.05, -0.3, 0.16);
+      const flag = box(paintOf(b.level).glow, b.x1, b.x1 + 0.55, 0, 0.36, -0.3, 0.04);
+      flags.push({ mesh: flag, x: b.x0, top: b.top });
+    },
+    site(b) {
+      // Sito: un pilastro e, in fondo, una casetta con le finestre accese.
+      const p = paintOf(b.level);
+      box(p.muted, b.x0, b.x1, -SOIL, b.top, 0, DEPTH * 0.85);
+      if (b.x1 - b.x0 < 1.5) return;
+      const mid = (b.x0 + b.x1) / 2;
+      const back = -DEPTH * 0.32;
+      box(p.full, mid - 0.45, mid + 0.45, b.top, b.top + 0.75, back, 0.5);
+      const roof = new Mesh(own(new ConeGeometry(0.72, 0.4, 4).rotateY(Math.PI / 4)), m.neutral);
+      roof.position.set(mid, b.top + 0.95, back);
+      roof.scale.z = 0.5;
+      root.add(roof);
+      for (const dx of [-0.2, 0.2]) {
+        box(p.glow, mid + dx - 0.09, mid + dx + 0.09, b.top + 0.3, b.top + 0.5, back + 0.26, 0.02);
+      }
+    },
+    bridge(b) {
+      // Ponte DNS: assi sospese tra due coppie di torri, un asse si e uno no in colore, e i cavi.
+      const p = paintOf(b.level);
+      const planks = 12;
+      const w = (b.x1 - b.x0) / planks;
+      for (let k = 0; k < planks; k += 1) {
+        const y = b.top - 0.18 * Math.sin((Math.PI * (k + 0.5)) / planks);
+        const x = b.x0 + k * w;
+        box(k % 2 ? p.full : m.neutral, x + 0.02, x + w - 0.02, y - 0.1, y, 0, DEPTH * 0.55);
+      }
+      const side = DEPTH * 0.3;
+      for (const x of [b.x0, b.x1]) {
+        for (const z of [-side, side]) box(m.neutral, x - 0.07, x + 0.07, b.top, b.top + 1.1, z, 0.14);
+      }
+      // Cavi: segmenti dritti dalla cima delle torri all'avvallamento centrale.
+      const mid = (b.x0 + b.x1) / 2;
+      const high = b.top + 1.05;
+      const low = b.top + 0.25;
+      for (const z of [-side, side]) {
+        for (const [xa, ya, xb, yb] of [
+          [b.x0, high, mid, low],
+          [mid, low, b.x1, high],
+        ] as const) {
+          const cable = box(p.glow, 0, 1, -0.02, 0.02, z, 0.03);
+          cable.position.set((xa + xb) / 2, (ya + yb) / 2, z);
+          cable.scale.x = Math.hypot(xb - xa, yb - ya);
+          cable.rotation.z = Math.atan2(yb - ya, xb - xa);
+        }
+      }
+    },
+    garden(b) {
+      // Giardino del volontariato: prato nel colore del livello, cespugli e fiori in fondo.
+      const p = paintOf(b.level);
+      box(m.soil, b.x0, b.x1, -SOIL, -0.06);
+      box(p.muted, b.x0, b.x1, -0.06, 0);
+      for (let x = b.x0 + 0.5, k = 0; x < b.x1 - 0.3; x += 0.9, k += 1) {
+        blob(m.leaf, x, 0.2, -DEPTH * 0.38, 0.55 - (k % 2) * 0.15, 0.45);
+        blob(k % 2 ? m.flower : p.glow, x + 0.42, 0.12, -DEPTH * 0.18, 0.12);
+      }
+    },
+    goal(b) {
+      // Meta: un igloo basso con la porta scura.
+      const mid = (b.x0 + b.x1) / 2;
+      const radius = (b.x1 - b.x0) / 2;
+      const dome = new Mesh(
+        own(new SphereGeometry(radius, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2)),
+        m.snow,
       );
-      const glow = new Mesh(leafGeometry, halo);
-      glow.position.set(-0.06, -0.03, 0);
-      glow.scale.set(1.14, 1.1, 1.3);
-      blade.add(glow);
-    }
-    pivot.add(blade);
-    root.add(pivot);
-    return { slug: leaf.slug, pivot, material, dim, bright, halo, phase: i * 1.7 };
-  });
-  const slugs = views.map((v) => v.slug);
+      dome.position.set(mid, 0, -DEPTH * 0.15);
+      root.add(dome);
+      box(m.dark, mid - 0.18, mid + 0.18, 0, 0.38, -DEPTH * 0.15 + radius - 0.05, 0.12);
+    },
+  };
+  for (const b of course.blocks) drawers[b.kind](b);
 
-  // Cima: ciuffo di gemme e foglioline giovani, spente. E il futuro della linea del tempo.
-  const crown = new Group();
-  crown.position.copy(trunkAt(pieces));
-  [0.0, 1.3, 2.5, 3.7, 5.0].forEach((yaw, k) => {
-    tuft(crown, new Vector3(0, 0.02 * k, 0), yaw, 0.95 - (k % 2) * 0.35, 0.46 - (k % 2) * 0.08);
-  });
-  tuft(crown, new Vector3(0, 0.05, 0), 0.8, 1.35, 0.3);
-  const bud = new Mesh(budGeometry, fillerMaterial);
-  bud.position.y = 0.12;
-  bud.scale.setScalar(1.1);
-  crown.add(bud);
-  root.add(crown);
+  // Sfondo: iceberg lontani, regolari ma non uguali, lungo tutto il percorso.
+  const berg = own(new ConeGeometry(1, 1, 5));
+  for (let x = -6, k = 0; x < course.length + 8; x += 3.4, k += 1) {
+    const mesh = new Mesh(berg, m.far);
+    const h = 1.6 + ((k * 7) % 5) * 0.45;
+    mesh.position.set(x + ((k * 3) % 4) * 0.4, h / 2 - 0.8, -7 - (k % 3) * 1.5);
+    mesh.scale.set(1.3 + (k % 2) * 0.6, h, 1);
+    mesh.rotation.y = k;
+    root.add(mesh);
+  }
 
-  // Terreno: un disco basso e discreto, qualche sasso e ciuffi d'erba.
-  const ground = new Mesh(
-    // Cilindro sottile invece di CircleGeometry: gia nel chunk di three, nessun peso in piu.
-    own(new CylinderGeometry(2.7, 2.7, 0.02, 9, 1).translate(0, -0.01, 0)),
-    own(new MeshStandardMaterial({ color: colors.ground, flatShading: true, roughness: 1 })),
+  // --- Pinguino ---------------------------------------------------------------------------------
+  const penguin = own(
+    createPenguin({
+      body: tint(['--ctp-surface2', '--surface-hi']),
+      belly: text,
+      beak: tint(['--ctp-peach', '--text']),
+      eye: tint(['--bg-deep', '--bg']),
+    }),
   );
-  ground.position.y = -0.03;
-  root.add(ground);
-  const rockGeometry = own(new IcosahedronGeometry(0.2, 0));
-  for (const [x, z, s] of [
-    [1.15, 0.7, 1],
-    [-1.3, 0.35, 0.7],
-    [0.6, -1.25, 0.55],
-  ] as const) {
-    const rock = new Mesh(rockGeometry, woodMaterial);
-    rock.position.set(x, 0.04, z);
-    rock.scale.set(s * 1.3, s * 0.6, s);
-    root.add(rock);
-  }
-  for (const [x, z] of [
-    [-0.9, -0.85],
-    [1.5, -0.3],
-    [-1.6, 0.95],
-    [0.3, 1.45],
-  ] as const) {
-    for (let k = 0; k < 3; k += 1) {
-      tuft(root, new Vector3(x + k * 0.07, 0, z + k * 0.04), k * 2.1, 1.2, 0.26);
-    }
-  }
+  // Di profilo, verso +X: corre nella direzione del percorso.
+  penguin.root.rotation.y = Math.PI / 2;
+  scene.add(penguin.root);
 
-  const ambient = new AmbientLight(colors.light, 0.85);
-  const sun = new DirectionalLight(colors.light, 1.5);
-  sun.position.set(-3, 8, 5);
+  const ambient = new AmbientLight(text, 0.9);
+  const sun = new DirectionalLight(text, 1.6);
+  sun.position.set(-4, 9, 7);
   scene.add(ambient, sun);
 
   // --- Stato ------------------------------------------------------------------------------------
-  let userYaw: number | null = null;
-  let elapsed = 0;
   let storyTarget = 0;
   let story = 0;
-  let interactive = true;
   let size = { width: 1, height: 1 };
-  const eye = new Vector3();
   const names = moments.length > 0 ? moments : ['overview'];
 
-  const leafPoint = (index: number): Vector3 => {
-    // Tra il tronco e il centro della foglia: si vede il ramo che la porta.
-    const { base, tip, side } = layout.branches[index] as (typeof layout.branches)[number];
-    const reach = (side === 'right' ? 1 : -1) * LEAF_LENGTH * 0.5;
-    return new Vector3(
-      (base.x + tip.x + reach) / 2 + trunkOffset(base.y),
-      (base.y + tip.y + 0.2) / 2,
-      (base.z + tip.z) / 2,
-    );
-  };
-
-  /** Inquadratura del momento `index`. */
-  const pose = (index: number): Pose => {
-    const leaf = leafIndex(names[index] ?? 'overview', slugs);
-    const aspect = size.width / size.height;
-    const portrait = aspect < 1;
-    if (leaf < 0) {
-      // Insieme: tutto l'albero. In apertura (livello 'full') la camera sale piano dal basso.
-      const intro = tier === 'full' && names[index] === 'overview' && !userYawSet() ? introT() : 1;
-      const target = new Vector3(0, height * mix(0.42, 0.5, intro), 0);
-      return {
-        target,
-        yaw: userYaw ?? Math.sin(elapsed * 0.15) * 0.15,
-        elevation: mix(0.02, 0.1, intro),
-        distance: fitDistance(
-          portrait ? height + 2.4 : height + 3.2,
-          portrait ? 5.6 : 5.4,
-          aspect,
-          camera.fov,
-        ),
-        shift: 0,
-        lift: portrait ? -0.03 : 0,
-        lit: views.map(() => (names[index] === 'exit' ? LIT.overview + 0.1 : LIT.overview)),
-      };
+  /** Inquadratura del momento `index`: prima schermata e uscita larghe, le schede di lato. */
+  const framing = (index: number): Framing => {
+    const name = names[index] ?? 'overview';
+    const portrait = size.width < size.height;
+    if (name === 'overview') {
+      return { lead: portrait ? 1.6 : 3.4, span: portrait ? 7 : 11.5, shift: 0, lift: 0 };
     }
-    const branch = layout.branches[leaf] as (typeof layout.branches)[number];
-    const frame = cardFraming(branch.side, size.width);
-    const sign = branch.side === 'right' ? 1 : -1;
-    return {
-      target: leafPoint(leaf),
-      yaw: -sign * 0.3,
-      elevation: 0.14,
-      distance: fitDistance(portrait ? 4.6 : 4.4, portrait ? 4.4 : 7, aspect, camera.fov),
-      shift: frame.shift,
-      lift: frame.lift,
-      lit: views.map((_, i) => (i === leaf ? LIT.active : LIT.dimmed)),
-    };
-  };
-  const userYawSet = (): boolean => userYaw !== null;
-  const introT = (): number => {
-    const x = Math.min(1, elapsed / INTRO_SECONDS);
-    return x * x * (3 - 2 * x);
+    if (name === 'exit') return { lead: 0.8, span: portrait ? 6 : 8, shift: 0, lift: 0 };
+    return { lead: portrait ? 1.0 : 1.8, span: portrait ? 6 : 8.5, ...cardFraming(size.width) };
   };
 
   const place = (): void => {
-    const { from, to, t } = blendAt(story, names.length);
-    const a = pose(from);
-    const b = pose(to);
-    const at = (key: Weight) => mix(a[key], b[key], t);
+    const runner = runnerAt(course, story);
+    penguin.setPose(runner.pose, runner.phase);
+    penguin.root.position.set(runner.x, runner.y, 0);
 
-    const target = a.target.lerp(b.target, t);
-    const yaw = at('yaw');
-    const elevation = at('elevation');
-    eye.set(
-      -Math.sin(yaw) * Math.cos(elevation),
-      Math.sin(elevation),
-      Math.cos(yaw) * Math.cos(elevation),
-    );
-    camera.position.copy(target).addScaledVector(eye, at('distance'));
-    camera.lookAt(target);
-    // Schermo largo: albero spostato di lato, la foglia resta accanto alla scheda. Schermo
-    // stretto: foglia nella parte alta, sopra la scheda.
+    for (const flag of flags) {
+      // La bandiera sale mentre il pinguino passa davanti al palo, e riscende tornando indietro.
+      const up = clamp01((runner.x - flag.x + 0.6) / 1.6);
+      flag.mesh.position.y = mix(0.3, flag.top - 0.25, up);
+    }
+    for (const belt of belts) {
+      // Le strisce scorrono con il pinguino mentre e sul nastro.
+      const length = belt.x1 - belt.x0 - 0.2;
+      const offset = clamp01((runner.x - belt.x0) / (belt.x1 - belt.x0)) * 3.2;
+      belt.stripes.forEach((stripe, k) => {
+        stripe.position.x = belt.x0 + 0.17 + ((k * STRIPE + offset) % length);
+      });
+    }
+
+    const { from, to, t } = blendAt(story, names.length);
+    const a = framing(from);
+    const b = framing(to);
+    const at = (key: keyof Framing) => mix(a[key], b[key], t);
+    const aspect = size.width / size.height;
+    const portrait = aspect < 1;
+    const distance = fitDistance(portrait ? 5.2 : 3.8, at('span'), aspect, camera.fov);
+    // Camera di lato, appena spostata e alzata: si vede la profondita del percorso.
+    const tx = runner.x + at('lead');
+    const ty = 0.75 + runner.y * 0.3;
+    camera.position.set(tx + distance * 0.2, ty + distance * 0.16, distance);
+    camera.lookAt(tx, ty, 0);
+    // Schermo largo: percorso a destra delle schede. Schermo stretto: percorso sopra la scheda.
     camera.setViewOffset(
       size.width,
       size.height,
@@ -410,72 +362,59 @@ export function mount({
       size.width,
       size.height,
     );
-
-    views.forEach((view, i) => {
-      const level = mix(a.lit[i] ?? 0, b.lit[i] ?? 0, t);
-      view.material.color.lerpColors(view.dim, view.bright, level);
-      view.material.emissiveIntensity = level * level * 0.32;
-      // Ondeggio e pulsazione solo con l'animazione accesa: a 'reduced' elapsed resta 0.
-      const wave = tier === 'full' ? Math.sin(elapsed * SWAY.speed + view.phase) : 0;
-      view.pivot.rotation.z = wave * SWAY.amplitude;
-      view.pivot.rotation.x = wave * SWAY.amplitude * 0.5;
-      if (view.halo) {
-        const pulse = tier === 'full' ? 0.75 + Math.sin(elapsed * 1.6 + view.phase) * 0.25 : 0.8;
-        view.halo.opacity = (0.06 + level * 0.2) * pulse;
-      }
-    });
   };
 
   // --- Ciclo ------------------------------------------------------------------------------------
+  // Il ciclo gira solo finche il racconto rincorre lo scroll: a riposo nessun fotogramma.
   let frame = 0;
   let last = 0;
+  let running = false;
   let disposed = false;
   const draw = (): void => {
     place();
     renderer.render(scene, camera);
   };
-  const invalidate = (): void => {
-    if (!frame && !disposed) draw();
-  };
   const tick = (now: number): void => {
     const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
     last = now;
-    elapsed += dt;
     const gap = storyTarget - story;
-    story = Math.abs(gap) < 0.001 ? storyTarget : story + gap * Math.min(1, dt * STORY_CATCH_UP);
+    story = Math.abs(gap) < EPSILON ? storyTarget : story + gap * Math.min(1, dt * STORY_CATCH_UP);
     draw();
+    if (story === storyTarget) {
+      frame = 0;
+      last = 0;
+      return;
+    }
     frame = requestAnimationFrame(tick);
   };
+  /** Ridisegna: subito se ferma o statica, altrimenti avvia la rincorsa. */
+  const kick = (): void => {
+    if (disposed) return;
+    if (running && tier === 'full' && story !== storyTarget) {
+      if (!frame) frame = requestAnimationFrame(tick);
+    } else if (!frame) {
+      draw();
+    }
+  };
   const stop = (): void => {
+    running = false;
     if (frame) cancelAnimationFrame(frame);
     frame = 0;
     last = 0;
   };
 
-  // Orbit orizzontale solo nella prima schermata; il click non fa nulla.
-  const detachOrbit = attachOrbit(canvas, {
-    maxYaw: MAX_YAW,
-    yaw: () => userYaw ?? Math.sin(elapsed * 0.15) * 0.15,
-    onYaw(value) {
-      if (!interactive) return;
-      userYaw = value;
-      invalidate();
-    },
-    onClick() {},
-  });
-
   return {
     start() {
-      if (disposed || frame || tier !== 'full') return;
-      frame = requestAnimationFrame(tick);
+      if (disposed || tier !== 'full') return;
+      running = true;
+      kick();
     },
     stop,
-    setStory(position, active) {
+    setStory(position) {
       storyTarget = Math.max(0, position);
-      interactive = active;
-      // Statica: si salta al momento e si ridisegna una volta; animata: la camera rincorre.
-      if (tier !== 'full') story = storyTarget;
-      invalidate();
+      // Statica (o fuori schermo): si salta al momento e si ridisegna una volta.
+      if (tier !== 'full' || !running) story = storyTarget;
+      kick();
     },
     resize(w, h) {
       if (disposed || w <= 0 || h <= 0) return;
@@ -483,13 +422,12 @@ export function mount({
       size = { width: w, height: h };
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      invalidate();
+      if (!frame) draw();
     },
     dispose() {
       if (disposed) return;
       disposed = true;
       stop();
-      detachOrbit();
       for (const resource of owned) resource.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
