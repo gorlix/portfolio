@@ -326,3 +326,69 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
     }
   });
 });
+
+describe('criteri di accettazione minimi §16 (PORT-73)', () => {
+  const isHuman = (url: string) => url === '/human/' || url === '/en/human/';
+  const textOf = (html: string) =>
+    html
+      .replace(/<script\b[\s\S]*?<\/script>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  it('nessun asset 3D e nessuno script delle scene fuori da /human', () => {
+    const threeAsset = /three|homelab|domotica|Scene\.astro|\.(glb|gltf|ktx2|basis|hdr|exr)\b/i;
+    for (const { url, html } of pages.filter((p) => !isHuman(p.url))) {
+      for (const tag of html.match(/<(?:script|link)\b[^>]*>/g) ?? []) {
+        expect(tag, `${url}: ${tag}`).not.toMatch(threeAsset);
+      }
+      expect(html, url).not.toContain('data-scene=');
+    }
+    // Il chunk di three esiste e lo richiama solo il percorso Umano.
+    const chunks = walk(outDir).filter((f) => /\/_astro\/three\.[^/]+\.js$/.test(f));
+    expect(chunks.length).toBe(1);
+  });
+
+  it('ogni scena 3D di /human ha un nome accessibile e il testo della sua sezione', () => {
+    for (const { url, html } of pages.filter((p) => isHuman(p.url))) {
+      const sections = [...html.matchAll(/<section\b[^>]*\bid="([^"]+)"[\s\S]*?<\/section>/g)];
+      expect(sections.length, url).toBe(9);
+      let scenes = 0;
+      for (const [block = '', id] of sections) {
+        const found = [...block.matchAll(/<div[^>]*data-scene="[^"]+"[^>]*>/g)];
+        for (const [tag] of found) {
+          scenes++;
+          expect(tag, `${url}#${id}`).toMatch(/role="img"/);
+          expect(tag, `${url}#${id}`).toMatch(/aria-label="[^"]{3,}"/);
+        }
+        // Il contenuto vero sta nel testo, non nella scena: ogni sezione ne ha a sufficienza.
+        const bare = block.replace(/<div[^>]*data-scene="[^"]+"[^>]*>[\s\S]*?<\/div>/g, ' ');
+        expect(textOf(bare).length, `${url}#${id}: testo troppo scarso`).toBeGreaterThan(80);
+      }
+      expect(scenes, `${url}: scene trovate`).toBeGreaterThanOrEqual(9);
+    }
+  });
+
+  it('nessun IP privato o hostname dell infrastruttura in nessun file di testo pubblicato', async () => {
+    const { scanText } = await import('../../src/lib/machine/validate');
+    const ext = /\.(html|txt|md|json|xml|css|js|svg|map)$/;
+    for (const file of walk(outDir).filter((f) => ext.test(f))) {
+      const found = scanText(readFileSync(file, 'utf8'));
+      expect(found, relative(outDir, file)).toEqual([]);
+    }
+  });
+
+  it('ogni pagina italiana ha la gemella inglese e viceversa, con lo stesso titolo di sezione', () => {
+    const urls = new Set(pages.map((p) => p.url));
+    for (const { url } of pages) {
+      const twin = url.startsWith('/en/') ? url.replace(/^\/en/, '') || '/' : `/en${url}`;
+      expect(urls.has(twin), `${url} senza gemella ${twin}`).toBe(true);
+    }
+    const ids = (url: string) =>
+      [
+        ...(pages.find((p) => p.url === url)?.html.matchAll(/<section\b[^>]*\bid="([^"]+)"/g) ??
+          []),
+      ].map((m) => m[1]);
+    expect(ids('/en/human/')).toEqual(ids('/human/'));
+  });
+});
