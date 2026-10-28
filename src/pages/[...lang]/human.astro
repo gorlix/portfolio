@@ -406,6 +406,15 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             </>
           )}
 
+          {s.id === 'beneficenza' && (
+            <Scene
+              scene="beneficenza"
+              label={page.scenes.beneficenza}
+              accent="beneficenza"
+              data={{ count: topicsIn('beneficenza').length }}
+            />
+          )}
+
           {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
             topicsIn(s.id).map(({ slug, data: t }) => (
               <article class="item" id={`${s.id}-${slug}`}>
@@ -421,6 +430,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'contatti' && (
             <>
+            <Scene scene="contatti" label={page.scenes.contatti} accent="contatti" data={{ count: 4 }} />
             <dl class="facts">
               <div>
                 <dt>{L.email}</dt>
