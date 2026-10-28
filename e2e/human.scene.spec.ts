@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|figure|beneficenza|contatti)\./.test(
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|avatar|figure|beneficenza|contatti|interessi)\./.test(
     url,
   );
 const scene = (page: Page) => page.locator('[data-scene="homelab"]');
@@ -227,7 +227,33 @@ for (const route of ['/human/', '/en/human/']) {
       await page.waitForTimeout(200);
       expect(await lavori.getAttribute('data-scene-state')).toBe('static');
       expect(await lavori.getAttribute('data-scene-progress')).toBeNull();
+
+      // Interessi (PORT-63): stessa regola, fotogramma finale con tutti gli oggetti.
+      const interessi = page.locator('[data-scene="interessi"]');
+      await interessi.scrollIntoViewIfNeeded();
+      await expect.poll(() => interessi.getAttribute('data-scene-state')).toBe('static');
+      await expect(interessi.locator('canvas')).toBeAttached();
+      expect(await interessi.getAttribute('data-scene-progress')).toBeNull();
     });
+  });
+
+  test(`${route}: la micro-scena Interessi avanza con lo scroll`, async ({ page }) => {
+    await page.goto(route);
+    const scene = page.locator('[data-scene="interessi"]');
+    const at = (f: number) =>
+      scene.evaluate((el, fr) => {
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo(0, top - window.innerHeight * fr);
+      }, f);
+    const value = async () =>
+      Number((await scene.getAttribute('data-scene-progress')) ?? Number.NaN);
+    await at(0.9);
+    await expect.poll(() => scene.getAttribute('data-scene-state')).toBe('running');
+    const start = await value();
+    await at(0.4);
+    await expect.poll(value).toBeGreaterThan(start);
+    await at(0.1);
+    await expect.poll(value).toBe(1);
   });
 
   // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato.

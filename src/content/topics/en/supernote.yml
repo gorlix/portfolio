@@ -1,5 +1,4 @@
 section: interessi
 links: []
 title: Supernote
-text:
-  todo: First-person text (Alessandro copy)
+text: "I read and write on a Supernote Manta, and since an e-reader alone was never enough I built a few tools around it: sn_make_space, sn-tcp-tunnel (my favourite) and SuperFlow, still a work in progress."

@@ -13,6 +13,7 @@ export const sceneLoaders = {
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),
   avatar: () => import('./scenes/avatar'),
+  interessi: () => import('./scenes/interessi'),
 } satisfies Record<string, () => Promise<SceneModule>>;
 
 export type SceneName = keyof typeof sceneLoaders;
