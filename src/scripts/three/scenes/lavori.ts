@@ -3,7 +3,6 @@ import {
   AmbientLight,
   BufferAttribute,
   BufferGeometry,
-  CircleGeometry,
   Color,
   CylinderGeometry,
   DirectionalLight,
@@ -288,7 +287,8 @@ export function mount({
 
   // Terreno: un disco basso e discreto, qualche sasso e ciuffi d'erba.
   const ground = new Mesh(
-    own(new CircleGeometry(2.7, 9).rotateX(-Math.PI / 2)),
+    // Cilindro sottile invece di CircleGeometry: gia nel chunk di three, nessun peso in piu.
+    own(new CylinderGeometry(2.7, 2.7, 0.02, 9, 1).translate(0, -0.01, 0)),
     own(new MeshStandardMaterial({ color: colors.ground, flatShading: true, roughness: 1 })),
   );
   ground.position.y = -0.03;
