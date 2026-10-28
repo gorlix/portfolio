@@ -314,6 +314,9 @@ for (const route of ['/human/', '/en/human/']) {
     // Le altre scene aspettano ancora: nessun avatar, nessun Homelab prima di un gesto.
     expect(urls.filter(isHomelabChunk)).toEqual([]);
     await expect(page.locator('#home .avatar')).toHaveCount(0);
+    // Col 3D attivo il poster resta nascosto (e lazy: mai scaricato) e l'avviso non compare.
+    expect(urls.filter((u) => /\/_astro\/poster-/.test(u))).toEqual([]);
+    await expect(page.locator('#home .poster-note')).toBeHidden();
   });
 
   test(`${route}: senza WebGL la scrivania sparisce e restano ritratto e saluto`, async ({
@@ -334,6 +337,10 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(() => desk(page).getAttribute('data-scene-state')).toBe('text');
     await expect(page.locator('#home .portrait')).toBeVisible();
     await expect(page.locator('#home .greeting')).toBeVisible();
+    // Al posto del 3D: poster della scrivania e avviso col motivo.
+    await expect(page.locator('#home .poster img')).toBeVisible();
+    await expect(page.locator('#home .poster-note [data-reason="webgl"]')).toBeVisible();
+    await expect(page.locator('#home .poster-note [data-reason="savedata"]')).toBeHidden();
   });
 
   test.describe('scrivania con reduced motion', () => {

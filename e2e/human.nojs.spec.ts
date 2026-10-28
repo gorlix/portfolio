@@ -67,6 +67,9 @@ for (const [route, lang] of [
       await expect(home.locator('.portrait')).toBeVisible();
       // Senza JS non c'e scena: lo spazio d'uscita della camera sparisce (media `scripting: none`).
       await expect(home.locator('.exit')).toBeHidden();
+      // Al posto del 3D: poster della scrivania e avviso che spiega perche.
+      await expect(home.locator('.poster img')).toBeVisible();
+      await expect(home.locator('.poster-note [data-reason="nojs"]')).toBeVisible();
       const badges = home.locator('nav[aria-label] a[href^="#"]');
       // Solo le competenze con `badge: true` nei dati (6-8).
       await expect(badges).toHaveCount(badgeSkills);

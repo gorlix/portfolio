@@ -1,4 +1,7 @@
 ---
+import { getImage } from 'astro:assets';
+import posterDesktopSrc from '../../assets/human/poster-desktop.png';
+import posterMobileSrc from '../../assets/human/poster-mobile.png';
 import AutomationSteps from '../../components/AutomationSteps.astro';
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
@@ -39,6 +42,12 @@ const [
   getEntries('topics', locale),
   getSingleton('infrastructure', locale),
   getEntries('automations', locale),
+]);
+
+/** Poster statici della scrivania: fallback se il 3D non parte (niente WebGL, risparmio dati, JS spento). */
+const [posterDesktop, posterMobile] = await Promise.all([
+  getImage({ src: posterDesktopSrc, format: 'webp', quality: 70 }),
+  getImage({ src: posterMobileSrc, format: 'webp', quality: 70 }),
 ]);
 
 const L = page.labels;
@@ -130,6 +139,17 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
         <section id={s.id} data-section={s.id} aria-labelledby={`h-${s.id}`} data-story={immersive(s.id) ? '' : undefined}>
           {s.id === 'home' && (
             <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={posterMobile.src} />
+                <img
+                  src={posterDesktop.src}
+                  width={posterDesktop.options.width}
+                  height={posterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
               <Scene scene="scrivania" label={page.scenes.scrivania} autostart />
             </div>
           )}
@@ -165,6 +185,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                     </ul>
                   </nav>
                   <p class="hint">{page.home.scrollHint}</p>
+                  <p class="poster-note" role="status">
+                    <span data-reason="webgl">{page.home.posterNotice.webgl}</span>
+                    <span data-reason="savedata">{page.home.posterNotice.savedata}</span>
+                    <span data-reason="error">{page.home.posterNotice.error}</span>
+                    <span data-reason="nojs">{page.home.posterNotice.nojs}</span>
+                  </p>
                 </div>
               </div>
               <div class="exit" data-moment="exit" aria-hidden="true"></div>
@@ -951,6 +977,62 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   @media (scripting: none) {
     .stage {
       display: none;
+    }
+    /* Senza JS la scrivania resta come poster fermo; le altre sezioni restano sul fondo semplice. */
+    section[data-section="home"] .stage {
+      display: block;
+    }
+  }
+  /*
+   * Poster della scrivania: sempre nel markup ma nascosto (e, essendo lazy, mai scaricato) finche il 3D
+   * funziona. Compare solo se la scena ripiega sul testo (niente WebGL, risparmio dati) o va in errore,
+   * e senza JavaScript.
+   */
+  .poster {
+    display: none;
+  }
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  .stage:has(.scene:is([data-scene-state="text"], [data-scene-state="error"])) .poster {
+    display: block;
+  }
+  @media (scripting: none) {
+    section[data-section="home"] .poster {
+      display: block;
+    }
+  }
+  /* Avviso sotto il vetro, solo quando al posto del 3D c'e il poster; un solo motivo alla volta. */
+  .poster-note {
+    display: none;
+    margin: 0.75rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  .poster-note > span {
+    display: none;
+  }
+  section[data-section="home"]:has(.scene[data-scene-state="text"], .scene[data-scene-state="error"]) .poster-note {
+    display: block;
+  }
+  section[data-section="home"]:has(.scene[data-scene-reason="webgl"]) .poster-note > [data-reason="webgl"],
+  section[data-section="home"]:has(.scene[data-scene-reason="savedata"]) .poster-note > [data-reason="savedata"],
+  section[data-section="home"]:has(.scene[data-scene-reason="error"]) .poster-note > [data-reason="error"] {
+    display: inline;
+  }
+  @media (scripting: none) {
+    section[data-section="home"] .poster-note {
+      display: block;
+    }
+    section[data-section="home"] .poster-note > [data-reason="nojs"] {
+      display: inline;
     }
   }
   @media (prefers-reduced-motion: reduce) {

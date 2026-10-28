@@ -52,9 +52,13 @@ const setState = (el: HTMLElement, state: SceneState): void => {
   el.dataset.sceneState = state;
 };
 
-/** Il riquadro sparisce: resta solo il testo della sezione. */
-const toText = (el: HTMLElement): void => {
+/** Perche una scena ripiega sul testo: lo legge l'avviso del poster (Home) via CSS. */
+type FallbackReason = 'webgl' | 'savedata' | 'error';
+
+/** Il riquadro sparisce: resta solo il testo della sezione (e, nella Home, il poster). */
+const toText = (el: HTMLElement, reason: FallbackReason = 'error'): void => {
   setState(el, 'text');
+  el.dataset.sceneReason = reason;
   el.hidden = true;
 };
 
@@ -171,7 +175,7 @@ async function mountScene(el: HTMLElement): Promise<void> {
   }
   const level = tierFor(name);
   if (level === 'text') {
-    toText(el);
+    toText(el, capabilities?.saveData ? 'savedata' : 'webgl');
     return;
   }
   const micro = sceneKind(name) === 'micro' && level === 'full';

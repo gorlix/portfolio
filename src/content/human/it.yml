@@ -8,6 +8,11 @@ home:
   greeting: Ciao, sono Alessandro. Smanetto, rompo cose e poi le rimetto insieme meglio di prima. Qui trovi il resto.
   scrollHint: Scorri, oppure salta direttamente a una tappa dal menu.
   badgesLabel: "Competenze tecniche: scegline una per vedere dove la uso"
+  posterNotice:
+    webgl: "Il 3D non è disponibile su questo browser (WebGL assente o accelerazione grafica spenta): al suo posto vedi un'immagine della scrivania."
+    savedata: "Hai attivato il risparmio dati: al posto del 3D vedi un'immagine della scrivania."
+    error: "Il 3D non è partito: al suo posto vedi un'immagine della scrivania."
+    nojs: "JavaScript è disattivato: al posto del 3D vedi un'immagine della scrivania."
 intros:
   home: Benvenuto nel percorso umano.
   lavori: Dove ho lavorato e cosa ho combinato, in ordine di apparizione.

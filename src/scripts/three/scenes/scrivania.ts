@@ -42,7 +42,12 @@ const MIN_DISTANCE = 6;
 const STORY_CATCH_UP = 5;
 const BREATH = { amplitude: 0.07, speed: 0.35 };
 const SCREEN = { x: 0, y: 1.95, z: -0.25 };
-const UP_SHIFT_NARROW = 0.9;
+/** In verticale (telefono) si inquadra il centro della scrivania e la si alza sopra il vetro. */
+const NARROW_WIDTH = 3.1;
+const NARROW_SIDE = 0.35;
+const UP_SHIFT_NARROW = 0.75;
+/** Larghezza dello schermo da tenere nel riquadro quando la camera arriva al monitor. */
+const SCREEN_FIT_WIDTH = 2.7;
 const SIDE_SHIFT_WIDE = 0.9;
 
 const TERMINAL_LINES = [
@@ -270,6 +275,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
   let elapsed = 0;
   let aspect = 1;
   let baseDistance = 8;
+  let nearDistance = 3;
   const target = new Vector3();
   const place = (): void => {
     const t = ease(Math.min(1, story));
@@ -278,12 +284,12 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
     const shift = (1 - t) * (wide ? SIDE_SHIFT_WIDE : 0);
     const lift = (1 - t) * (wide ? 0 : UP_SHIFT_NARROW);
     const breath = Math.sin(elapsed * BREATH.speed) * BREATH.amplitude * (1 - t * 0.6);
-    const far = new Vector3(0.6, 3.1, baseDistance);
-    const near = new Vector3(SCREEN.x, SCREEN.y + 0.05, SCREEN.z + 3.0);
+    const far = new Vector3(wide ? 0.6 : NARROW_SIDE, 3.1, baseDistance);
+    const near = new Vector3(SCREEN.x, SCREEN.y + 0.05, SCREEN.z + nearDistance);
     camera.position.lerpVectors(far, near, t);
     camera.position.x += breath * 3;
     camera.position.y += breath * 1.5;
-    target.set(0, 2.2 + (SCREEN.y - 2.2) * t, 0 + (SCREEN.z - 0) * t);
+    target.set(wide ? 0 : NARROW_SIDE * (1 - t), 2.2 + (SCREEN.y - 2.2) * t, SCREEN.z * t);
     target.x -= shift;
     target.y -= lift;
     camera.lookAt(target);
@@ -338,8 +344,10 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
   const fitDistance = (): void => {
     const vertical = (camera.fov * Math.PI) / 360;
     const horizontal = Math.atan(Math.tan(vertical) * aspect);
-    const wideNeed = aspect >= 1.3 ? DESK_WIDTH * 1.35 : DESK_WIDTH * 1.05;
+    const wideNeed =
+      aspect >= 1.3 ? DESK_WIDTH * 1.35 : aspect >= 1 ? DESK_WIDTH * 1.05 : NARROW_WIDTH;
     baseDistance = Math.max(wideNeed / 2 / Math.tan(horizontal), MIN_DISTANCE);
+    nearDistance = Math.max(3, SCREEN_FIT_WIDTH / 2 / Math.tan(horizontal));
   };
 
   return {

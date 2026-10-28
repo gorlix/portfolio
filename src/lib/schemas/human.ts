@@ -27,6 +27,13 @@ export const humanSchema = z.strictObject({
     scrollHint: text,
     /** Nome accessibile dell'elenco di badge: ciascuno porta alla sezione dove la competenza si vede. */
     badgesLabel: text,
+    /** Avviso mostrato col poster al posto del 3D: una frase per ogni motivo del ripiego. */
+    posterNotice: z.strictObject({
+      webgl: text,
+      savedata: text,
+      error: text,
+      nojs: text,
+    }),
   }),
   /** Frase d'apertura di ogni sezione, in prima persona. */
   intros: sectionTexts,
@@ -131,6 +138,10 @@ export const humanTranslatable = [
   'home.greeting',
   'home.scrollHint',
   'home.badgesLabel',
+  'home.posterNotice.webgl',
+  'home.posterNotice.savedata',
+  'home.posterNotice.error',
+  'home.posterNotice.nojs',
   ...humanSectionIds.map((id) => `intros.${id}`),
   'labels.ongoing',
   'labels.results',
