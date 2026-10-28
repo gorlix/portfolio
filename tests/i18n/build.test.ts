@@ -221,3 +221,51 @@ describe('JSON-LD', () => {
     }
   });
 });
+
+describe('Web Analytics solo su /human (PORT-72)', () => {
+  // Token finto, composto a runtime: non deve somigliare a una chiave vera.
+  const token = 'ab'.repeat(16);
+  const analyticsOut = join(root, 'node_modules/.cache/test-dist-analytics');
+  let withToken: { url: string; html: string }[] = [];
+
+  beforeAll(async () => {
+    rmSync(analyticsOut, { recursive: true, force: true });
+    mkdirSync(analyticsOut, { recursive: true });
+    const previous = process.env.PUBLIC_CF_ANALYTICS_TOKEN;
+    process.env.PUBLIC_CF_ANALYTICS_TOKEN = token;
+    try {
+      await build({ root, outDir: analyticsOut, logLevel: 'error' });
+    } finally {
+      if (previous === undefined) delete process.env.PUBLIC_CF_ANALYTICS_TOKEN;
+      else process.env.PUBLIC_CF_ANALYTICS_TOKEN = previous;
+    }
+    withToken = walk(analyticsOut)
+      .filter((f) => f.endsWith('.html'))
+      .map((f) => ({
+        url: `/${relative(analyticsOut, f).replace(/index\.html$/, '')}`,
+        html: readFileSync(f, 'utf8'),
+      }));
+  }, 60_000);
+
+  afterAll(() => rmSync(analyticsOut, { recursive: true, force: true }));
+
+  it('senza token nessuna pagina nomina il beacon', () => {
+    for (const { url, html } of pages) expect(html, url).not.toContain('cloudflareinsights');
+  });
+
+  it('con token il beacon sta solo su /human e /en/human, una volta, nella head', () => {
+    expect(withToken.length).toBe(pages.length);
+    for (const { url, html } of withToken) {
+      const count = html.split('static.cloudflareinsights.com/beacon.min.js').length - 1;
+      if (url === '/human/' || url === '/en/human/') {
+        expect(count, url).toBe(1);
+        const head = html.slice(0, html.indexOf('</head>'));
+        expect(head, url).toContain(`data-cf-beacon="{&quot;token&quot;:&quot;${token}&quot;}"`);
+        expect(head, url).toMatch(/<script[^>]*\sdefer[\s>]/);
+      } else {
+        expect(count, `${url}: nessun beacon fuori da /human`).toBe(0);
+        expect(html, url).not.toContain('cloudflareinsights');
+      }
+    }
+  });
+});

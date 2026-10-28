@@ -45,6 +45,7 @@ const ui = await getSingleton('ui', locale);
     <meta name="twitter:card" content="summary" />
     {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
     {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
+    <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#main">{ui.skipToContent}</a>
