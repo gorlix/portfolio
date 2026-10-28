@@ -103,6 +103,8 @@ for (const route of ['/human/', '/en/human/']) {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(violations, violations.map((v) => `${v.id}: ${v.help}`).join('\n')).toEqual([]);
+  });
+
   test(`${route}: fuori schermo la scena si ferma e non chiede fotogrammi`, async ({ page }) => {
     await page.addInitScript(() => {
       const w = window as Window & { __frames?: number };
