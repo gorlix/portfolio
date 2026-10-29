@@ -31,7 +31,8 @@ const scriptClosure = (entry: string, seen: Set<string>): number => {
 };
 
 const pages = walk(dist)
-  .filter((f) => f.endsWith('index.html'))
+  // /admin (pannello CMS, Sveltia) non e una pagina del sito: fuori dai budget di peso.
+  .filter((f) => f.endsWith('index.html') && relative(dist, f).split('/')[0] !== 'admin')
   .map((file) => {
     const url = `/${relative(dist, file).replace(/index\.html$/, '')}`;
     const html = readFileSync(file, 'utf8');
