@@ -423,8 +423,9 @@ export function mount({
           target: centroid([...adrNodes], 0.95),
           yaw: -0.22,
           elevation: 0.36,
-          distance: 0.72,
-          shift: 0.3,
+          // Schermo largo: la scheda e a sinistra, le due piattaforme devono stare nel resto (PORT-85).
+          distance: size.width >= size.height ? 1.45 : 0.72,
+          shift: size.width >= size.height ? 0.26 : 0.3,
           decisions: 1,
         };
       case 'failover':
