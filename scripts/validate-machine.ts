@@ -26,6 +26,8 @@ const walk = (dir: string): string[] =>
     const p = join(dir, n);
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
+// /admin = pannello CMS di terze parti (Sveltia), non un contenuto del sito: fuori dalle scansioni.
+const site = (files: string[]) => files.filter((f) => relative(dist, f).split('/')[0] !== 'admin');
 
 const errors: string[] = [];
 for (const [file, validate] of Object.entries(validators)) {
@@ -39,10 +41,10 @@ for (const [file, validate] of Object.entries(validators)) {
   for (const p of validate(text)) errors.push(`${file}: ${p}`);
 }
 // Ogni pagina HTML porta il suo JSON-LD valido.
-for (const path of walk(dist).filter((f) => f.endsWith('.html')))
+for (const path of site(walk(dist)).filter((f) => f.endsWith('.html')))
   for (const p of validateJsonLd(readFileSync(path, 'utf8')))
     errors.push(`${relative(dist, path)}: JSON-LD: ${p}`);
-for (const path of walk(dist).filter((f) => textExt.has(extname(f)))) {
+for (const path of site(walk(dist)).filter((f) => textExt.has(extname(f)))) {
   for (const f of scanText(readFileSync(path, 'utf8')))
     errors.push(`${relative(dist, path)}: ${f.rule} "${f.match}"`);
 }
