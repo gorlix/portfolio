@@ -10,7 +10,7 @@ import type { SceneContext, SceneInstance } from '../types';
  * secondo, che si abbassa a riceverla. Il fotogramma finale e il secondo bagher.
  */
 
-const SPACING = 1.3;
+const SPACING = 1.0;
 /** Altezza del pinguino (~1) e punto di contatto della palla, davanti alle pinne unite. */
 const CONTACT_X = SPACING - 0.5;
 const CONTACT_Y = 0.55;
@@ -79,7 +79,11 @@ export function mount(context: SceneContext): SceneInstance {
       fit(aspect) {
         const vertical = (camera.fov * Math.PI) / 360;
         const horizontal = Math.atan(Math.tan(vertical) * aspect);
-        const distance = Math.max(1.2 / Math.tan(vertical), (SPACING + 0.8) / Math.tan(horizontal));
+        // Inquadratura stretta sui due pinguini: nei riquadri piccoli restano ben visibili (PORT-85).
+        const distance = Math.max(
+          0.95 / Math.tan(vertical),
+          (SPACING + 0.4) / Math.tan(horizontal),
+        );
         camera.position.set(0, 1.0, distance + 0.6);
         camera.lookAt(0, 0.95, 0);
       },
