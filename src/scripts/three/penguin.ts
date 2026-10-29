@@ -1,13 +1,16 @@
 import {
+  BufferAttribute,
   type BufferGeometry,
   Color,
   type ColorRepresentation,
   ConeGeometry,
   Group,
   IcosahedronGeometry,
+  LatheGeometry,
   type Material,
   Mesh,
   MeshStandardMaterial,
+  Vector2,
 } from 'three';
 
 /*
@@ -16,16 +19,19 @@ import {
  * Origine tra i piedi, in piedi lungo +Y, fronte verso +Z, alto ~1,0. Le pose sono funzioni pure di
  * (posa, fase): nessun tempo, nessun caso. `root.position` e del chiamante: il rimbalzo va su un
  * gruppo interno.
+ *
+ * Corpo e testa sono un solo solido di rotazione a goccia; pancia e maschera del viso sono le sue
+ * facce anteriori colorate (colori per faccia), non pezzi appoggiati davanti: nessun bordo staccato.
  */
 
 export interface PenguinColors {
-  /** Corpo a uovo, dorso, testa. */
+  /** Corpo a goccia, dorso, testa. */
   body: ColorRepresentation;
-  /** Pancia e viso (anche il bianco degli occhi). */
+  /** Pancia e maschera del viso. */
   belly: ColorRepresentation;
   /** Becco e piedi. */
   beak: ColorRepresentation;
-  /** Pupille. */
+  /** Occhi. */
   eye: ColorRepresentation;
 }
 export type PenguinPose = 'stand' | 'run' | 'jump' | 'ride' | 'wave' | 'ski' | 'bagher';
@@ -52,9 +58,36 @@ export interface Penguin {
 }
 
 const TAU = Math.PI * 2;
+/** Perno del corpo (a meta altezza) e centro della testa, rispetto al corpo. */
 const BODY_Y = 0.4;
-const HEAD_Y = 0.4; // rispetto al corpo
-const FOOT_Y = 0.05;
+const HEAD_Y = 0.45;
+const FOOT_Y = 0.03;
+/** Pinne a riposo: appena aperte, seguono il fianco senza entrarci. */
+const FLIPPER_REST = 0.3;
+/** Sagoma (raggio, quota) dal basso alla cima: pancia piena, collo appena accennato, testa tonda. */
+const PROFILE: readonly [number, number][] = [
+  [0, 0.04],
+  [0.2, 0.05],
+  [0.31, 0.14],
+  [0.36, 0.3],
+  [0.35, 0.45],
+  [0.3, 0.6],
+  [0.24, 0.71],
+  [0.215, 0.78],
+  [0.21, 0.86],
+  [0.17, 0.95],
+  [0.09, 1.0],
+  [0, 1.02],
+];
+const SEGMENTS = 12;
+const STEP = TAU / SEGMENTS;
+
+/**
+ * Lo spicchio `slice` (0 = quello centrato sul davanti) della fascia a quota media `y` e chiaro?
+ * Tre spicchi davanti, dalla base del petto fino sotto la fronte: pancia e viso in un pezzo solo.
+ */
+const isFront = (slice: number, y: number): boolean =>
+  Math.min(slice, SEGMENTS - slice) <= 1 && y > 0.1 && y < 0.94;
 
 export function createPenguin(colors: PenguinColors): Penguin {
   const owned: { dispose(): void }[] = [];
@@ -64,13 +97,12 @@ export function createPenguin(colors: PenguinColors): Penguin {
     owned.push(g);
     return g;
   };
-  const mat = (color: ColorRepresentation): Material => {
-    const m = new MeshStandardMaterial({ color, flatShading: true, roughness: 0.9 });
+  const mat = (color: ColorRepresentation, vertexColors = false): Material => {
+    const m = new MeshStandardMaterial({ color, flatShading: true, roughness: 0.9, vertexColors });
     owned.push(m);
     return m;
   };
   const dark = mat(colors.body);
-  const light = mat(colors.belly);
   const peach = mat(colors.beak);
   const pupil = mat(colors.eye);
   // Le pinne sono un poco piu scure del corpo: restano leggibili anche di profilo.
@@ -90,36 +122,65 @@ export function createPenguin(colors: PenguinColors): Penguin {
   const root = new Group();
   const inner = group(root);
 
-  // Corpo a uovo (pivot a meta), pancia chiara davanti.
-  const body = group(inner, 0, BODY_Y);
-  body.add(mesh(geo(new IcosahedronGeometry(0.36, 1), 1, 1.2, 0.95), dark));
-  body.add(mesh(geo(new IcosahedronGeometry(0.3, 1), 0.85, 1.1, 0.5), light, 0, -0.02, 0.2));
-
-  // Testa con maschera chiara, occhi (bianco + pupilla) e becco.
-  const head = group(body, 0, HEAD_Y);
-  head.add(mesh(geo(new IcosahedronGeometry(0.2, 1)), dark));
-  head.add(mesh(geo(new IcosahedronGeometry(0.15, 0), 1, 0.85, 0.55), light, 0, -0.03, 0.11));
-  const white = geo(new IcosahedronGeometry(0.06, 0));
-  const dot = geo(new IcosahedronGeometry(0.034, 0));
-  for (const s of [-1, 1]) {
-    head.add(mesh(white, light, s * 0.09, 0.05, 0.15));
-    head.add(mesh(dot, pupil, s * 0.095, 0.05, 0.19));
+  // Corpo e testa: un solo solido di rotazione, colorato faccia per faccia (dorso scuro, fronte chiaro).
+  // Senza indici: ogni faccia ha i suoi tre vertici e quindi un colore suo, a spigolo netto.
+  // Uno spicchio centrato sul davanti (+Z): pancia e viso simmetrici.
+  const lathe = new LatheGeometry(
+    PROFILE.map(([r, y]) => new Vector2(r, y)),
+    SEGMENTS,
+    -STEP / 2,
+  );
+  const solid = geo(lathe.toNonIndexed(), 1, 1, 1, -BODY_Y);
+  lathe.dispose();
+  const position = solid.getAttribute('position');
+  const tint = new Float32Array(position.count * 3);
+  const back = new Color(colors.body);
+  const front = new Color(colors.belly);
+  for (let v = 0; v < position.count; v += 3) {
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    for (let k = 0; k < 3; k += 1) {
+      x += position.getX(v + k) / 3;
+      y += position.getY(v + k) / 3 + BODY_Y / 3;
+      z += position.getZ(v + k) / 3;
+    }
+    // Spicchio e fascia del quadrilatero, uguali per i suoi due triangoli: bordo pulito.
+    const slice = (Math.round(Math.atan2(x, z) / STEP) + SEGMENTS) % SEGMENTS;
+    const band = Math.max(
+      1,
+      PROFILE.findIndex(([, py]) => py > y),
+    );
+    const mid = ((PROFILE[band - 1]?.[1] ?? 0) + (PROFILE[band]?.[1] ?? 1)) / 2;
+    const c = isFront(slice, mid) ? front : back;
+    for (let k = 0; k < 3; k += 1) c.toArray(tint, (v + k) * 3);
   }
-  head.add(mesh(geo(new ConeGeometry(0.06, 0.15, 4).rotateX(Math.PI / 2)), peach, 0, -0.02, 0.24));
+  solid.setAttribute('color', new BufferAttribute(tint, 3));
+  const body = group(inner, 0, BODY_Y);
+  body.add(mesh(solid, mat(0xffffff, true)));
 
-  // Pinne: perno alla spalla, pendono lungo -Y. Piedi: perno alla caviglia.
-  const wing = geo(new IcosahedronGeometry(0.1, 0), 0.4, 3, 1.6, -0.15);
+  // Testa: solo occhi e becco, sul solido; perno al centro della testa, cosi ruotando restano sulla sfera.
+  const head = group(body, 0, HEAD_Y);
+  const dot = geo(new IcosahedronGeometry(0.036, 1));
+  for (const s of [-1, 1]) {
+    const angle = s * 0.38;
+    head.add(mesh(dot, pupil, Math.sin(angle) * 0.18, 0.045, Math.cos(angle) * 0.18));
+  }
+  head.add(mesh(geo(new ConeGeometry(0.05, 0.13, 4).rotateX(Math.PI / 2)), peach, 0, -0.02, 0.245));
+
+  // Pinne: perno alla spalla, pendono lungo -Y aderenti al fianco. Piedi: perno alla caviglia.
+  const wing = geo(new IcosahedronGeometry(0.5, 1), 0.065, 0.36, 0.16, -0.3);
   const flipper = (s: number): Group => {
-    const g = group(body, s * 0.33, 0.22);
+    const g = group(body, s * 0.3, 0.2);
     g.add(mesh(wing, fin));
     return g;
   };
   const flipperL = flipper(-1);
   const flipperR = flipper(1);
-  const sole = geo(new IcosahedronGeometry(0.1, 0), 1.3, 0.4, 2, 0);
+  const sole = geo(new IcosahedronGeometry(0.5, 1), 0.15, 0.05, 0.24);
   const foot = (s: number): Group => {
-    const g = group(inner, s * 0.14, FOOT_Y);
-    g.add(mesh(sole, peach, 0, 0, 0.06));
+    const g = group(inner, s * 0.12, FOOT_Y);
+    g.add(mesh(sole, peach, 0, 0, 0.12));
     return g;
   };
   const footL = foot(-1);
@@ -138,9 +199,10 @@ export function createPenguin(colors: PenguinColors): Penguin {
     body.rotation.set(0, 0, 0);
     body.scale.set(1, 1, 1);
     head.rotation.set(0, 0, 0);
-    for (const j of [flipperL, flipperR]) j.rotation.set(0, 0, 0);
-    footL.position.set(-0.14, FOOT_Y, 0);
-    footR.position.set(0.14, FOOT_Y, 0);
+    flipperL.rotation.set(0, 0, -FLIPPER_REST);
+    flipperR.rotation.set(0, 0, FLIPPER_REST);
+    footL.position.set(-0.12, FOOT_Y, 0);
+    footR.position.set(0.12, FOOT_Y, 0);
     footL.rotation.set(0, 0, 0);
     footR.rotation.set(0, 0, 0);
     skis.visible = pose === 'ski';
@@ -148,14 +210,15 @@ export function createPenguin(colors: PenguinColors): Penguin {
     const c = Math.cos(p * TAU);
 
     if (pose === 'run') {
-      inner.position.y = 0.05 * Math.abs(s);
-      body.rotation.set(0.12, 0, 0.14 * s);
-      footL.position.z = 0.16 * s;
-      footR.position.z = -0.16 * s;
-      footL.position.y += 0.07 * Math.max(0, c);
-      footR.position.y += 0.07 * Math.max(0, -c);
-      flipperL.rotation.set(1.2 * s, 0, -0.9);
-      flipperR.rotation.set(-1.2 * s, 0, 0.9);
+      // Camminata dondolante: il corpo oscilla da un piede all'altro, le pinne si aprono appena.
+      inner.position.y = 0.03 * Math.abs(s);
+      body.rotation.set(0.06, 0, 0.1 * s);
+      footL.position.z = 0.1 * s;
+      footR.position.z = -0.1 * s;
+      footL.position.y += 0.04 * Math.max(0, c);
+      footR.position.y += 0.04 * Math.max(0, -c);
+      flipperL.rotation.z = -(FLIPPER_REST + 0.25 * Math.max(0, s));
+      flipperR.rotation.z = FLIPPER_REST + 0.25 * Math.max(0, -s);
     } else if (pose === 'jump') {
       const down = p < 0.15 ? 1 - p / 0.15 : p > 0.85 ? (p - 0.85) / 0.15 : 0;
       const air = 1 - down;
@@ -181,14 +244,15 @@ export function createPenguin(colors: PenguinColors): Penguin {
       body.rotation.set(0.5, 0, 0.3 * p);
       body.position.y -= 0.1;
       head.rotation.x = -0.3;
-      flipperL.rotation.set(0.9, 0, -0.3);
-      flipperR.rotation.set(0.9, 0, 0.3);
+      flipperL.rotation.set(0.5, 0, -0.45);
+      flipperR.rotation.set(0.5, 0, 0.45);
     } else if (pose === 'bagher') {
       body.rotation.x = 0.4 * p;
       body.position.y -= 0.1 * p;
       head.rotation.x = -0.3 * p;
-      flipperL.rotation.set(-0.9 * p, 0, 1.1 * p);
-      flipperR.rotation.set(-0.9 * p, 0, -1.1 * p);
+      // Pinne avanti e verso il basso, quasi unite davanti alla pancia (senza entrarci).
+      flipperL.rotation.set(-1.1 * p, 0, -FLIPPER_REST * (1 - p) + 0.3 * p);
+      flipperR.rotation.set(-1.1 * p, 0, FLIPPER_REST * (1 - p) - 0.3 * p);
     }
   }
   setPose('stand');
