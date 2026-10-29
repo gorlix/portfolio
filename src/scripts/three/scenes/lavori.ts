@@ -78,7 +78,8 @@ export function mount({
   renderer.setClearAlpha(0);
 
   const scene = new Scene();
-  const camera = new PerspectiveCamera(35, 1, 0.1, 160);
+  // Near non troppo piccolo: la camera sta a 8-12 unita, piu precisione di profondita.
+  const camera = new PerspectiveCamera(35, 1, 1, 80);
 
   const owned: { dispose(): void }[] = [];
   const own = <T extends { dispose(): void }>(resource: T): T => {
@@ -155,7 +156,9 @@ export function mount({
   // --- Strada: una striscia per livello, con il bordo nel colore del livello ---------------------
   for (const strip of course.strips) {
     box(m.soil, strip.x0, strip.x1, -SOIL, 0);
-    box(paintOf(strip.level).muted, strip.x0, strip.x1, -0.12, 0.02, DEPTH / 2 - 0.06, 0.12);
+    // Il bordo sporge di 0,02 davanti e sopra il terreno e ai lati: nessuna faccia complanare.
+    const edge = paintOf(strip.level).muted;
+    box(edge, strip.x0 - 0.02, strip.x1 + 0.02, -0.12, 0.02, DEPTH / 2 - 0.04, 0.12);
   }
 
   // --- Scenografia: oggetti fermi dietro la strada, uno per voce dei dati -------------------------
