@@ -30,6 +30,10 @@ export interface WorkCourse {
   levels: Level[];
 }
 
+/** Solo le esperienze dei Lavori: le altre (es. Beneficenza) restano nel CV ma non sono livelli. */
+export const inLavori = <T extends { humanSection: 'lavori' | 'beneficenza' }>(items: T[]): T[] =>
+  items.filter((e) => e.humanSection === 'lavori');
+
 /** Scenografia di un'esperienza che non la indica nei dati: una bandierina, o un giardino. */
 export const defaultScenery = (kind: LevelInput['kind']): Scenery[] =>
   kind === 'volunteer' ? ['garden'] : ['flag'];

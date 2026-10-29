@@ -3,6 +3,7 @@ import {
   chronological,
   defaultScenery,
   detailPath,
+  inLavori,
   splitResult,
   workCourse,
 } from '../../src/lib/work';
@@ -84,5 +85,18 @@ describe('punti del CV', () => {
     });
     const long = `${'parola '.repeat(10)}: resto`;
     expect(splitResult(long)).toEqual({ text: long });
+  });
+});
+
+describe('esperienze fuori dai Lavori', () => {
+  it('una esperienza di Beneficenza non entra nei livelli dei Lavori', () => {
+    const items = [
+      { slug: 'lavoro', start: '2026-01', humanSection: 'lavori' as const },
+      { slug: 'club', start: '2025-01', humanSection: 'beneficenza' as const },
+    ];
+    const course = workCourse(
+      inLavori(items).map((e) => ({ ...e, end: null, kind: 'work' as const })),
+    );
+    expect(course.levels.map((l) => l.slug)).toEqual(['lavoro']);
   });
 });
