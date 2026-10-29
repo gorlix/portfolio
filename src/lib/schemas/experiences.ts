@@ -35,6 +35,8 @@ export const experienceSchema = z.strictObject({
   stack: orTodo(z.array(text)),
   /** Lavoro o volontariato: l'albero di /human marca il volontariato come tale. */
   kind: z.enum(['work', 'volunteer']).default('work'),
+  /** Dove compare su /human: nei Lavori o solo come argomento di Beneficenza; il CV la elenca comunque. */
+  humanSection: z.enum(['lavori', 'beneficenza']).default('lavori'),
   /** Pagina di approfondimento dell'esperienza, se esiste. */
   detail: z.enum(detailPages).optional(),
   /** Scenografia del livello dei Lavori; senza, un default per lavoro o volontariato. */

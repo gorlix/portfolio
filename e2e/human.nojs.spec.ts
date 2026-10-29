@@ -55,7 +55,9 @@ for (const [route, lang] of [
     }) => {
       await page.goto(route);
       await expect(page.locator('#homelab table tbody tr')).toHaveCount(3);
-      await expect(page.getByText('TODO(Alessandro)').first()).toBeVisible();
+      await expect(
+        page.getByText('TODO(Alessandro)').filter({ visible: true }).first(),
+      ).toBeVisible();
       await expect(page.locator('#contatti a[href^="mailto:"]')).toHaveCount(1);
     });
 
