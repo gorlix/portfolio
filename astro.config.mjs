@@ -1,6 +1,20 @@
 import { defineConfig } from 'astro/config';
 
+// Dev: /admin/ serve public/admin/index.html (su Cloudflare Pages lo fa gia l'hosting).
+const adminIndex = {
+  name: 'admin-index',
+  hooks: {
+    'astro:server:setup': ({ server }) => {
+      server.middlewares.use((req, _res, next) => {
+        if (req.url === '/admin' || req.url === '/admin/') req.url = '/admin/index.html';
+        next();
+      });
+    },
+  },
+};
+
 export default defineConfig({
+  integrations: [adminIndex],
   site: 'https://alessandrogorla.it',
   output: 'static',
   trailingSlash: 'always',

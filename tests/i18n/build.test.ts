@@ -16,6 +16,8 @@ const walk = (dir: string): string[] =>
   });
 
 // Pagina HTML -> URL pubblico (con slash finale).
+// /admin = pannello CMS di terze parti (Sveltia), non una pagina del sito.
+const isAdmin = (file: string) => relative(outDir, file).split('/')[0] === 'admin';
 const urlOf = (file: string) => `/${relative(outDir, file).replace(/index\.html$/, '')}`;
 const attr = (tag: string, name: string) => tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
 
@@ -26,7 +28,7 @@ beforeAll(async () => {
   mkdirSync(outDir, { recursive: true });
   await build({ root, outDir, logLevel: 'error' });
   pages = walk(outDir)
-    .filter((f) => f.endsWith('.html'))
+    .filter((f) => f.endsWith('.html') && !isAdmin(f))
     .map((f) => ({ url: urlOf(f), html: readFileSync(f, 'utf8') }));
 }, 60_000);
 
@@ -248,7 +250,7 @@ describe('Web Analytics solo su /human (PORT-72)', () => {
       else process.env.PUBLIC_CF_ANALYTICS_TOKEN = previous;
     }
     withToken = walk(analyticsOut)
-      .filter((f) => f.endsWith('.html'))
+      .filter((f) => f.endsWith('.html') && relative(analyticsOut, f).split('/')[0] !== 'admin')
       .map((f) => ({
         url: `/${relative(analyticsOut, f).replace(/index\.html$/, '')}`,
         html: readFileSync(f, 'utf8'),
@@ -437,7 +439,7 @@ describe('criteri di accettazione minimi §16 (PORT-73)', () => {
   it('nessun IP privato o hostname dell infrastruttura in nessun file di testo pubblicato', async () => {
     const { scanText } = await import('../../src/lib/machine/validate');
     const ext = /\.(html|txt|md|json|xml|css|js|svg|map)$/;
-    for (const file of walk(outDir).filter((f) => ext.test(f))) {
+    for (const file of walk(outDir).filter((f) => ext.test(f) && !isAdmin(f))) {
       const found = scanText(readFileSync(file, 'utf8'));
       expect(found, relative(outDir, file)).toEqual([]);
     }
