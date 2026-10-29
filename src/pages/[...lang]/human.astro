@@ -20,7 +20,7 @@ import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import { isTodo, type Locale } from '../../lib/schemas/common';
-import { chronological, detailPath, splitResult, workTree } from '../../lib/work';
+import { chronological, detailPath, splitResult, workCourse } from '../../lib/work';
 import { createDomoticaSim, SIM_SEED, sparkPoints } from '../../scripts/three/domotica/sim';
 
 export const getStaticPaths = localeStaticPaths;
@@ -85,13 +85,12 @@ const sections = [{ id: 'home' as const, title: page.homeTitle }, ...theme.secti
 const badges = skills.filter((k) => k.data.kind === 'technical' && k.data.badge === true);
 
 /**
- * Albero dei Lavori (PORT-81): dal basso la piu vecchia, una foglia per esperienza, lati alternati.
- * Le schede partono dall'alto (la piu recente) e scendono lungo il tronco (deciso da Alessandro).
+ * Percorso dei Lavori (PORT-83): le schede partono dalla piu recente (deciso da Alessandro), un
+ * livello del percorso a piattaforme per esperienza, nello stesso ordine.
  */
 const work = chronological(experiences.map((e) => ({ ...e, start: e.data.start })));
-const tree = workTree(work.map((e) => ({ slug: e.slug, ...e.data })));
+const course = workCourse(work.map((e) => ({ slug: e.slug, ...e.data })));
 const newestFirst = [...work].reverse();
-const leafOf = (slug: string) => tree.leaves.find((l) => l.slug === slug);
 const W = page.work;
 /** Punti del CV nella scheda: fino a tre; con una pagina di approfondimento due, il resto sta li. */
 const highlights = (detail: boolean) => (detail ? 2 : 3);
@@ -210,7 +209,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   decoding="async"
                 />
               </picture>
-              <Scene scene="lavori" label={page.scenes.lavori} accent="lavori" data={tree} />
+              <Scene scene="lavori" label={page.scenes.lavori} accent="lavori" data={course} />
             </div>
           )}
           {s.id === 'homelab' && (
@@ -332,11 +331,10 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <div class="cards">
                 {newestFirst.map(({ slug, data: e }) => {
                   const when = period(e.start, e.end);
-                  const leaf = leafOf(slug);
                   const volunteer = e.kind === 'volunteer';
                   const company = isTodo(e.company) ? null : e.company;
                   return (
-                    <article class="card job" data-moment={slug} data-side={leaf?.side} data-kind={e.kind}>
+                    <article class="card job" data-moment={slug} data-kind={e.kind}>
                       <h3>{isTodo(e.role) ? <Todo label={page.todoLabel} hint={e.role.todo} /> : e.role}</h3>
                       <p class="org">
                         <strong>{company ?? <Todo label={page.todoLabel} hint={isTodo(e.company) ? e.company.todo : ''} />}</strong>
@@ -1186,16 +1184,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     margin-top: 1rem;
   }
   /*
-   * Lavori ad albero (PORT-81): schede in stile CV dal lato della loro foglia, alternate.
-   * Senza 3D (o su schermi stretti) restano in colonna sul fondo semplice.
+   * Lavori a piattaforme (PORT-83): schede in stile CV tutte a sinistra, il percorso del pinguino
+   * corre a destra. Senza 3D (o su schermi stretti) restano in colonna sul fondo semplice.
    */
   section[data-section="lavori"] > .cards {
     max-width: 72rem;
-  }
-  @media (min-width: 60rem) and (scripting: enabled) {
-    section[data-section="lavori"]:not(:has(.scene[data-scene-state="text"])) .job[data-side="right"] {
-      justify-self: end;
-    }
   }
   .job h3 {
     font-size: 1.125rem;

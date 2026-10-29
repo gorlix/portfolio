@@ -8,6 +8,21 @@ import { isoDate, orTodo, text } from './common';
 export const detailPages = ['trimind'] as const;
 export type DetailPage = (typeof detailPages)[number];
 
+/**
+ * Scenografia del livello dei Lavori (PORT-83): oggetti accanto alla strada, nell'ordine in cui il
+ * pinguino ci passa davanti. Solo forme generiche: nessun dato reale d'infrastruttura.
+ */
+export const sceneryKinds = [
+  'container',
+  'firewall',
+  'conveyor',
+  'flag',
+  'site',
+  'bridge',
+  'garden',
+] as const;
+export type Scenery = (typeof sceneryKinds)[number];
+
 export const experienceSchema = z.strictObject({
   company: orTodo(text),
   role: orTodo(text),
@@ -22,6 +37,8 @@ export const experienceSchema = z.strictObject({
   kind: z.enum(['work', 'volunteer']).default('work'),
   /** Pagina di approfondimento dell'esperienza, se esiste. */
   detail: z.enum(detailPages).optional(),
+  /** Scenografia del livello dei Lavori; senza, un default per lavoro o volontariato. */
+  scenery: z.array(z.enum(sceneryKinds)).min(1).optional(),
 });
 
 export const experienceTranslatable = ['role', 'summary', 'results.*'];
