@@ -1,5 +1,5 @@
 import { isTodo, type Todo } from './schemas/common';
-import type { DetailPage, Obstacle } from './schemas/experiences';
+import type { DetailPage, Scenery } from './schemas/experiences';
 
 /*
  * Percorso dei Lavori di /human (spec §7.3, §13, PORT-83) e pagine di approfondimento (PORT-82).
@@ -13,7 +13,7 @@ export interface LevelInput {
   end: string | null | Todo;
   kind: 'work' | 'volunteer';
   detail?: DetailPage | undefined;
-  obstacles?: Obstacle[] | undefined;
+  scenery?: Scenery[] | undefined;
 }
 
 /** Livello del percorso: quanto basta alla scena (nessun testo, che sta nelle schede). */
@@ -23,16 +23,16 @@ export interface Level {
   volunteer: boolean;
   /** Ha una pagina di approfondimento. */
   detail: boolean;
-  obstacles: Obstacle[];
+  scenery: Scenery[];
 }
 
 export interface WorkCourse {
   levels: Level[];
 }
 
-/** Livello di un'esperienza senza ostacoli nei dati: un gradino e l'arrivo, o un giardino. */
-export const defaultObstacles = (kind: LevelInput['kind']): Obstacle[] =>
-  kind === 'volunteer' ? ['garden'] : ['platform', 'flag'];
+/** Scenografia di un'esperienza che non la indica nei dati: una bandierina, o un giardino. */
+export const defaultScenery = (kind: LevelInput['kind']): Scenery[] =>
+  kind === 'volunteer' ? ['garden'] : ['flag'];
 
 /**
  * Ordine cronologico, dalla piu vecchia. Senza data d'inizio nota l'esperienza va per prima;
@@ -58,7 +58,7 @@ export function workCourse(items: LevelInput[]): WorkCourse {
         ongoing: e.end === null,
         volunteer: e.kind === 'volunteer',
         detail: e.detail !== undefined,
-        obstacles: e.obstacles ?? defaultObstacles(e.kind),
+        scenery: e.scenery ?? defaultScenery(e.kind),
       })),
   };
 }

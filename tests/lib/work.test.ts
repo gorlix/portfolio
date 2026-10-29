@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   chronological,
-  defaultObstacles,
+  defaultScenery,
   detailPath,
   splitResult,
   workCourse,
@@ -35,7 +35,7 @@ describe('percorso dei lavori', () => {
         end: null,
         kind: 'work',
         detail: 'trimind',
-        obstacles: ['container', 'flag'],
+        scenery: ['container', 'flag'],
       },
       { slug: 'club', start: todo, end: todo, kind: 'volunteer' },
       { slug: 'distretto', start: '2026-01', end: '2026-06', kind: 'work' },
@@ -46,21 +46,21 @@ describe('percorso dei lavori', () => {
         ongoing: true,
         volunteer: false,
         detail: true,
-        obstacles: ['container', 'flag'],
+        scenery: ['container', 'flag'],
       },
       {
         slug: 'distretto',
         ongoing: false,
         volunteer: false,
         detail: false,
-        obstacles: defaultObstacles('work'),
+        scenery: defaultScenery('work'),
       },
       {
         slug: 'club',
         ongoing: false,
         volunteer: true,
         detail: false,
-        obstacles: defaultObstacles('volunteer'),
+        scenery: defaultScenery('volunteer'),
       },
     ]);
   });

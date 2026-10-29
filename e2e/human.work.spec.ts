@@ -52,12 +52,12 @@ for (const [route, detail] of [
       (el) =>
         (
           JSON.parse(el.textContent ?? '{}') as {
-            levels: { slug: string; obstacles: string[] }[];
+            levels: { slug: string; scenery: string[] }[];
           }
         ).levels,
     );
     expect(levels.map((l) => l.slug)).toEqual(names.slice(1, -1));
-    for (const level of levels) expect(level.obstacles.length).toBeGreaterThan(0);
+    for (const level of levels) expect(level.scenery.length).toBeGreaterThan(0);
   });
 
   test(`${route}: "Approfondisci" solo sulle esperienze con pagina dedicata`, async ({ page }) => {

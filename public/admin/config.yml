@@ -1281,6 +1281,23 @@ collections:
         widget: select
         options:
           - trimind
+      - name: scenery
+        i18n: duplicate
+        required: false
+        widget: list
+        min: 1
+        field:
+          name: item
+          i18n: duplicate
+          widget: select
+          options:
+            - container
+            - firewall
+            - conveyor
+            - flag
+            - site
+            - bridge
+            - garden
   - name: certifications
     label: Certifications
     folder: src/content/certifications
