@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 // Popup sull'hardware della scrivania (Home di /human, PORT-84). I link sono quelli forniti da
 // Alessandro: qui sono verificati alla lettera, in italiano e in inglese, anche senza JavaScript.
@@ -64,25 +64,56 @@ for (const route of routes) {
       await expect(button).toHaveAttribute('aria-expanded', 'false');
     });
 
-    test('il mouse sull’oggetto apre il popup e lo lascia raggiungere', async ({ page }) => {
-      test.setTimeout(90_000);
+    // Trova l'oggetto passando il mouse su una griglia: il primo punto che apre il popup.
+    const findPrinter = async (page: Page): Promise<{ x: number; y: number }> => {
       const popup = page.locator('#home [data-hw-pop="printer"]');
       const box = await page.locator('[data-scene="scrivania"] canvas').boundingBox();
       if (!box) throw new Error('canvas assente');
-      // Cerca l'oggetto passando il mouse su una griglia: il primo che apre il popup della stampante.
-      let found = false;
-      for (let y = 0.45; y < 0.85 && !found; y += 0.05) {
-        for (let x = 0.7; x < 0.98 && !found; x += 0.04) {
-          await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
-          found = await popup.isVisible();
+      for (let y = 0.45; y < 0.85; y += 0.05) {
+        for (let x = 0.7; x < 0.98; x += 0.04) {
+          const at = { x: box.x + box.width * x, y: box.y + box.height * y };
+          await page.mouse.move(at.x, at.y);
+          if (await popup.isVisible()) return at;
         }
       }
-      expect(found).toBe(true);
-      const pop = await popup.boundingBox();
-      if (!pop) throw new Error('popup assente');
-      await page.mouse.move(pop.x + pop.width / 2, pop.y + pop.height / 2, { steps: 6 });
-      await page.waitForTimeout(500);
+      throw new Error('stampante non trovata');
+    };
+
+    test('il mouse va dall’oggetto al link senza che il popup si chiuda', async ({ page }) => {
+      test.setTimeout(90_000);
+      const popup = page.locator('#home [data-hw-pop="printer"]');
+      await findPrinter(page);
+      const link = popup.getByRole('link');
+      await expect(link).toHaveAttribute('href', links.printer);
+      const target = await link.boundingBox();
+      if (!target) throw new Error('link assente');
+      // Movimento lento (a passi) verso il link, come una mano vera.
+      await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, {
+        steps: 25,
+      });
+      await page.waitForTimeout(700);
       await expect(popup).toBeVisible();
+      await link.hover();
+      await expect(link).toBeVisible();
+      // Uscendo dal popup verso il vuoto si chiude, con ritardo.
+      await page.mouse.move(5, 5, { steps: 4 });
+      await expect(popup).toBeHidden({ timeout: 3000 });
+    });
+
+    test('il click sull’oggetto fissa il popup fino a un click fuori', async ({ page }) => {
+      test.setTimeout(90_000);
+      const popup = page.locator('#home [data-hw-pop="printer"]');
+      const at = await findPrinter(page);
+      await page.mouse.click(at.x, at.y);
+      const box = await page.locator('[data-scene="scrivania"] canvas').boundingBox();
+      if (!box) throw new Error('canvas assente');
+      // Il mouse se ne va nel vuoto: il popup fisso resta.
+      await page.mouse.move(box.x + 4, box.y + 4, { steps: 5 });
+      await page.waitForTimeout(800);
+      await expect(popup).toBeVisible();
+      // Un click fuori (sul vuoto del canvas) lo chiude.
+      await page.mouse.click(box.x + 4, box.y + 4);
+      await expect(popup).toBeHidden();
     });
 
     test('axe pulito con un popup aperto', async ({ page }) => {

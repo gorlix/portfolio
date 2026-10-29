@@ -6,9 +6,10 @@
  * Nessuna dipendenza da three: la scena decide cosa c'e sotto il puntatore e dove sta l'oggetto.
  */
 
-/** Pausa prima di chiudere un popup aperto dal passaggio del mouse (tempo per raggiungerlo). */
-const CLOSE_DELAY_MS = 280;
-const GAP = 12;
+/** Pausa prima di chiudere un popup aperto dal passaggio del mouse (tempo per raggiungerlo
+ * attraversando il vuoto tra oggetto e popup). Il click sull'oggetto lo fissa. */
+const CLOSE_DELAY_MS = 400;
+const GAP = 4;
 const MARGIN = 8;
 
 export interface Point {
@@ -160,7 +161,16 @@ export function bindHardwareUi(container: HTMLElement, hooks: HardwareHooks): Ha
     p.addEventListener('pointerleave', onPopupLeave);
     p.addEventListener('focusin', onPopupFocus);
   }
+  // Un popup fisso si chiude con un clic fuori (canvas e pulsanti hanno gia la loro logica).
+  const onDocDown = (event: PointerEvent): void => {
+    if (open === null || !pinned) return;
+    const target = event.target as Node | null;
+    if (!target || layer.contains(target) || root.contains(target)) return;
+    if (container.contains(target)) return;
+    show(null, false);
+  };
   document.addEventListener('keydown', onKey);
+  document.addEventListener('pointerdown', onDocDown, { passive: true });
   root.hidden = false;
   if (text) text.hidden = true;
 
@@ -193,6 +203,7 @@ export function bindHardwareUi(container: HTMLElement, hooks: HardwareHooks): Ha
         p.removeEventListener('focusin', onPopupFocus);
       }
       document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDocDown);
       root.hidden = true;
       if (text) text.hidden = false;
     },
