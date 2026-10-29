@@ -1315,6 +1315,14 @@ collections:
           - work
           - volunteer
         default: work
+      - name: humanSection
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - lavori
+          - beneficenza
+        default: lavori
       - name: detail
         i18n: duplicate
         required: false
