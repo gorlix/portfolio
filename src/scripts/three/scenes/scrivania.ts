@@ -1,5 +1,6 @@
 import {
   AmbientLight,
+  Box3,
   BoxGeometry,
   CanvasTexture,
   type Color,
@@ -11,15 +12,19 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  type Object3D,
   PerspectiveCamera,
+  Raycaster,
   Scene,
   SphereGeometry,
   SRGBColorSpace,
   Color as ThreeColor,
+  Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three';
 import { pixelRatioFor } from '../capabilities';
+import { bindHardwareUi } from '../hardware';
 import { ease } from '../story';
 import { firstToken } from '../tokens';
 import type { SceneContext, SceneInstance } from '../types';
@@ -29,7 +34,8 @@ import type { SceneContext, SceneInstance } from '../types';
  * low-poly con monitor (terminale con cursore), tastiera split, stampante 3D, mensola con
  * mini-server e finestra con luce calda. Tutto procedurale, flat-shaded, colori solo dai token.
  *
- * Non e interattiva: nella prima schermata la camera "respira" lentamente; scorrendo si avvicina
+ * Nella prima schermata gli oggetti con un popup (stampante, trackball, tastiera, monitor, mini-server,
+ * finestra; ../hardware.ts) si possono indicare col mouse o toccare. La camera "respira" lentamente; scorrendo si avvicina
  * al monitor (posizione del racconto, ../story.ts) mentre lo sfondo sfuma nella sezione dopo.
  * Con reduced-motion e un solo fotogramma fermo sulla prima inquadratura.
  */
@@ -144,6 +150,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Monitor con terminale ---------------------------------------------------------------------
   const monitor = new Group();
+  monitor.name = 'monitor';
   root.add(monitor);
   box(monitor, [0.7, 0.05, 0.4], [0, top + 0.025, -0.25], lit('bodyDark'));
   box(monitor, [0.12, 0.45, 0.1], [0, top + 0.25, -0.35], lit('bodyDark'));
@@ -184,6 +191,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Tastiera split (due meta inclinate, tasti istanziati) -------------------------------------
   const keyboard = new Group();
+  keyboard.name = 'moonlander';
   root.add(keyboard);
   const COLS = 6;
   const ROWS = 4;
@@ -209,6 +217,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Trackball (stile Ploopy Adept) tra le due meta: corpo ottagonale, pallina e tre tasti ------
   const ball = new Group();
+  ball.name = 'trackball';
   ball.position.set(0, top, 0.55);
   keyboard.add(ball);
   const hull = new Mesh(own(new CylinderGeometry(0.23, 0.26, 0.09, 8)), lit('trackball'));
@@ -222,6 +231,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Stampante 3D con pezzo che cresce ----------------------------------------------------------
   const printer = new Group();
+  printer.name = 'printer';
   printer.position.set(DESK_WIDTH / 2 - 0.85, top, -0.1);
   root.add(printer);
   box(printer, [0.9, 0.08, 0.9], [0, 0.04, 0], lit('bodyDark'));
@@ -233,6 +243,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Mensola con mini-server -------------------------------------------------------------------
   const shelf = new Group();
+  shelf.name = 'server';
   shelf.position.set(-DESK_WIDTH / 2 + 1.0, 3.2, -2.1);
   root.add(shelf);
   box(shelf, [2.0, 0.08, 0.7], [0, 0, 0], lit('desk'));
@@ -252,6 +263,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
 
   // --- Finestra con luce calda -------------------------------------------------------------------
   const win = new Group();
+  win.name = 'window';
   win.position.set(DESK_WIDTH / 2 - 1.6, 3.4, -2.48);
   root.add(win);
   box(win, [1.7, 1.9, 0.08], [0, 0, 0], lit('desk'));
@@ -295,6 +307,59 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
     camera.lookAt(target);
   };
 
+  // --- Popup sull'hardware: oggetti indicabili, punto di ancoraggio e puntatore -------------------
+  const pickables = [monitor, keyboard, printer, shelf, win];
+  root.updateMatrixWorld(true);
+  const anchors = new Map<string, Vector3>();
+  for (const group of [...pickables, ball]) {
+    const box = new Box3().setFromObject(group);
+    const at = box.getCenter(new Vector3());
+    at.y = box.max.y;
+    anchors.set(group.name, at);
+  }
+  // La tastiera e larga e la trackball sta in mezzo: il popup della tastiera ancora su una meta.
+  anchors.set('moonlander', new Vector3(-0.8, top + 0.2, 0.55));
+  let size = { width: 1, height: 1 };
+  const hw = bindHardwareUi(container, {
+    anchor(id) {
+      const at = anchors.get(id);
+      if (!at) return null;
+      const p = at.clone().project(camera);
+      if (p.z > 1) return null;
+      return { x: ((p.x + 1) / 2) * size.width, y: ((1 - p.y) / 2) * size.height };
+    },
+  });
+  const raycaster = new Raycaster();
+  const ndc = new Vector2();
+  const pick = (event: PointerEvent | MouseEvent): string | null => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    ndc.set(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    raycaster.setFromCamera(ndc, camera);
+    for (const hit of raycaster.intersectObjects(pickables, true)) {
+      // Il gruppo con nome piu vicino: la trackball sta dentro la tastiera ma ha il suo popup.
+      for (let o: Object3D | null = hit.object; o; o = o.parent)
+        if (anchors.has(o.name)) return o.name;
+    }
+    return null;
+  };
+  const onMove = (event: PointerEvent): void => {
+    if (event.pointerType !== 'mouse') return;
+    const id = pick(event);
+    canvas.style.cursor = id ? 'pointer' : '';
+    hw.hover(id);
+  };
+  const onLeave = (event: PointerEvent): void => {
+    if (event.pointerType === 'mouse') hw.hover(null);
+  };
+  const onClick = (event: MouseEvent): void => hw.tap(pick(event));
+  canvas.addEventListener('pointermove', onMove, { passive: true });
+  canvas.addEventListener('pointerleave', onLeave, { passive: true });
+  canvas.addEventListener('click', onClick);
+
   // --- Ciclo di disegno --------------------------------------------------------------------------
   const BLINK = 0.55;
   let cursorOn = true;
@@ -321,6 +386,7 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
   const draw = (): void => {
     place();
     renderer.render(scene, camera);
+    if (hw.isOpen()) hw.reposition();
   };
   const invalidate = (): void => {
     if (!frame && !disposed) draw();
@@ -356,14 +422,17 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
       frame = requestAnimationFrame(tick);
     },
     stop,
-    setStory(position) {
+    setStory(position, interactive) {
       storyTarget = Math.max(0, position);
+      hw.setActive(interactive);
+      if (!interactive) canvas.style.cursor = '';
       if (tier !== 'full') story = storyTarget;
       invalidate();
     },
     resize(width, height) {
       if (disposed || width <= 0 || height <= 0) return;
       renderer.setSize(width, height, false);
+      size = { width, height };
       aspect = width / height;
       camera.aspect = aspect;
       fitDistance();
@@ -374,6 +443,10 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
       if (disposed) return;
       disposed = true;
       stop();
+      canvas.removeEventListener('pointermove', onMove);
+      canvas.removeEventListener('pointerleave', onLeave);
+      canvas.removeEventListener('click', onClick);
+      hw.dispose();
       for (const resource of owned) resource.dispose();
       renderer.dispose();
       renderer.forceContextLoss();

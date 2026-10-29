@@ -1,5 +1,15 @@
 import { z } from 'astro/zod';
-import { humanSectionIds, text } from './common';
+import { humanSectionIds, text, url } from './common';
+
+/** Oggetti della scrivania con un popup, nell'ordine dell'elenco. */
+export const hardwareIds = [
+  'printer',
+  'trackball',
+  'moonlander',
+  'monitor',
+  'server',
+  'window',
+] as const;
 
 const id = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 
@@ -29,6 +39,22 @@ export const humanSchema = z.strictObject({
     badgesLabel: text,
     /** Cosa mostra il poster della sezione, inserito in `posterNotice` al posto di `{subject}`. */
     posterSubject: text,
+    /** Hardware sulla scrivania (PORT-84): elenco accessibile e popup sugli oggetti della scena. */
+    hardwareTitle: text,
+    hardwareLabel: text,
+    hardwareHint: text,
+    hardware: z
+      .array(
+        z.strictObject({
+          /** Collega la voce all'oggetto con lo stesso nome nella scena (scrivania.ts). */
+          id: z.enum(hardwareIds),
+          name: text,
+          text,
+          url: url.optional(),
+          linkLabel: text.optional(),
+        }),
+      )
+      .length(hardwareIds.length),
   }),
   /**
    * Avviso mostrato col poster al posto del 3D, comune alle sezioni immersive: una frase per ogni
@@ -221,6 +247,12 @@ export const humanTranslatable = [
   'home.scrollHint',
   'home.badgesLabel',
   'home.posterSubject',
+  'home.hardwareTitle',
+  'home.hardwareLabel',
+  'home.hardwareHint',
+  'home.hardware.*.name',
+  'home.hardware.*.text',
+  'home.hardware.*.linkLabel',
   'posterNotice.webgl',
   'posterNotice.savedata',
   'posterNotice.error',

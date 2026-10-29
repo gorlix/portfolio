@@ -438,6 +438,46 @@ collections:
               - name: posterSubject
                 i18n: true
                 widget: string
+              - name: hardwareTitle
+                i18n: true
+                widget: string
+              - name: hardwareLabel
+                i18n: true
+                widget: string
+              - name: hardwareHint
+                i18n: true
+                widget: string
+              - name: hardware
+                i18n: true
+                widget: list
+                min: 6
+                max: 6
+                fields:
+                  - name: id
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - printer
+                      - trackball
+                      - moonlander
+                      - monitor
+                      - server
+                      - window
+                  - name: name
+                    i18n: true
+                    widget: string
+                  - name: text
+                    i18n: true
+                    widget: text
+                  - name: url
+                    i18n: duplicate
+                    required: false
+                    widget: string
+                    type: url
+                  - name: linkLabel
+                    i18n: true
+                    required: false
+                    widget: string
           - name: posterNotice
             i18n: true
             widget: object
