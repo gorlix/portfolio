@@ -289,7 +289,17 @@ function hashHasScene(): boolean {
   return !!target && (target.matches('[data-scene]') || !!target.querySelector('[data-scene]'));
 }
 
+/** Schede che scorrono al loro interno (telefono, PORT-85): focus da tastiera solo se traboccano. */
+const syncScrollableCards = (): void => {
+  for (const card of document.querySelectorAll<HTMLElement>('.card')) {
+    if (card.scrollHeight > card.clientHeight + 1) card.tabIndex = 0;
+    else card.removeAttribute('tabindex');
+  }
+};
+
 function init(): void {
+  syncScrollableCards();
+  addEventListener('resize', syncScrollableCards, { passive: true });
   for (const section of document.querySelectorAll<HTMLElement>('[data-story]')) {
     const moments = [...section.querySelectorAll<HTMLElement>('[data-moment]')];
     if (moments.length > 0) stories.push({ section, moments });

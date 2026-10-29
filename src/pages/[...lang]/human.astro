@@ -1039,6 +1039,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   section[data-story] > :is(h1, h2) {
     top: var(--head);
   }
+  /* Prima schermata: il titolo scorre via con l'intro invece di restarle sopra (PORT-85). */
+  section[data-phase="hero"] > :is(h1, h2) {
+    position: relative;
+    top: auto;
+  }
   /* Durante le schede il titolo ha un fondo pieno: le schede gli scorrono sotto senza mescolarsi. */
   section[data-phase="cards"] > :is(h1, h2) {
     transform: scale(0.6);
@@ -1080,7 +1085,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
       padding: 1rem;
       border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
       border-radius: 0.75rem;
-      background: color-mix(in srgb, var(--bg) 84%, transparent);
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
       backdrop-filter: blur(12px);
     }
   }
@@ -1091,7 +1096,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
       padding: 0.75rem;
       border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
       border-radius: 0.75rem;
-      background: color-mix(in srgb, var(--bg) 86%, transparent);
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
       backdrop-filter: blur(12px);
     }
     .hero .lab-ui > .meta {
@@ -1146,10 +1151,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     padding: 1.25rem 1.5rem;
     border: 1px solid var(--accent);
     border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     backdrop-filter: blur(14px) saturate(1.2);
     box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+    /* Testo attenuato nel vetro: leggermente piu vicino a quello pieno, cosi resta AA con il vetro piu trasparente (PORT-85). */
+    --text-muted: color-mix(in srgb, var(--text) 70%, var(--text-muted));
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .card,
@@ -1172,6 +1179,17 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     }
     .card :is(th, td) {
       padding: 0.375rem 0.25rem;
+    }
+  }
+  /*
+   * Telefono: una scheda lunga non copre tutto il 3D, scorre al suo interno (PORT-85). Il bootstrap
+   * le rende raggiungibili da tastiera (tabindex) quando traboccano; la pagina prosegue al bordo.
+   */
+  @media (max-width: 47.99rem) and (scripting: enabled) {
+    .card {
+      max-height: 58svh;
+      overflow-y: auto;
+      overscroll-behavior-y: auto;
     }
   }
   /* Il nome del nodo non si spezza sul trattino ("node-1"). */
@@ -1428,10 +1446,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     padding: 1.25rem 1.5rem;
     border: 1px solid var(--accent);
     border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     backdrop-filter: blur(14px) saturate(1.2);
     box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+    /* Testo attenuato nel vetro: leggermente piu vicino a quello pieno, cosi resta AA con il vetro piu trasparente (PORT-85). */
+    --text-muted: color-mix(in srgb, var(--text) 70%, var(--text-muted));
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass {
@@ -1478,6 +1498,20 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     }
     .glass .hint {
       font-size: 0.875rem;
+    }
+  }
+  /* Telefono basso (es. 375x667): il vetro si accorcia in righe che scorrono di lato e lascia in vista la tastiera (PORT-85). */
+  @media (max-width: 48rem) and (max-height: 46rem) {
+    .glass .hint {
+      display: none;
+    }
+    .glass .badges,
+    .glass .hw-list {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .glass :is(.badges, .hw-list) > li {
+      flex: none;
     }
   }
   /* Hardware della scrivania (PORT-84): pulsanti nel vetro, popup sopra la scena. */
@@ -1544,7 +1578,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     padding: 0.625rem 0.875rem;
     border: 1px solid var(--accent);
     border-radius: 0.5rem;
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     backdrop-filter: blur(14px) saturate(1.2);
     box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--bg-deep) 55%, transparent);

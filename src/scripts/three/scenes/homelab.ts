@@ -69,6 +69,9 @@ const PULSES = 3;
 const MAX_YAW = 0.7;
 /** Oscillazione lenta finche l'utente non prende il controllo. */
 const SWAY = { amplitude: 0.22, speed: 0.18 };
+/** Prima schermata con la colonna dei comandi a destra (22rem): zoom indietro e soggetto a sinistra. */
+const SIDE_CONTROLS = { minWidth: 1152, distance: 1.22, shift: -0.22 };
+
 /** Rincorsa della camera verso la posizione chiesta dallo scroll (1/s). */
 const STORY_CATCH_UP = 5;
 
@@ -420,8 +423,9 @@ export function mount({
           target: centroid([...adrNodes], 0.95),
           yaw: -0.22,
           elevation: 0.36,
-          distance: 0.72,
-          shift: 0.3,
+          // Schermo largo: la scheda e a sinistra, le due piattaforme devono stare nel resto (PORT-85).
+          distance: size.width >= size.height ? 1.45 : 0.72,
+          shift: size.width >= size.height ? 0.26 : 0.3,
           decisions: 1,
         };
       case 'failover':
@@ -465,8 +469,9 @@ export function mount({
           target: new Vector3(0, 0.45, 0),
           yaw: userYaw ?? Math.sin(elapsed * SWAY.speed) * SWAY.amplitude,
           elevation: 0.46,
-          distance: 1,
-          shift: -0.12,
+          // Con la colonna dei comandi a destra (PORT-85) entrambe le piattaforme restano a sinistra.
+          distance: sideControls ? SIDE_CONTROLS.distance : 1,
+          shift: sideControls ? SIDE_CONTROLS.shift : -0.12,
           decisions: layers.decisions ? 1 : 0,
           backup: layers.backup ? 1 : 0,
           wip: layers.wip ? 1 : 0,
@@ -484,6 +489,8 @@ export function mount({
   let interactive = true;
   let baseDistance = 10;
   let size = { width: 1, height: 1 };
+  /** Da 72rem i comandi stanno in una colonna a destra (stessa soglia del CSS di /human). */
+  let sideControls = false;
   const eye = new Vector3();
 
   const place = (dt: number): void => {
@@ -683,6 +690,7 @@ export function mount({
       if (disposed || width <= 0 || height <= 0) return;
       renderer.setSize(width, height, false);
       size = { width, height };
+      sideControls = width >= SIDE_CONTROLS.minWidth;
       camera.aspect = width / height;
       fitDistance(camera.aspect);
       camera.updateProjectionMatrix();

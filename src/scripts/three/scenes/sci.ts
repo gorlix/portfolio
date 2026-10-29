@@ -22,7 +22,7 @@ const RADIUS = 1.9;
 const SEGMENTS = 64;
 const SIDES = 4;
 /** Il pinguino misura ~1: ridotto a ~0,5 e in scala con la montagna. */
-const SKIER_SCALE = 0.5;
+const SKIER_SCALE = 0.8;
 /** Indici per segmento del tubo: lati * 2 triangoli * 3 vertici. */
 const PER_SEGMENT = SIDES * 6;
 

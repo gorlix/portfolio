@@ -239,6 +239,11 @@ const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage'
     content: "~/lavori/" / "";
     color: var(--text-muted);
   }
+  /* Prima schermata: il titolo scorre via con l'intro invece di restarle sopra (PORT-85). */
+  section[data-phase="hero"] > h1 {
+    position: relative;
+    top: auto;
+  }
   section[data-phase="cards"] > h1 {
     transform: scale(0.6);
     border-radius: 0 0 0.5rem 0;
@@ -275,10 +280,12 @@ const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage'
     padding: 1.25rem 1.5rem;
     border: 1px solid var(--accent);
     border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     backdrop-filter: blur(14px) saturate(1.2);
     box-shadow: 0 1rem 3rem color-mix(in srgb, var(--bg-deep) 55%, transparent);
+    /* Testo attenuato nel vetro: leggermente piu vicino a quello pieno, cosi resta AA con il vetro piu trasparente (PORT-85). */
+    --text-muted: color-mix(in srgb, var(--text) 70%, var(--text-muted));
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass,
@@ -373,6 +380,13 @@ const jsonLd = await loadJsonLd({ locale, path, name: pageTitle, type: 'WebPage'
   @media (max-width: 30rem) {
     .card {
       padding: 1rem 0.75rem;
+    }
+  }
+  /* Telefono: la scheda lunga scorre al suo interno e non copre tutto il 3D (PORT-85). */
+  @media (max-width: 47.99rem) and (scripting: enabled) {
+    .card {
+      max-height: 58svh;
+      overflow-y: auto;
     }
   }
   .outro {

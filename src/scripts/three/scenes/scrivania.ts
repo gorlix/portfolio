@@ -52,6 +52,9 @@ const SCREEN = { x: 0, y: 1.95, z: -0.25 };
 const NARROW_WIDTH = 3.1;
 const NARROW_SIDE = 0.35;
 const UP_SHIFT_NARROW = 0.75;
+/** Telefono basso (es. 375x667): il vetro occupa piu schermo, la scrivania sale di piu (PORT-85). */
+const UP_SHIFT_SHORT = 1.15;
+const SHORT_HEIGHT = 720;
 /** Larghezza dello schermo da tenere nel riquadro quando la camera arriva al monitor. */
 const SCREEN_FIT_WIDTH = 2.7;
 const SIDE_SHIFT_WIDE = 0.9;
@@ -294,7 +297,8 @@ export function mount({ canvas, container, tier, profile }: SceneContext): Scene
     const wide = aspect >= 1.3;
     // Prima inquadratura: scena spostata da un lato (largo) o in alto (stretto), lasciando spazio al vetro.
     const shift = (1 - t) * (wide ? SIDE_SHIFT_WIDE : 0);
-    const lift = (1 - t) * (wide ? 0 : UP_SHIFT_NARROW);
+    const lift =
+      (1 - t) * (wide ? 0 : size.height < SHORT_HEIGHT ? UP_SHIFT_SHORT : UP_SHIFT_NARROW);
     const breath = Math.sin(elapsed * BREATH.speed) * BREATH.amplitude * (1 - t * 0.6);
     const far = new Vector3(wide ? 0.6 : NARROW_SIDE, 3.1, baseDistance);
     const near = new Vector3(SCREEN.x, SCREEN.y + 0.05, SCREEN.z + nearDistance);
