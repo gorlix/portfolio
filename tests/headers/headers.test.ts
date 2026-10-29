@@ -78,6 +78,24 @@ describe('_headers', () => {
     }
   });
 
+  it('/admin/*: CMS con script solo del sito, niente eval ne script inline, nessun dominio esterno', () => {
+    const value = csp('/admin/*') ?? '';
+    expect(value).toContain("default-src 'none'");
+    expect(value).toContain("script-src 'self';");
+    expect(value).toContain("frame-ancestors 'none'");
+    expect(value).not.toMatch(/https?:|unsafe-eval|\*/);
+    // 'unsafe-inline' ammesso solo per gli stili (Sveltia li scrive da script).
+    expect(value.replace(/style-src [^;]*;/, '')).not.toContain('unsafe-inline');
+    expect(rules.find((r) => r.path === '/admin/*')?.headers['X-Robots-Tag']).toContain('noindex');
+  });
+
+  it('le CSP con unsafe-inline o script propri esistono solo per /admin (e /human, /, /en/)', () => {
+    for (const rule of rules) {
+      const value = rule.headers['Content-Security-Policy'] ?? '';
+      if (value.includes("'unsafe-inline'")) expect(rule.path).toBe('/admin/*');
+    }
+  });
+
   it.each(['/llms.txt', '/agent.md', '/profile.json', '/robots.txt', '/sitemap.xml'])(
     'file per macchine %s: Content-Type esplicito e CSP chiusa',
     (path) => {

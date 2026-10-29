@@ -13,3 +13,7 @@ playwright-report/
 
 # Local drop folder for personal source material (CV, photos): never commit
 file-drop/
+/public/admin/sveltia-cms.js
+/public/admin/chunks/
+/public/admin/fonts/
+/public/admin/locales/

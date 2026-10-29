@@ -1,0 +1,1530 @@
+# GENERATO da `pnpm cms:config` dagli schemi Zod (src/lib/schemas): non modificare a mano.
+backend:
+  name: github
+  repo: gorlix/portfolio
+  branch: main
+publish_mode: simple
+media_folder: public/cv
+public_folder: /cv
+site_url: https://alessandrogorla.it
+i18n:
+  structure: multiple_folders
+  locales:
+    - it
+    - en
+  default_locale: it
+output:
+  omit_empty_optional_fields: true
+  yaml:
+    quote: double
+    indent_size: 2
+collections:
+  - name: pagine
+    label: Pagine e testi
+    i18n: true
+    files:
+      - name: profile
+        label: Profile
+        file: src/content/profile/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: name
+            i18n: duplicate
+            widget: string
+          - name: role
+            i18n: true
+            required: false
+            widget: string
+            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+          - name: location
+            i18n: true
+            widget: string
+          - name: availability
+            i18n: true
+            required: false
+            widget: string
+            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+          - name: tagline
+            i18n: true
+            required: false
+            widget: text
+            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+          - name: languages
+            i18n: true
+            widget: list
+            min: 1
+            fields:
+              - name: name
+                i18n: true
+                widget: string
+              - name: level
+                i18n: true
+                widget: string
+          - name: email
+            i18n: duplicate
+            widget: string
+            type: email
+          - name: links
+            i18n: duplicate
+            widget: object
+            fields:
+              - name: github
+                i18n: duplicate
+                widget: string
+                type: url
+              - name: linkedin
+                i18n: duplicate
+                widget: string
+                type: url
+              - name: devto
+                i18n: duplicate
+                required: false
+                widget: string
+                type: url
+                hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+              - name: x
+                i18n: duplicate
+                widget: string
+                type: url
+          - name: cv
+            i18n: true
+            required: false
+            widget: string
+            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+          - name: photo
+            i18n: true
+            required: false
+            widget: object
+            fields:
+              - name: src
+                i18n: duplicate
+                widget: string
+              - name: alt
+                i18n: true
+                widget: string
+            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: agent
+        label: Agent
+        file: src/content/agent/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: titleSuffix
+            i18n: true
+            widget: string
+          - name: metaDescription
+            i18n: true
+            widget: text
+          - name: backToChoice
+            i18n: true
+            widget: string
+          - name: menuLabel
+            i18n: true
+            widget: string
+          - name: links
+            i18n: true
+            widget: object
+            fields:
+              - name: human
+                i18n: true
+                widget: string
+              - name: recruiter
+                i18n: true
+                widget: string
+          - name: languageNote
+            i18n: true
+            widget: text
+          - name: command
+            i18n: duplicate
+            widget: string
+          - name: download
+            i18n: true
+            widget: string
+          - name: table
+            i18n: true
+            widget: object
+            fields:
+              - name: caption
+                i18n: true
+                widget: string
+              - name: file
+                i18n: true
+                widget: string
+              - name: description
+                i18n: true
+                widget: text
+              - name: link
+                i18n: true
+                widget: string
+          - name: files
+            i18n: true
+            widget: list
+            min: 5
+            max: 5
+            fields:
+              - name: name
+                i18n: duplicate
+                widget: select
+                options:
+                  - llms.txt
+                  - profile.json
+                  - agent.md
+                  - robots.txt
+                  - sitemap.xml
+              - name: description
+                i18n: true
+                widget: text
+      - name: theme
+        label: Theme
+        file: src/content/theme/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: sections
+            i18n: true
+            widget: list
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: select
+                options:
+                  - lavori
+                  - homelab
+                  - domotica
+                  - certificazioni
+                  - sport
+                  - interessi
+                  - beneficenza
+                  - contatti
+              - name: title
+                i18n: true
+                widget: string
+      - name: ui
+        label: Ui
+        file: src/content/ui/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: skipToContent
+            i18n: true
+            widget: string
+          - name: languageSwitcher
+            i18n: true
+            widget: object
+            fields:
+              - name: label
+                i18n: true
+                widget: string
+              - name: it
+                i18n: duplicate
+                widget: string
+              - name: en
+                i18n: duplicate
+                widget: string
+      - name: entrance
+        label: Entrance
+        file: src/content/entrance/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: metaDescription
+            i18n: true
+            widget: text
+          - name: command
+            i18n: true
+            widget: string
+          - name: greeting
+            i18n: true
+            widget: list
+            min: 1
+            field:
+              name: item
+              i18n: true
+              widget: string
+          - name: skip
+            i18n: true
+            widget: string
+          - name: hints
+            i18n: true
+            widget: object
+            fields:
+              - name: keys
+                i18n: true
+                widget: string
+              - name: lang
+                i18n: true
+                widget: string
+          - name: question
+            i18n: true
+            widget: string
+          - name: choices
+            i18n: true
+            widget: list
+            min: 3
+            max: 3
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: select
+                options:
+                  - human
+                  - recruiter
+                  - agent
+              - name: label
+                i18n: true
+                widget: string
+              - name: path
+                i18n: duplicate
+                widget: select
+                options:
+                  - /human
+                  - /recruiter
+                  - /agent
+      - name: recruiter
+        label: Recruiter
+        file: src/content/recruiter/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: titleSuffix
+            i18n: true
+            widget: string
+          - name: metaDescription
+            i18n: true
+            widget: text
+          - name: menuLabel
+            i18n: true
+            widget: string
+          - name: backToChoice
+            i18n: true
+            widget: string
+          - name: sections
+            i18n: true
+            widget: list
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: select
+                options:
+                  - profilo
+                  - competenze
+                  - esperienze
+                  - certificazioni
+                  - progetti
+                  - formazione
+                  - contatti
+              - name: title
+                i18n: true
+                widget: string
+          - name: links
+            i18n: true
+            widget: object
+            fields:
+              - name: human
+                i18n: true
+                widget: string
+              - name: agent
+                i18n: true
+                widget: string
+          - name: projects
+            i18n: true
+            widget: object
+            fields:
+              - name: intro
+                i18n: true
+                widget: string
+              - name: methodLabel
+                i18n: true
+                widget: string
+              - name: methods
+                i18n: true
+                widget: object
+                fields:
+                  - name: by-hand
+                    i18n: true
+                    widget: string
+                  - name: ai-copilot
+                    i18n: true
+                    widget: string
+                  - name: vibecoded
+                    i18n: true
+                    widget: string
+          - name: todoLabel
+            i18n: duplicate
+            widget: string
+          - name: labels
+            i18n: true
+            widget: object
+            fields:
+              - name: location
+                i18n: true
+                widget: string
+              - name: availability
+                i18n: true
+                widget: string
+              - name: ongoing
+                i18n: true
+                widget: string
+              - name: paused
+                i18n: true
+                widget: string
+              - name: languages
+                i18n: true
+                widget: string
+              - name: results
+                i18n: true
+                widget: string
+              - name: stack
+                i18n: true
+                widget: string
+              - name: issuer
+                i18n: true
+                widget: string
+              - name: verify
+                i18n: true
+                widget: string
+              - name: technicalCertifications
+                i18n: true
+                widget: string
+              - name: supplementaryCertifications
+                i18n: true
+                widget: string
+              - name: repository
+                i18n: true
+                widget: string
+              - name: language
+                i18n: true
+                widget: string
+              - name: email
+                i18n: true
+                widget: string
+              - name: profiles
+                i18n: true
+                widget: string
+              - name: cv
+                i18n: true
+                widget: string
+      - name: human
+        label: Human
+        file: src/content/human/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: titleSuffix
+            i18n: true
+            widget: string
+          - name: metaDescription
+            i18n: true
+            widget: text
+          - name: menuLabel
+            i18n: true
+            widget: string
+          - name: menuToggle
+            i18n: true
+            widget: string
+          - name: backToChoice
+            i18n: true
+            widget: string
+          - name: homeTitle
+            i18n: true
+            widget: string
+          - name: home
+            i18n: true
+            widget: object
+            fields:
+              - name: greeting
+                i18n: true
+                widget: string
+              - name: scrollHint
+                i18n: true
+                widget: string
+              - name: badgesLabel
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+          - name: posterNotice
+            i18n: true
+            widget: object
+            fields:
+              - name: webgl
+                i18n: true
+                widget: string
+              - name: savedata
+                i18n: true
+                widget: string
+              - name: error
+                i18n: true
+                widget: string
+              - name: nojs
+                i18n: true
+                widget: string
+          - name: intros
+            i18n: true
+            widget: object
+            fields:
+              - name: home
+                i18n: true
+                widget: string
+              - name: lavori
+                i18n: true
+                widget: string
+              - name: homelab
+                i18n: true
+                widget: string
+              - name: domotica
+                i18n: true
+                widget: string
+              - name: certificazioni
+                i18n: true
+                widget: string
+              - name: sport
+                i18n: true
+                widget: string
+              - name: interessi
+                i18n: true
+                widget: string
+              - name: beneficenza
+                i18n: true
+                widget: string
+              - name: contatti
+                i18n: true
+                widget: string
+          - name: todoLabel
+            i18n: duplicate
+            widget: string
+          - name: labels
+            i18n: true
+            widget: object
+            fields:
+              - name: ongoing
+                i18n: true
+                widget: string
+              - name: results
+                i18n: true
+                widget: string
+              - name: stack
+                i18n: true
+                widget: string
+              - name: issuer
+                i18n: true
+                widget: string
+              - name: verify
+                i18n: true
+                widget: string
+              - name: technicalCertifications
+                i18n: true
+                widget: string
+              - name: supplementaryCertifications
+                i18n: true
+                widget: string
+              - name: repository
+                i18n: true
+                widget: string
+              - name: language
+                i18n: true
+                widget: string
+              - name: email
+                i18n: true
+                widget: string
+              - name: profiles
+                i18n: true
+                widget: string
+              - name: cv
+                i18n: true
+                widget: string
+          - name: scenes
+            i18n: true
+            widget: object
+            fields:
+              - name: homelab
+                i18n: true
+                widget: string
+              - name: domotica
+                i18n: true
+                widget: string
+              - name: lavori
+                i18n: true
+                widget: string
+              - name: certificazioni
+                i18n: true
+                widget: string
+              - name: beneficenza
+                i18n: true
+                widget: string
+              - name: contatti
+                i18n: true
+                widget: string
+              - name: sci
+                i18n: true
+                widget: string
+              - name: tennis
+                i18n: true
+                widget: string
+              - name: pallavolo
+                i18n: true
+                widget: string
+              - name: scrivania
+                i18n: true
+                widget: string
+              - name: interessi
+                i18n: true
+                widget: string
+              - name: trimind
+                i18n: true
+                widget: string
+          - name: work
+            i18n: true
+            widget: object
+            fields:
+              - name: deeper
+                i18n: true
+                widget: string
+              - name: deeperLabel
+                i18n: true
+                widget: string
+              - name: volunteer
+                i18n: true
+                widget: string
+              - name: highlights
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+          - name: trimind
+            i18n: true
+            widget: object
+            fields:
+              - name: titleSuffix
+                i18n: true
+                widget: string
+              - name: metaDescription
+                i18n: true
+                widget: text
+              - name: eyebrow
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
+              - name: back
+                i18n: true
+                widget: string
+              - name: scrollHint
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+              - name: simulatedNote
+                i18n: true
+                widget: text
+              - name: step
+                i18n: true
+                widget: string
+              - name: moments
+                i18n: true
+                widget: list
+                min: 5
+                max: 5
+                fields:
+                  - name: id
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - infra
+                      - backup
+                      - cicd
+                      - observability
+                      - quality
+                  - name: title
+                    i18n: true
+                    widget: string
+                  - name: lead
+                    i18n: true
+                    widget: text
+                  - name: results
+                    i18n: duplicate
+                    widget: list
+                    min: 1
+                    field:
+                      name: item
+                      i18n: duplicate
+                      widget: number
+                      value_type: int
+                      min: 0
+                      max: 9007199254740991
+                  - name: stack
+                    i18n: duplicate
+                    required: false
+                    widget: boolean
+                    default: false
+              - name: figures
+                i18n: duplicate
+                widget: object
+                fields:
+                  - name: services
+                    i18n: duplicate
+                    widget: number
+                    value_type: int
+                    min: 1
+                    max: 9007199254740991
+                  - name: repositories
+                    i18n: duplicate
+                    widget: number
+                    value_type: int
+                    min: 1
+                    max: 9007199254740991
+                  - name: retentionDays
+                    i18n: duplicate
+                    widget: number
+                    value_type: int
+                    min: 1
+                    max: 9007199254740991
+                  - name: tests
+                    i18n: duplicate
+                    widget: number
+                    value_type: int
+                    min: 1
+                    max: 9007199254740991
+                  - name: providers
+                    i18n: duplicate
+                    widget: number
+                    value_type: int
+                    min: 1
+                    max: 9007199254740991
+          - name: homelab
+            i18n: true
+            widget: object
+            fields:
+              - name: caption
+                i18n: true
+                widget: string
+              - name: simulatedNote
+                i18n: true
+                widget: text
+              - name: region
+                i18n: true
+                widget: string
+              - name: node
+                i18n: true
+                widget: string
+              - name: services
+                i18n: true
+                widget: string
+              - name: underConstruction
+                i18n: true
+                widget: string
+              - name: decisions
+                i18n: true
+                widget: string
+              - name: backup
+                i18n: true
+                widget: string
+              - name: backupIntro
+                i18n: true
+                widget: string
+              - name: cloud
+                i18n: true
+                widget: string
+              - name: local
+                i18n: true
+                widget: string
+              - name: offsite
+                i18n: true
+                widget: string
+              - name: onsite
+                i18n: true
+                widget: string
+              - name: wip
+                i18n: true
+                widget: string
+              - name: explore
+                i18n: true
+                widget: string
+              - name: sceneHint
+                i18n: true
+                widget: string
+              - name: nodesLabel
+                i18n: true
+                widget: string
+              - name: layersLabel
+                i18n: true
+                widget: string
+              - name: close
+                i18n: true
+                widget: string
+              - name: noAdrs
+                i18n: true
+                widget: string
+              - name: metrics
+                i18n: true
+                widget: string
+              - name: cpu
+                i18n: duplicate
+                widget: string
+              - name: ram
+                i18n: duplicate
+                widget: string
+              - name: net
+                i18n: true
+                widget: string
+              - name: logs
+                i18n: true
+                widget: string
+              - name: failoverStart
+                i18n: true
+                widget: string
+              - name: failoverStop
+                i18n: true
+                widget: string
+              - name: failoverNormal
+                i18n: true
+                widget: string
+              - name: failoverActive
+                i18n: true
+                widget: string
+              - name: failoverText
+                i18n: true
+                widget: string
+              - name: failoverTitle
+                i18n: true
+                widget: string
+              - name: projects
+                i18n: true
+                widget: string
+          - name: domotica
+            i18n: true
+            widget: object
+            fields:
+              - name: projects
+                i18n: true
+                widget: string
+              - name: automationsTodo
+                i18n: true
+                widget: string
+              - name: trigger
+                i18n: true
+                widget: string
+              - name: conditions
+                i18n: true
+                widget: string
+              - name: actions
+                i18n: true
+                widget: string
+              - name: room
+                i18n: true
+                widget: string
+              - name: rooms
+                i18n: true
+                widget: list
+                min: 1
+                fields:
+                  - name: id
+                    i18n: duplicate
+                    widget: string
+                    pattern:
+                      - ^[a-z0-9]+(-[a-z0-9]+)*$
+                      - Formato non valido
+                  - name: name
+                    i18n: true
+                    widget: string
+                  - name: kind
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - room
+                      - house
+              - name: sceneHint
+                i18n: true
+                widget: string
+              - name: roomsLabel
+                i18n: true
+                widget: string
+              - name: close
+                i18n: true
+                widget: string
+              - name: noAutomations
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+              - name: simulatedNote
+                i18n: true
+                widget: text
+              - name: climate
+                i18n: true
+                widget: object
+                fields:
+                  - name: title
+                    i18n: true
+                    widget: string
+                  - name: text
+                    i18n: true
+                    widget: text
+                  - name: temperature
+                    i18n: true
+                    widget: string
+                  - name: humidity
+                    i18n: true
+                    widget: string
+              - name: audio
+                i18n: true
+                widget: object
+                fields:
+                  - name: title
+                    i18n: duplicate
+                    widget: string
+                  - name: text
+                    i18n: true
+                    widget: text
+                  - name: rooms
+                    i18n: true
+                    widget: string
+              - name: weather
+                i18n: true
+                widget: object
+                fields:
+                  - name: title
+                    i18n: true
+                    widget: string
+                  - name: text
+                    i18n: true
+                    widget: text
+                  - name: air
+                    i18n: true
+                    widget: string
+                  - name: co2
+                    i18n: duplicate
+                    widget: string
+                  - name: voc
+                    i18n: true
+                    widget: string
+                  - name: pm25
+                    i18n: duplicate
+                    widget: string
+                  - name: station
+                    i18n: true
+                    widget: string
+                  - name: pressure
+                    i18n: true
+                    widget: string
+                  - name: outdoorTemperature
+                    i18n: true
+                    widget: string
+                  - name: outdoorHumidity
+                    i18n: true
+                    widget: string
+                  - name: wind
+                    i18n: true
+                    widget: string
+                  - name: trendLabel
+                    i18n: true
+                    widget: string
+                  - name: falling
+                    i18n: true
+                    widget: string
+                  - name: steady
+                    i18n: true
+                    widget: string
+                  - name: rising
+                    i18n: true
+                    widget: string
+          - name: farewell
+            i18n: true
+            widget: object
+            fields:
+              - name: command
+                i18n: duplicate
+                widget: string
+              - name: message
+                i18n: true
+                widget: string
+      - name: infrastructure
+        label: Infrastructure
+        file: src/content/infrastructure/{{locale}}.yml
+        i18n: true
+        fields:
+          - name: simulated
+            i18n: duplicate
+            widget: boolean
+            default: true
+            readonly: true
+          - name: regions
+            i18n: true
+            widget: list
+            min: 1
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: name
+                i18n: true
+                widget: string
+              - name: kind
+                i18n: duplicate
+                widget: select
+                options:
+                  - home
+                  - production
+          - name: nodes
+            i18n: duplicate
+            widget: list
+            min: 1
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: name
+                i18n: duplicate
+                widget: string
+              - name: region
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+          - name: services
+            i18n: true
+            widget: list
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: name
+                i18n: true
+                widget: string
+              - name: node
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+          - name: links
+            i18n: duplicate
+            widget: list
+            fields:
+              - name: from
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: to
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: kind
+                i18n: duplicate
+                widget: select
+                options:
+                  - overlay
+                  - tunnel
+                  - backup
+                  - failover
+          - name: adrs
+            i18n: true
+            widget: list
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: title
+                i18n: true
+                widget: string
+              - name: summary
+                i18n: true
+                widget: text
+              - name: url
+                i18n: duplicate
+                widget: string
+                type: url
+              - name: nodes
+                i18n: duplicate
+                widget: list
+                min: 1
+                field:
+                  name: item
+                  i18n: duplicate
+                  widget: string
+                  pattern:
+                    - ^[a-z0-9]+(-[a-z0-9]+)*$
+                    - Formato non valido
+          - name: backup
+            i18n: true
+            widget: object
+            fields:
+              - name: source
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: targets
+                i18n: true
+                widget: list
+                min: 3
+                fields:
+                  - name: id
+                    i18n: duplicate
+                    widget: string
+                    pattern:
+                      - ^[a-z0-9]+(-[a-z0-9]+)*$
+                      - Formato non valido
+                  - name: name
+                    i18n: true
+                    widget: string
+                  - name: medium
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - cloud
+                      - local
+                  - name: offsite
+                    i18n: duplicate
+                    widget: boolean
+          - name: wip
+            i18n: true
+            widget: list
+            fields:
+              - name: id
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+              - name: name
+                i18n: true
+                widget: string
+              - name: summary
+                i18n: true
+                widget: text
+              - name: region
+                i18n: duplicate
+                widget: string
+                pattern:
+                  - ^[a-z0-9]+(-[a-z0-9]+)*$
+                  - Formato non valido
+          - name: simulation
+            i18n: duplicate
+            widget: object
+            fields:
+              - name: seed
+                i18n: duplicate
+                widget: number
+                value_type: int
+                min: 0
+                max: 9007199254740991
+              - name: logs
+                i18n: duplicate
+                widget: list
+                min: 1
+                fields:
+                  - name: service
+                    i18n: duplicate
+                    widget: string
+                    pattern:
+                      - ^[a-z0-9]+(-[a-z0-9]+)*$
+                      - Formato non valido
+                  - name: message
+                    i18n: duplicate
+                    widget: string
+              - name: failover
+                i18n: duplicate
+                widget: object
+                fields:
+                  - name: down
+                    i18n: duplicate
+                    widget: list
+                    min: 1
+                    fields:
+                      - name: service
+                        i18n: duplicate
+                        widget: string
+                        pattern:
+                          - ^[a-z0-9]+(-[a-z0-9]+)*$
+                          - Formato non valido
+                      - name: message
+                        i18n: duplicate
+                        widget: string
+                  - name: up
+                    i18n: duplicate
+                    widget: list
+                    min: 1
+                    fields:
+                      - name: service
+                        i18n: duplicate
+                        widget: string
+                        pattern:
+                          - ^[a-z0-9]+(-[a-z0-9]+)*$
+                          - Formato non valido
+                      - name: message
+                        i18n: duplicate
+                        widget: string
+  - name: skills
+    label: Skills
+    folder: src/content/skills
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: name
+    fields:
+      - name: name
+        i18n: duplicate
+        widget: string
+      - name: group
+        i18n: true
+        widget: string
+      - name: kind
+        i18n: duplicate
+        widget: select
+        options:
+          - technical
+          - supplementary
+      - name: linkedSection
+        i18n: duplicate
+        widget: select
+        options:
+          - lavori
+          - homelab
+          - domotica
+          - certificazioni
+          - sport
+          - interessi
+          - beneficenza
+          - contatti
+      - name: badge
+        i18n: duplicate
+        required: false
+        widget: boolean
+  - name: experiences
+    label: Experiences
+    folder: src/content/experiences
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: company
+    fields:
+      - name: company
+        i18n: duplicate
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: role
+        i18n: true
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: summary
+        i18n: true
+        required: false
+        widget: text
+      - name: start
+        i18n: duplicate
+        required: false
+        widget: string
+        pattern:
+          - ^\d{4}(-\d{2}(-\d{2})?)?$
+          - Formato non valido
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+      - name: end
+        i18n: duplicate
+        required: false
+        widget: string
+        pattern:
+          - ^\d{4}(-\d{2}(-\d{2})?)?$
+          - Formato non valido
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+      - name: results
+        i18n: true
+        required: false
+        widget: list
+        min: 1
+        field:
+          name: item
+          i18n: true
+          widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: stack
+        i18n: duplicate
+        required: false
+        widget: list
+        field:
+          name: item
+          i18n: duplicate
+          widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: kind
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - work
+          - volunteer
+        default: work
+      - name: detail
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - trimind
+  - name: certifications
+    label: Certifications
+    folder: src/content/certifications
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: name
+    fields:
+      - name: name
+        i18n: true
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: issuer
+        i18n: duplicate
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: date
+        i18n: duplicate
+        required: false
+        widget: string
+        pattern:
+          - ^\d{4}(-\d{2}(-\d{2})?)?$
+          - Formato non valido
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+      - name: verifyUrl
+        i18n: duplicate
+        required: false
+        widget: string
+        type: url
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: kind
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - technical
+          - supplementary
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: status
+        i18n: duplicate
+        widget: select
+        options:
+          - earned
+          - in-progress
+  - name: education
+    label: Education
+    folder: src/content/education
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: institution
+    fields:
+      - name: institution
+        i18n: duplicate
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: degree
+        i18n: true
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: start
+        i18n: duplicate
+        required: false
+        widget: string
+        pattern:
+          - ^\d{4}(-\d{2}(-\d{2})?)?$
+          - Formato non valido
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+      - name: end
+        i18n: duplicate
+        required: false
+        widget: string
+        pattern:
+          - ^\d{4}(-\d{2}(-\d{2})?)?$
+          - Formato non valido
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+      - name: paused
+        i18n: duplicate
+        required: false
+        widget: boolean
+  - name: projects
+    label: Projects
+    folder: src/content/projects
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: name
+    fields:
+      - name: name
+        i18n: true
+        widget: string
+      - name: description
+        i18n: true
+        required: false
+        widget: text
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: repo
+        i18n: duplicate
+        required: false
+        widget: string
+        type: url
+      - name: language
+        i18n: duplicate
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: method
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - by-hand
+          - ai-copilot
+          - vibecoded
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: status
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - active
+          - wip
+          - archived
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: featured
+        i18n: duplicate
+        widget: boolean
+      - name: rank
+        i18n: duplicate
+        required: false
+        widget: number
+        value_type: int
+        min: 1
+        max: 9007199254740991
+      - name: section
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - lavori
+          - homelab
+          - domotica
+          - certificazioni
+          - sport
+          - interessi
+          - beneficenza
+          - contatti
+  - name: automations
+    label: Automations
+    folder: src/content/automations
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: name
+    fields:
+      - name: name
+        i18n: true
+        widget: string
+      - name: room
+        i18n: duplicate
+        widget: string
+        pattern:
+          - ^[a-z0-9]+(-[a-z0-9]+)*$
+          - Formato non valido
+      - name: rank
+        i18n: duplicate
+        required: false
+        widget: number
+        value_type: int
+        min: -9007199254740991
+        max: 9007199254740991
+      - name: trigger
+        i18n: true
+        required: false
+        widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: conditions
+        i18n: true
+        required: false
+        widget: list
+        field:
+          name: item
+          i18n: true
+          widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: actions
+        i18n: true
+        required: false
+        widget: list
+        min: 1
+        field:
+          name: item
+          i18n: true
+          widget: string
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: repo
+        i18n: duplicate
+        required: false
+        widget: string
+        type: url
+  - name: topics
+    label: Topics
+    folder: src/content/topics
+    extension: yml
+    format: yaml
+    create: true
+    i18n: true
+    identifier_field: title
+    fields:
+      - name: section
+        i18n: duplicate
+        widget: select
+        options:
+          - sport
+          - interessi
+          - beneficenza
+      - name: title
+        i18n: true
+        widget: string
+      - name: tagline
+        i18n: true
+        required: false
+        widget: text
+      - name: text
+        i18n: true
+        required: false
+        widget: text
+        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
+      - name: links
+        i18n: true
+        widget: list
+        fields:
+          - name: label
+            i18n: true
+            widget: string
+          - name: url
+            i18n: duplicate
+            widget: string
+            type: url
