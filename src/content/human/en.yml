@@ -9,6 +9,34 @@ home:
   scrollHint: Scroll, or jump straight to any stop from the menu.
   badgesLabel: "Technical skills: pick one to see where I use it"
   posterSubject: of my desk
+  hardwareTitle: What is on my desk
+  hardwareLabel: "Desk hardware: pick one to learn more"
+  hardwareHint: Hover over the desk objects, tap them, or choose from the list.
+  hardware:
+    - id: printer
+      name: 3D printer
+      text: It prints parts I then design badly and reprint better. My models live on Printables.
+      url: https://www.printables.com/@Gorlix_50644
+      linkLabel: My Printables profile
+    - id: trackball
+      name: Ploopy Adept trackball
+      text: Yellow, with a black ball. The QMK firmware is mine, because a regular mouse was never enough.
+      url: https://github.com/gorlix/my-adept
+      linkLabel: The firmware on GitHub
+    - id: moonlander
+      name: ZSA Moonlander keyboard
+      text: A split keyboard with more layers than I can remember. The layout is mine, on Oryx.
+      url: https://configure.zsa.io/moonlander/layouts/0olR6/latest/0
+      linkLabel: My layout on Oryx
+    - id: monitor
+      name: Monitor
+      text: The terminal stays open longer than it should.
+    - id: server
+      name: Mini server on the shelf
+      text: Small, quiet, and with more blinking lights than necessary.
+    - id: window
+      name: Window
+      text: My only contact with the outside world during deploys.
 posterNotice:
   webgl: "3D is not available in this browser (no WebGL, or graphics acceleration is off): you see a picture {subject} instead."
   savedata: "Data saver is on: you see a picture {subject} instead of the 3D scene."
