@@ -48,13 +48,14 @@ for (const [route, detail] of [
     expect(names.at(-1)).toBe('exit');
     expect(names).toHaveLength(count + 2);
     // La scena riceve un livello per esperienza, nello stesso ordine delle schede, con gli ostacoli.
-    const levels = await page
-      .locator('[data-scene="lavori"] script[data-scene-data]')
-      .evaluate(
-        (el) =>
-          (JSON.parse(el.textContent ?? '{}') as { levels: { slug: string; obstacles: string[] }[] })
-            .levels,
-      );
+    const levels = await page.locator('[data-scene="lavori"] script[data-scene-data]').evaluate(
+      (el) =>
+        (
+          JSON.parse(el.textContent ?? '{}') as {
+            levels: { slug: string; obstacles: string[] }[];
+          }
+        ).levels,
+    );
     expect(levels.map((l) => l.slug)).toEqual(names.slice(1, -1));
     for (const level of levels) expect(level.obstacles.length).toBeGreaterThan(0);
   });

@@ -73,8 +73,8 @@ export function createPenguin(colors: PenguinColors): Penguin {
   const light = mat(colors.belly);
   const peach = mat(colors.beak);
   const pupil = mat(colors.eye);
-  // Le pinne sono un poco piu chiare del corpo: restano leggibili anche di profilo.
-  const fin = mat(new Color(colors.body).lerp(new Color(colors.belly), 0.22));
+  // Le pinne sono un poco piu scure del corpo: restano leggibili anche di profilo.
+  const fin = mat(new Color(colors.body).lerp(new Color(colors.eye), 0.3));
   const mesh = (g: BufferGeometry, m: Material, x = 0, y = 0, z = 0): Mesh => {
     const part = new Mesh(g, m);
     part.position.set(x, y, z);

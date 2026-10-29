@@ -30,7 +30,8 @@ export function mount(context: SceneContext): SceneInstance {
     players.forEach((p, i) => {
       own(p);
       p.root.position.x = i === 0 ? -SPACING : SPACING;
-      p.root.rotation.y = i === 0 ? Math.PI / 2 : -Math.PI / 2;
+      // Di tre quarti verso la camera: si vedono pancia e becco, non solo il fianco.
+      p.root.rotation.y = i === 0 ? Math.PI / 2 - 0.5 : -Math.PI / 2 + 0.5;
       // Fascia al collo: il colore distingue le due squadre.
       const band = new Mesh(
         own(new TorusGeometry(0.16, 0.035, 5, 10)),

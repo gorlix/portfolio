@@ -12,9 +12,11 @@ import {
 
 const levels = (...lists: Obstacle[][]) => lists.map((obstacles) => ({ obstacles }));
 /** I tre livelli di oggi: Trimind, Distretto 2050, Club. */
-const today = levels(['container', 'firewall', 'conveyor', 'flag'], ['site', 'bridge', 'site'], [
-  'garden',
-]);
+const today = levels(
+  ['container', 'firewall', 'conveyor', 'flag'],
+  ['site', 'bridge', 'site'],
+  ['garden'],
+);
 
 /** Il piano piu alto sotto `x` (blocchi pieni, il ponte compreso). */
 const surfaceAt = (course: Course, x: number): number | null => {
@@ -70,7 +72,11 @@ describe('runnerAt', () => {
   });
 
   it('a ogni momento e fermo, a terra, su un piano (fotogramma statico di ogni tappa)', () => {
-    for (const data of [today, levels(['platform', 'flag']), levels(['bridge'], ['site', 'garden'])]) {
+    for (const data of [
+      today,
+      levels(['platform', 'flag']),
+      levels(['bridge'], ['site', 'garden']),
+    ]) {
       const course = buildCourse(data);
       for (let k = 0; k < course.anchors.length; k += 1) {
         const runner = runnerAt(course, k);

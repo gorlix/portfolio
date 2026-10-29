@@ -100,7 +100,12 @@ export function buildCourse(levels: readonly Pick<Level, 'obstacles'>[]): Course
   const block = (kind: BlockKind, x0: number, x1: number, top = 0): void => {
     blocks.push({ kind, x0, x1, top, level });
   };
-  const move = (kind: MoveKind, x1: number, y1: number, extra: { peak?: number; sag?: number } = {}) => {
+  const move = (
+    kind: MoveKind,
+    x1: number,
+    y1: number,
+    extra: { peak?: number; sag?: number } = {},
+  ) => {
     const dx = Math.abs(x1 - x);
     const length =
       kind === 'jump'
@@ -358,6 +363,6 @@ export interface Framing {
  * schermo stretto il percorso sta nella parte alta, sopra la scheda.
  */
 export function cardFraming(widthPx: number): Framing {
-  if (widthPx >= SIDE_BY_SIDE_PX) return { shift: 0.3, lift: 0 };
-  return { shift: 0, lift: 0.27 };
+  if (widthPx >= SIDE_BY_SIDE_PX) return { shift: 0.5, lift: 0 };
+  return { shift: 0, lift: 0.33 };
 }

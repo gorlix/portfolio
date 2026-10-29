@@ -38,6 +38,8 @@ const EPSILON = 0.0005;
 /** Profondita del percorso (Z) e spessore del terreno sotto il piano. */
 const DEPTH = 1.5;
 const SOIL = 0.6;
+/** Il pinguino corre verso +X, girato un po' verso la camera: si vedono pancia e becco. */
+const FACING = Math.PI / 2 - 0.55;
 /** Passo delle strisce sul nastro. */
 const STRIPE = 0.5;
 
@@ -107,7 +109,7 @@ export function mount({
     mortar: paint(soft(red, 0.35)),
     flower: paint(tint(['--ctp-peach', '--text'])),
     leaf: paint(soft(tint(['--ctp-green', '--text']), 0.7)),
-    far: paint(soft(text, 0.14)),
+    far: paint(soft(tint(['--ctp-sky', '--text']), 0.16)),
   };
   /** Materiali per livello: accento pieno, accento tenue, luce (finestre, bandiera, strisce). */
   const levelPaint = levels.map((level) => {
@@ -233,7 +235,8 @@ export function mount({
       }
       const side = DEPTH * 0.3;
       for (const x of [b.x0, b.x1]) {
-        for (const z of [-side, side]) box(m.neutral, x - 0.07, x + 0.07, b.top, b.top + 1.1, z, 0.14);
+        for (const z of [-side, side])
+          box(m.neutral, x - 0.07, x + 0.07, b.top, b.top + 1.1, z, 0.14);
       }
       // Cavi: segmenti dritti dalla cima delle torri all'avvallamento centrale.
       const mid = (b.x0 + b.x1) / 2;
@@ -276,13 +279,13 @@ export function mount({
   };
   for (const b of course.blocks) drawers[b.kind](b);
 
-  // Sfondo: iceberg lontani, regolari ma non uguali, lungo tutto il percorso.
+  // Sfondo: iceberg bassi e lontani, regolari ma non uguali, lungo tutto il percorso.
   const berg = own(new ConeGeometry(1, 1, 5));
-  for (let x = -6, k = 0; x < course.length + 8; x += 3.4, k += 1) {
+  for (let x = -6, k = 0; x < course.length + 8; x += 2.9, k += 1) {
     const mesh = new Mesh(berg, m.far);
-    const h = 1.6 + ((k * 7) % 5) * 0.45;
-    mesh.position.set(x + ((k * 3) % 4) * 0.4, h / 2 - 0.8, -7 - (k % 3) * 1.5);
-    mesh.scale.set(1.3 + (k % 2) * 0.6, h, 1);
+    const h = 0.9 + ((k * 7) % 5) * 0.3;
+    mesh.position.set(x + ((k * 3) % 4) * 0.4, h / 2 - 0.9, -9 - (k % 3) * 1.6);
+    mesh.scale.set(1.6 + (k % 2) * 0.7, h, 1);
     mesh.rotation.y = k;
     root.add(mesh);
   }
@@ -296,8 +299,6 @@ export function mount({
       eye: tint(['--bg-deep', '--bg']),
     }),
   );
-  // Di profilo, verso +X: corre nella direzione del percorso.
-  penguin.root.rotation.y = Math.PI / 2;
   scene.add(penguin.root);
 
   const ambient = new AmbientLight(text, 0.9);
@@ -316,16 +317,22 @@ export function mount({
     const name = names[index] ?? 'overview';
     const portrait = size.width < size.height;
     if (name === 'overview') {
-      return { lead: portrait ? 1.6 : 3.4, span: portrait ? 7 : 11.5, shift: 0, lift: 0 };
+      return { lead: portrait ? 1.2 : 3.4, span: portrait ? 5.5 : 11.5, shift: 0, lift: 0 };
     }
     if (name === 'exit') return { lead: 0.8, span: portrait ? 6 : 8, shift: 0, lift: 0 };
-    return { lead: portrait ? 1.0 : 1.8, span: portrait ? 6 : 8.5, ...cardFraming(size.width) };
+    return { lead: portrait ? 0.9 : 0.5, span: portrait ? 5.5 : 8.5, ...cardFraming(size.width) };
   };
 
   const place = (): void => {
     const runner = runnerAt(course, story);
     penguin.setPose(runner.pose, runner.phase);
     penguin.root.position.set(runner.x, runner.y, 0);
+    // Di tre quarti verso la camera mentre corre; per salutare si gira del tutto verso chi guarda.
+    penguin.root.rotation.y = mix(
+      FACING,
+      0.15,
+      runner.pose === 'wave' ? clamp01(runner.phase * 2) : 0,
+    );
 
     for (const flag of flags) {
       // La bandiera sale mentre il pinguino passa davanti al palo, e riscende tornando indietro.
