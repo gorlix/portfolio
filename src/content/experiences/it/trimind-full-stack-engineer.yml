@@ -25,3 +25,4 @@ stack:
   - "Python"
   - "Claude API"
 detail: trimind
+scenery: ["container", "firewall", "conveyor", "flag"]

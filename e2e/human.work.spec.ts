@@ -34,7 +34,7 @@ for (const [route, detail] of [
   ['/human/', '/human/lavori/trimind/'],
   ['/en/human/', '/en/human/lavori/trimind/'],
 ] as const) {
-  test(`${route}: una scheda per esperienza, lati alternati, prima schermata e uscita`, async ({
+  test(`${route}: una scheda per esperienza, un livello del percorso per scheda, prima schermata e uscita`, async ({
     page,
   }) => {
     await page.goto(route);
@@ -47,20 +47,17 @@ for (const [route, detail] of [
     expect(names[0]).toBe('overview');
     expect(names.at(-1)).toBe('exit');
     expect(names).toHaveLength(count + 2);
-    // Lati alternati: due schede vicine non stanno mai dallo stesso lato.
-    const sides = await cards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.side));
-    sides.slice(1).forEach((side, i) => {
-      expect(side).not.toBe(sides[i]);
-    });
-    // La scena riceve le stesse foglie, dal basso (la piu vecchia); le schede partono dall'alto.
-    const leaves = await page
-      .locator('[data-scene="lavori"] script[data-scene-data]')
-      .evaluate((el) =>
-        (JSON.parse(el.textContent ?? '{}') as { leaves: { slug: string }[] }).leaves.map(
-          (l) => l.slug,
-        ),
-      );
-    expect([...leaves].reverse()).toEqual(names.slice(1, -1));
+    // La scena riceve un livello per esperienza, nello stesso ordine delle schede, con gli ostacoli.
+    const levels = await page.locator('[data-scene="lavori"] script[data-scene-data]').evaluate(
+      (el) =>
+        (
+          JSON.parse(el.textContent ?? '{}') as {
+            levels: { slug: string; scenery: string[] }[];
+          }
+        ).levels,
+    );
+    expect(levels.map((l) => l.slug)).toEqual(names.slice(1, -1));
+    for (const level of levels) expect(level.scenery.length).toBeGreaterThan(0);
   });
 
   test(`${route}: "Approfondisci" solo sulle esperienze con pagina dedicata`, async ({ page }) => {

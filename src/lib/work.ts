@@ -1,39 +1,42 @@
 import { isTodo, type Todo } from './schemas/common';
-import type { DetailPage } from './schemas/experiences';
+import type { DetailPage, Scenery } from './schemas/experiences';
 
 /*
- * Albero dei Lavori di /human (spec §7.3, §13, PORT-81) e pagine di approfondimento (PORT-82).
+ * Percorso dei Lavori di /human (spec §7.3, §13, PORT-83) e pagine di approfondimento (PORT-82).
  * Logica PURA, senza Astro ne three: la pagina e la scena leggono lo stesso modello, cosi una nuova
- * esperienza nei dati aggiunge sia la scheda sia la foglia.
+ * esperienza nei dati aggiunge sia la scheda sia il livello del percorso.
  */
 
-export type Side = 'left' | 'right';
-
-export interface LeafInput {
+export interface LevelInput {
   slug: string;
   start: string | Todo;
   end: string | null | Todo;
   kind: 'work' | 'volunteer';
   detail?: DetailPage | undefined;
+  scenery?: Scenery[] | undefined;
 }
 
-/** Foglia dell'albero: quanto basta alla scena (nessun testo, che sta nelle schede). */
-export interface Leaf {
+/** Livello del percorso: quanto basta alla scena (nessun testo, che sta nelle schede). */
+export interface Level {
   slug: string;
-  side: Side;
   ongoing: boolean;
   volunteer: boolean;
   /** Ha una pagina di approfondimento. */
   detail: boolean;
+  scenery: Scenery[];
 }
 
-export interface WorkTree {
-  leaves: Leaf[];
+export interface WorkCourse {
+  levels: Level[];
 }
+
+/** Scenografia di un'esperienza che non la indica nei dati: una bandierina, o un giardino. */
+export const defaultScenery = (kind: LevelInput['kind']): Scenery[] =>
+  kind === 'volunteer' ? ['garden'] : ['flag'];
 
 /**
- * Ordine dell'albero: cronologico, dal basso (piu vecchia) verso l'alto. Senza data d'inizio nota
- * l'esperienza va in fondo all'albero, prima delle altre; a parita, l'ordine e quello dello slug.
+ * Ordine cronologico, dalla piu vecchia. Senza data d'inizio nota l'esperienza va per prima;
+ * a parita, l'ordine e quello dello slug.
  */
 export function chronological<T extends { slug: string; start: string | Todo }>(items: T[]): T[] {
   const start = (e: T) => (isTodo(e.start) ? '' : e.start);
@@ -42,18 +45,21 @@ export function chronological<T extends { slug: string; start: string | Todo }>(
   );
 }
 
-/** Rami alternati: la prima foglia a sinistra, poi destra, sinistra... */
-export const sideAt = (index: number): Side => (index % 2 === 0 ? 'left' : 'right');
-
-export function workTree(items: LeafInput[]): WorkTree {
+/**
+ * Livelli nell'ordine delle schede: dalla piu recente (deciso da Alessandro), un livello per
+ * esperienza, cosi il pinguino attraversa il livello della scheda che si sta leggendo.
+ */
+export function workCourse(items: LevelInput[]): WorkCourse {
   return {
-    leaves: chronological(items).map((e, i) => ({
-      slug: e.slug,
-      side: sideAt(i),
-      ongoing: e.end === null,
-      volunteer: e.kind === 'volunteer',
-      detail: e.detail !== undefined,
-    })),
+    levels: chronological(items)
+      .reverse()
+      .map((e) => ({
+        slug: e.slug,
+        ongoing: e.end === null,
+        volunteer: e.kind === 'volunteer',
+        detail: e.detail !== undefined,
+        scenery: e.scenery ?? defaultScenery(e.kind),
+      })),
   };
 }
 

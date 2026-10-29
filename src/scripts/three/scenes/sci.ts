@@ -7,6 +7,7 @@ import {
   Vector3,
 } from 'three';
 import { mountMicro } from '../micro';
+import { createPenguin } from '../penguin';
 import { phase } from '../phases';
 import type { SceneContext, SceneInstance } from '../types';
 
@@ -20,6 +21,8 @@ const HEIGHT = 3.2;
 const RADIUS = 1.9;
 const SEGMENTS = 64;
 const SIDES = 4;
+/** Il pinguino misura ~1: ridotto a ~0,5 e in scala con la montagna. */
+const SKIER_SCALE = 0.5;
 /** Indici per segmento del tubo: lati * 2 triangoli * 3 vertici. */
 const PER_SEGMENT = SIDES * 6;
 
@@ -62,17 +65,31 @@ export function mount(context: SceneContext): SceneInstance {
     const line = new Mesh(geometry, trail);
     scene.add(line);
 
-    // Lo sciatore: una punta che segue la testa della traccia.
-    const skier = new Mesh(own(new ConeGeometry(0.09, 0.2, 4)), trail);
-    scene.add(skier);
+    // Lo sciatore: un pinguino sugli sci in testa alla traccia, orientato lungo la tangente.
+    const skier = createPenguin({
+      body: tint(['--text']),
+      belly: tint(['--bg-deep', '--bg']),
+      beak: tint(['--ctp-peach', '--text']),
+      eye: tint(['--bg-deep', '--bg']),
+    });
+    own(skier);
+    skier.root.scale.setScalar(SKIER_SCALE);
+    scene.add(skier.root);
     const curve = new CatmullRomCurve3(points);
+    const ahead = new Vector3();
 
     return {
       update(progress) {
         const run = phase(progress, 0.05, 1);
         geometry.setDrawRange(0, Math.round(run * SEGMENTS) * PER_SEGMENT);
-        skier.visible = run > 0;
-        skier.position.copy(curve.getPointAt(run));
+        skier.root.visible = run > 0;
+        skier.root.position.copy(curve.getPointAt(run));
+        // Fronte (+Z) lungo la tangente; la curva e il cambio di direzione laterale dopo di essa.
+        const tangent = curve.getTangentAt(run);
+        const later = curve.getTangentAt(Math.min(1, run + 0.04));
+        skier.root.rotation.y = Math.atan2(tangent.x, tangent.z);
+        ahead.copy(tangent).cross(later);
+        skier.setPose('ski', Math.max(-1, Math.min(1, ahead.y * 40)));
         scene.rotation.y = (progress - 0.5) * 0.35;
       },
       fit(aspect) {
