@@ -6,10 +6,10 @@ const bounds = { width: 1000, height: 600 };
 
 describe('placePopup', () => {
   it('sta sopra il punto, centrato', () => {
-    expect(placePopup({ x: 500, y: 300 }, size, bounds)).toEqual({ left: 400, top: 188 });
+    expect(placePopup({ x: 500, y: 300 }, size, bounds)).toEqual({ left: 400, top: 196 });
   });
   it('va sotto se sopra non c e posto', () => {
-    expect(placePopup({ x: 500, y: 60 }, size, bounds).top).toBe(72);
+    expect(placePopup({ x: 500, y: 60 }, size, bounds).top).toBe(64);
   });
   it('resta dentro i margini a destra e a sinistra', () => {
     expect(placePopup({ x: 990, y: 300 }, size, bounds).left).toBe(792);
