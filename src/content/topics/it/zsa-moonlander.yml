@@ -1,4 +1,6 @@
 section: interessi
-links: []
+links:
+  - label: "Il mio layout su Oryx"
+    url: "https://configure.zsa.io/moonlander/layouts/0olR6/latest/0"
 title: Tastiera ZSA Moonlander
 text: "Scrivo su una ZSA Moonlander con un layout tutto mio: un layer gaming per quando smetto di lavorare e un layout ibrido US/IT, perché le parentesi le voglio dove le trovo senza pensarci."

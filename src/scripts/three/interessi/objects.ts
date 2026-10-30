@@ -13,6 +13,11 @@ export interface BenchPalette {
   apron: Rgb;
   wall: Rgb;
   wallLow: Rgb;
+  /** Fasce di cielo, dall'orizzonte verso l'alto. */
+  sky: readonly Rgb[];
+  sun: Rgb;
+  hillFar: Rgb;
+  hillNear: Rgb;
   mat: Rgb;
   frame: Rgb;
   metal: Rgb;
@@ -66,6 +71,15 @@ const BENCH_BACK = -7;
 const BENCH_FRONT = 50;
 const PLANK = 3;
 const WALL = BENCH_BACK;
+/** Vetrata: quote di davanzale, traversa e architrave, passo dei montanti. */
+const SILL = 3.6;
+const TRANSOM = 17;
+const HEADER = 34;
+const MULLION = 13;
+/** Cielo lontano dalla parete: si muove con la camera, da profondita. */
+const SKY_Z = -56;
+const BAND = 7;
+const HILL = 9;
 /** Altezza del tappetino sotto ogni oggetto. */
 const MAT = 0.08;
 
@@ -118,31 +132,47 @@ function gearOutline(teeth: number, pitch: number): [number, number][] {
 
 const spread = (index: number): number => stationX(index);
 
-function buildRoom(m: Mesher, p: BenchPalette): void {
-  m.box(0, -2, WALL - 1, REACH * 3, 90, 2, p.wall);
-  // Zoccolo della parete: dietro al banco, sporge di poco.
-  m.box(0, -1, WALL + 0.15, REACH * 3, 3.2, 0.3, p.wallLow);
-  // Pannello forato dietro agli oggetti, con qualche attrezzo generico appeso.
-  m.box(0, 3.6, WALL + 0.15, REACH * 3, 12, 0.3, p.wallLow);
-  for (let col = -40; col <= 110; col += 1) {
-    for (let row = 0; row < 6; row += 1) {
-      m.box(col * 2, 4.5 + row * 2, WALL + 0.34, 0.2, 0.2, 0.08, p.wall);
-    }
+/** Fila di colline: spicchi a facce piane, altezza che sale e scende lungo X. */
+function ridge(m: Mesher, z: number, height: number, wave: number, tint: Rgb): void {
+  const top = (x: number) => height + 4 * Math.sin(x * wave) + 2.5 * Math.sin(x * wave * 2.3 + 1);
+  for (let x = -REACH * 2.5; x < REACH * 2.5; x += HILL) {
+    const [left, right] = [top(x), top(x + HILL)];
+    const middle = (left + right) / 4;
+    m.extrude(
+      [
+        [-HILL / 2, -middle],
+        [HILL / 2, -middle],
+        [HILL / 2, right - middle],
+        [-HILL / 2, left - middle],
+      ],
+      1,
+      tint,
+      { x: x + HILL / 2, y: middle, z },
+    );
   }
-  interessiOrder.forEach((_, i) => {
-    const z = WALL + 0.5;
-    const x = spread(i) + 6.5;
-    if (i % 3 === 0) {
-      m.box(x, 6, z, 0.9, 8, 0.12, p.frame);
-      for (let k = 0; k < 8; k += 1) m.box(x - 0.2, 6.5 + k, z + 0.08, 0.5, 0.08, 0.06, p.wall);
-    } else if (i % 3 === 1) {
-      m.box(x, 7, z, 0.34, 6.4, 0.2, p.frame);
-      m.box(x, 12.6, z, 2.1, 1, 0.5, p.frame);
-    } else {
-      m.box(x, 7, z, 0.6, 6, 0.14, p.frame);
-      m.box(x + 1.5, 7, z, 3.6, 0.6, 0.14, p.frame);
-    }
+}
+
+function buildRoom(m: Mesher, p: BenchPalette): void {
+  // Parete con una vetrata continua: davanzale in basso, architrave in alto, montanti sottili.
+  m.box(0, -2, WALL - 1, REACH * 2, SILL + 2, 2, p.wallLow);
+  m.box(0, SILL, WALL + 0.4, REACH * 2, 0.5, 1.6, p.woodAlt);
+  m.box(0, HEADER, WALL - 1, REACH * 2, 90, 2, p.wall);
+  m.box(0, TRANSOM, WALL - 0.4, REACH * 2, 0.5, 0.5, p.frame);
+  for (let x = -REACH; x <= REACH; x += MULLION) {
+    m.box(x, SILL, WALL - 0.4, 0.6, HEADER - SILL, 0.6, p.frame);
+  }
+  // Fuori: il cielo a fasce, dal caldo dell'orizzonte al buio, un sole basso, due file di colline.
+  p.sky.forEach((tint, i) => {
+    m.box(0, -4 + i * BAND, SKY_Z, REACH * 5, BAND + 0.2, 1 + i * 0.1, tint);
   });
+  const sun: [number, number][] = [];
+  for (let i = 0; i < 16; i += 1) {
+    const angle = (i * Math.PI) / 8;
+    sun.push([Math.cos(angle) * 7, Math.sin(angle) * 7]);
+  }
+  m.extrude(sun, 1, p.sun, { x: 14, y: 16, z: SKY_Z + 3 });
+  ridge(m, SKY_Z + 7, 13, 0.03, p.hillFar);
+  ridge(m, SKY_Z + 14, 9, 0.047, p.hillNear);
   const planks = Math.ceil((BENCH_FRONT - BENCH_BACK) / PLANK);
   for (let i = 0; i < planks; i += 1) {
     const tint = i % 2 ? p.wood : p.woodAlt;

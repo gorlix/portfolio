@@ -1,4 +1,6 @@
 section: interessi
-links: []
+links:
+  - label: "My layout on Oryx"
+    url: "https://configure.zsa.io/moonlander/layouts/0olR6/latest/0"
 title: ZSA Moonlander keyboard
 text: "I type on a ZSA Moonlander with a layout of my own: a gaming layer for when I stop working and a hybrid US/IT layout, because I want my brackets where my fingers expect them."

@@ -58,6 +58,8 @@ const HEAD_REACH = 1.3;
 /** Pezzo gia iniziato prima di arrivarci e quanto si apre la cupola, in radianti. */
 const PRINT_START = 0.3;
 const LID_OPEN = 1.9;
+/** Cielo: quanto ogni fascia tende al caldo, dall'orizzonte al buio. */
+const SKY = [0.6, 0.48, 0.36, 0.26, 0.18, 0.12, 0.07, 0.03];
 
 export function mount({
   canvas,
@@ -77,7 +79,7 @@ export function mount({
 
   const scene = new Scene();
   // Near non troppo piccolo: la camera sta sempre oltre 10 unita, piu precisione di profondita.
-  const camera = new PerspectiveCamera(FOV, 1, 3, 520);
+  const camera = new PerspectiveCamera(FOV, 1, 3, 900);
 
   const owned: { dispose(): void }[] = [];
   const own = <T extends { dispose(): void }>(resource: T): T => {
@@ -94,6 +96,8 @@ export function mount({
   const soft = (color: Color, amount: number) => surface.clone().lerp(color, amount);
   const channels = (color: Color): Rgb => [color.r, color.g, color.b];
   const key = soft(text, 0.35);
+  const night = tint(['--bg-deep', '--bg']);
+  const glow = peach.clone().lerp(red, 0.3);
 
   const bench = buildBench({
     wood: channels(soft(peach, 0.5)),
@@ -101,6 +105,10 @@ export function mount({
     apron: channels(soft(peach, 0.22)),
     wall: channels(surface),
     wallLow: channels(tint(['--surface-hi', '--surface'])),
+    sky: SKY.map((k) => channels(night.clone().lerp(glow, k))),
+    sun: channels(tint(['--ctp-yellow', '--text']).lerp(peach, 0.5)),
+    hillFar: channels(night.clone().lerp(tint(['--ctp-mauve', '--text']), 0.3)),
+    hillNear: channels(night.clone().lerp(tint(['--ctp-mauve', '--text']), 0.12)),
     mat: channels(soft(accent, 0.2)),
     frame: channels(tint(['--bg-deep', '--bg'])),
     metal: channels(soft(text, 0.6)),
