@@ -1,4 +1,4 @@
-import { STRIDE } from '../lavori/course';
+import { STRIDE } from '../penguin';
 
 /*
  * Citta dei repository (PORT-89). Logica PURA, senza three: dai gruppi costruisce un viale dritto
