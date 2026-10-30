@@ -3,3 +3,7 @@ languageSwitcher:
   label: Language
   it: Italiano
   en: English
+notFound:
+  title: Page not found
+  message: This address does not exist, or the page has moved.
+  home: Back to the home page

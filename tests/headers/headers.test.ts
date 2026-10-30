@@ -41,6 +41,13 @@ describe('_headers', () => {
     expect(raw).not.toMatch(/^\s*Strict-Transport-Security:/m);
   });
 
+  it.each(['https://:project.pages.dev/*', 'https://:version.:project.pages.dev/*'])(
+    'indirizzo tecnico %s: mai indicizzato',
+    (path) => {
+      expect(rules.find((r) => r.path === path)?.headers['X-Robots-Tag']).toBe('noindex');
+    },
+  );
+
   it('ogni percorso ha una sola regola', () => {
     const paths = rules.map((r) => r.path);
     expect(new Set(paths).size).toBe(paths.length);

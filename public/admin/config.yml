@@ -218,6 +218,19 @@ collections:
               - name: en
                 i18n: duplicate
                 widget: string
+          - name: notFound
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: message
+                i18n: true
+                widget: string
+              - name: home
+                i18n: true
+                widget: string
       - name: entrance
         label: Entrance
         file: src/content/entrance/{{locale}}.yml
