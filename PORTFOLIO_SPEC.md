@@ -185,7 +185,7 @@ Root (testo puro, per macchine):
 4. **Certificazioni tecniche in evidenza** (le accessorie più in basso, piccole).
 5. **Progetti scelti** (3–4, con homelab e Home Assistant in testa).
 6. **Formazione.**
-7. **Contatti** + pulsante **CV (PDF)** sempre visibile. Oggi su `main` esiste un solo PDF, in italiano (`public/cv/alessandro-gorla-it.pdf`): anche la pagina EN punta a quello, finché il CV in inglese (PR #70) non sarà mergiato.
+7. **Contatti** + pulsante **CV (PDF)** sempre visibile: PDF italiano (`public/cv/alessandro-gorla-it.pdf`) e inglese (`public/cv/alessandro-gorla-en.pdf`), uno per lingua.
 - In fondo e nel menu: "Conoscimi meglio" → `/human`, "Vista macchina" → `/agent`.
 
 **Dati chiave:** *Alessandro Gorla — DevOps & Home Automation — Milano — Hybrid Milano, remote ovunque.*
