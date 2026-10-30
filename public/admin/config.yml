@@ -739,6 +739,13 @@ collections:
               - name: posterSubject
                 i18n: true
                 widget: string
+          - name: interessi
+            i18n: true
+            widget: object
+            fields:
+              - name: posterSubject
+                i18n: true
+                widget: string
           - name: trimind
             i18n: true
             widget: object

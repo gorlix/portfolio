@@ -1,4 +1,5 @@
-import { type Shot, track, trackAt } from './course';
+import type { Shot } from '../framing';
+import { track, trackAt } from './course';
 import { heightAt, PISTE, TENNIS, TRAIL, VOLLEY } from './terrain';
 
 /*

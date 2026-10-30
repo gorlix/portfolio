@@ -70,7 +70,7 @@ scenes:
   beneficenza: "Una rete di punti che si avvicinano piano e si collegano al centro"
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
   scrivania: "La mia scrivania low-poly: monitor col terminale, tastiera split, stampante 3D e mini-server con le spie che lampeggiano"
-  interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
+  interessi: "Un lungo banco da lavoro low-poly con sei oggetti giganti in fila (stampante 3D, tastiera split, tablet e-ink, appunti con una roccia di ossidiana, ingranaggi, piatto con la cupola) e un piccolo pinguino che ci cammina davanti"
   lavori: "Un albero low-poly: il tronco è la linea del tempo e da lì spuntano le esperienze, una foglia a destra e una a sinistra"
   trimind: "La mappa low-poly di Trimind: un server chiuso con i suoi container e un solo tunnel verso la nuvola, i backup che scadono, la pipeline, i pannelli di monitoraggio e i test che diventano verdi"
   opensource: "Una città low-poly con un quartiere per ogni gruppo di repository e un pinguino che la attraversa, più alta dove ci sono più stelle"
@@ -215,6 +215,8 @@ certifications:
   posterSubject: "della bacheca"
 sport:
   posterSubject: "della montagna"
+interessi:
+  posterSubject: "del banco"
 trimind:
   titleSuffix: "Trimind, nel dettaglio"
   metaDescription: "Il mio lavoro per Trimind in cinque momenti: infrastruttura, backup, CI/CD, osservabilità e multi-provider, qualità."

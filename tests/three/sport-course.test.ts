@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { fitDistance } from '../../src/scripts/three/framing';
+import { cameraAt, fitDistance } from '../../src/scripts/three/framing';
 import {
-  cameraAt,
   climbAt,
   descentAt,
   rallyAt,

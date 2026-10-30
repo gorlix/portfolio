@@ -16,15 +16,13 @@ import {
   WebGLRenderer,
 } from 'three';
 import { pixelRatioFor } from '../capabilities';
-import { cardFraming, fitDistance } from '../framing';
+import { cameraAt, cardFraming, fitDistance, type Shot } from '../framing';
 import { createPenguin, type Penguin } from '../penguin';
 import {
-  cameraAt,
   climbAt,
   descentAt,
   rallyAt,
   ribbon,
-  type Shot,
   STILL_TIME,
   TENNIS_SHOT,
   tennisBallY,

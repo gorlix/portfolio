@@ -70,7 +70,7 @@ scenes:
   beneficenza: "A network of dots that slowly move closer and link up around a centre"
   contatti: "A small terminal that switches on, with prompt lines appearing one after another"
   scrivania: "My low-poly desk: a monitor with a terminal, a split keyboard, a 3D printer and a mini server with blinking LEDs"
-  interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
+  interessi: "A long low-poly workbench with six giant objects in a row (3D printer, split keyboard, e-ink tablet, notes with an obsidian rock, gears, a plate under a cloche) and a small penguin walking past them"
   lavori: "A low-poly tree: the trunk is the timeline and the jobs sprout from it, one leaf to the right and one to the left"
   trimind: "The low-poly map of Trimind: a closed server with its containers and a single tunnel to the cloud, expiring backups, the pipeline, monitoring panels and tests turning green"
   opensource: "A low-poly city with one district for each group of repositories and a penguin walking through it, taller where there are more stars"
@@ -215,6 +215,8 @@ certifications:
   posterSubject: "of the board"
 sport:
   posterSubject: "of the mountain"
+interessi:
+  posterSubject: "of the workbench"
 trimind:
   titleSuffix: "Trimind, in depth"
   metaDescription: "My work for Trimind in five moments: infrastructure, backups, CI/CD, observability and multi-provider, quality."
