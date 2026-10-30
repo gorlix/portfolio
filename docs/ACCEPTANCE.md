@@ -14,15 +14,15 @@ Ogni criterio rimanda al test che lo verifica in CI (check obbligatori su `main`
 
 ## Altri requisiti della fase 6 (§10) con verifica automatica
 
-| Requisito                                                                            | Verifica                                                         |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| Accessibilità WCAG 2.2 AA (axe, Mocha e Latte, anche con scene 3D montate)           | `e2e/a11y.spec.ts`                                               |
-| Tastiera, focus visibile, "salta al contenuto", reflow a 320 px                      | `e2e/a11y-keyboard.spec.ts`                                      |
-| Lighthouse ≥ 95 sui percorsi leggeri, limiti di script su `/human`, a ogni PR        | Check "Lighthouse" (`lighthouserc.json`)                         |
-| Budget di peso (spec §3.5)                                                           | `pnpm check:budget`                                              |
-| Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion) | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts` |
-| Analitica solo su `/human`, solo con token valido                                    | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`        |
-| Colori solo come token, contrasto                                                    | `pnpm check:theme`                                               |
+| Requisito                                                                            | Verifica                                                                                                       |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Accessibilità WCAG 2.2 AA (axe, Mocha e Latte, anche con scene 3D montate)           | `e2e/a11y.spec.ts`                                                                                             |
+| Tastiera, focus visibile, "salta al contenuto", reflow a 320 px                      | `e2e/a11y-keyboard.spec.ts`                                                                                    |
+| Lighthouse ≥ 95 sui percorsi leggeri, limiti di script su `/human`, a ogni PR        | Check "Lighthouse" (`lighthouserc.json`)                                                                       |
+| Budget di peso (spec §3.5)                                                           | `pnpm check:budget`                                                                                            |
+| Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion) | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts`                                               |
+| Analitica solo su `/human`, solo con token valido                                    | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`                                                      |
+| Colori solo come token, contrasto                                                    | `pnpm check:theme`                                                                                             |
 | Dati mancanti (`todo`) mai visibili sul sito, in nessun file per macchine            | `tests/i18n/build.test.ts` (nessun `TODO(Alessandro)`), `e2e/recruiter.nojs.spec.ts`, `e2e/human.nojs.spec.ts` |
 
 ## Verifiche manuali (le fa Alessandro; esito da annotare qui)
