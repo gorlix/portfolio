@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { type Scenery, sceneryKinds } from '../../src/lib/schemas/experiences';
+import { cardFraming, fitDistance, SIDE_BY_SIDE_PX } from '../../src/scripts/three/framing';
 import {
   buildCourse,
   type Course,
-  cardFraming,
-  fitDistance,
   HOP_HEIGHT,
   runnerAt,
-  SIDE_BY_SIDE_PX,
 } from '../../src/scripts/three/lavori/course';
 
 const levels = (...lists: Scenery[][]) => lists.map((scenery) => ({ scenery }));

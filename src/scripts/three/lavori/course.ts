@@ -163,30 +163,3 @@ export function runnerAt(course: Course, story: number): Runner {
   const end = course.moves.at(-1);
   return { x: end?.x1 ?? 0, y: 0, pose: end ? 'wave' : 'stand', phase: 3, level: -1 };
 }
-
-/** Distanza della camera perche un riquadro `spanH` x `spanW` (unita) stia nel campo visivo. */
-export function fitDistance(spanH: number, spanW: number, aspect: number, fov: number): number {
-  const vertical = (fov * Math.PI) / 360;
-  const horizontal = Math.atan(Math.tan(vertical) * aspect);
-  return Math.max(spanH / 2 / Math.tan(vertical), spanW / 2 / Math.tan(horizontal));
-}
-
-/** Larghezza minima (px) da cui le schede stanno di lato al percorso (come il CSS: 60rem). */
-export const SIDE_BY_SIDE_PX = 960;
-
-export interface Framing {
-  /** Spostamento orizzontale del pinguino, in frazioni di meta larghezza (positivo = a destra). */
-  shift: number;
-  /** Spostamento verticale, in frazioni d'altezza (positivo = sale). */
-  lift: number;
-}
-
-/**
- * Dove tenere il pinguino sullo schermo durante le schede. Su schermo largo le schede stanno
- * tutte a sinistra e il pinguino a destra: l'occhio non deve rimbalzare da un lato all'altro.
- * Su schermo stretto la strada sta nella parte alta, sopra la scheda.
- */
-export function cardFraming(widthPx: number): Framing {
-  if (widthPx >= SIDE_BY_SIDE_PX) return { shift: 0.45, lift: 0 };
-  return { shift: 0, lift: 0.33 };
-}

@@ -59,7 +59,6 @@ labels:
   stack: Stack
   issuer: Issuer
   verify: Verify
-  technicalCertifications: Technical certifications
   supplementaryCertifications: Other things I learned
   repository: Repository
   language: Language
@@ -75,7 +74,7 @@ scenes:
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A low-poly tree: the trunk is the timeline and the jobs sprout from it, one leaf to the right and one to the left"
   trimind: "The low-poly map of Trimind: a closed server with its containers and a single tunnel to the cloud, expiring backups, the pipeline, monitoring panels and tests turning green"
-  certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
+  certificazioni: "A low-poly notice board with hexagonal slots, two hexagons half full of liquid and a row of small badges, with a penguin reading in front of it"
   sport: "A big snowy low-poly mountain inspired by Mont Blanc: a ski run in the middle with a penguin carving down, a trail on the left with two penguins climbing, a tennis court and a volleyball court on the right"
 farewell:
   command: "$ logout"
@@ -173,6 +172,10 @@ work:
   volunteer: "volunteering"
   highlights: "In short"
   posterSubject: "of the work tree"
+certifications:
+  earned: "earned"
+  expected: "Expected date"
+  posterSubject: "of the board"
 sport:
   posterSubject: "of the mountain"
 trimind:

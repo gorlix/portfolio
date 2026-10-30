@@ -56,6 +56,14 @@
   Content-Type: application/xml; charset=utf-8
   Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 
+# Anteprime e indirizzo tecnico *.pages.dev: mai indicizzati, il sito pubblico e solo il dominio.
+
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
+
 # Percorso immersivo: unico con script e beacon Cloudflare Web Analytics (iniezione automatica spenta).
 
 /human/*

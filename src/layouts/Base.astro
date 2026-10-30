@@ -18,9 +18,20 @@ interface Props {
   jsonLd?: Record<string, unknown>;
   /** Forza la variante Mocha (percorso /human) ignorando prefers-color-scheme. */
   theme?: 'mocha';
+  /** Pagina 404: non e un indirizzo vero, quindi niente canonical, hreflang e selettore lingua. */
+  notFound?: boolean;
 }
 
-const { locale, path, title, description, stickyHeader = false, jsonLd, theme } = Astro.props;
+const {
+  locale,
+  path,
+  title,
+  description,
+  stickyHeader = false,
+  jsonLd,
+  theme,
+  notFound = false,
+} = Astro.props;
 const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
 const pageUrl = absoluteUrl(localizedPath(path, locale));
 const otherLocales = locales.filter((l) => l !== locale);
@@ -34,16 +45,25 @@ const ui = await getSingleton('ui', locale);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={pageUrl} />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={title} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={pageUrl} />
-    <meta property="og:locale" content={ogLocale[locale]} />
-    {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
-    <meta name="twitter:card" content="summary" />
-    {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {
+      notFound ? (
+        <meta name="robots" content="noindex" />
+      ) : (
+        <>
+          <link rel="canonical" href={pageUrl} />
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content={title} />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:locale" content={ogLocale[locale]} />
+          {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
+          <meta name="twitter:card" content="summary" />
+          {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+        </>
+      )
+    }
     {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
     <slot name="head" />
   </head>
@@ -51,7 +71,7 @@ const ui = await getSingleton('ui', locale);
     <a class="skip" href="#main">{ui.skipToContent}</a>
     <header class:list={['site-header', { fixed: stickyHeader }]}>
       <slot name="header" />
-      <LanguageSwitcher locale={locale} path={path} />
+      {!notFound && <LanguageSwitcher locale={locale} path={path} />}
     </header>
     <main id="main"><slot /></main>
     <slot name="footer" />
@@ -59,15 +79,46 @@ const ui = await getSingleton('ui', locale);
 </html>
 
 <style is:global>
-  .site-header.fixed {
+  /* Barra superiore comune (PORT-90): striscia in stile tmux con percorso/menu a sinistra e lingua a destra. */
+  .site-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem 1.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--bg);
+    gap: 0.25rem 1.5rem;
+    box-sizing: border-box;
+    min-height: 2.25rem;
+    padding: 0.25rem 1rem;
+    background: var(--bg-alt);
     border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  header.site-header .back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+  }
+  header.site-header .back:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+  header.site-header .menu a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+  header.site-header .menu a:hover {
+    text-decoration: underline;
+  }
+  .site-header > nav:last-child {
+    margin-left: auto;
   }
   @media (min-width: 48rem) {
     .site-header.fixed {

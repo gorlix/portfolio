@@ -8,6 +8,12 @@ skip: salta
 hints:
   keys: "Usa le frecce e Invio, oppure premi 1, 2 o 3."
   lang: "Scrivi «lang» e premi Invio per cambiare lingua."
+tmux:
+  session: portfolio
+  mainPane: presentati.sh
+  infoPane: info
+  infoRole: ruolo
+  infoLocation: sede
 question: Allora, chi sei?
 choices:
   - { id: human, label: Umano, path: /human }

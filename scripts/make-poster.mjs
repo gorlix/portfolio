@@ -18,6 +18,12 @@ const targets = [
   { path: '/human/', section: 'domotica', scene: 'domotica', prefix: 'domotica-poster' },
   { path: '/human/', section: 'sport', scene: 'sport', prefix: 'sport-poster' },
   {
+    path: '/human/',
+    section: 'certificazioni',
+    scene: 'certificazioni',
+    prefix: 'certificazioni-poster',
+  },
+  {
     path: '/human/lavori/trimind/',
     section: 'trimind',
     scene: 'trimind',

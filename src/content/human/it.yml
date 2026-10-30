@@ -59,7 +59,6 @@ labels:
   stack: Stack
   issuer: Ente
   verify: Verifica
-  technicalCertifications: Certificazioni tecniche
   supplementaryCertifications: Altro che ho imparato
   repository: Repository
   language: Linguaggio
@@ -75,7 +74,7 @@ scenes:
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
   lavori: "Un albero low-poly: il tronco è la linea del tempo e da lì spuntano le esperienze, una foglia a destra e una a sinistra"
   trimind: "La mappa low-poly di Trimind: un server chiuso con i suoi container e un solo tunnel verso la nuvola, i backup che scadono, la pipeline, i pannelli di monitoraggio e i test che diventano verdi"
-  certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
+  certificazioni: "Una parete-bacheca low-poly con slot esagonali, due esagoni mezzi pieni di liquido e una fila di badge piccoli, con un pinguino che legge davanti"
   sport: "Una grande montagna low-poly innevata, ispirata al Monte Bianco: al centro una pista da sci con un pinguino che scende a curve, a sinistra un sentiero con due pinguini che salgono, a destra un campo da tennis e uno da pallavolo"
 farewell:
   command: "$ logout"
@@ -173,6 +172,10 @@ work:
   volunteer: "volontariato"
   highlights: "In breve"
   posterSubject: "dell'albero dei lavori"
+certifications:
+  earned: "conseguita"
+  expected: "Data prevista"
+  posterSubject: "della bacheca"
 sport:
   posterSubject: "della montagna"
 trimind:

@@ -7,3 +7,5 @@ verifyUrl:
   todo: "Verification link (not in CV)"
 kind: technical
 status: in-progress
+rank: 2
+scenery: cluster
