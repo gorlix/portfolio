@@ -31,8 +31,6 @@ export const recruiterSchema = z
       methodLabel: text,
       methods: z.strictObject({ 'by-hand': text, 'ai-copilot': text, vibecoded: text }),
     }),
-    /** Etichetta del segnaposto per i dati non ancora forniti. */
-    todoLabel: text,
     labels: z.strictObject({
       location: text,
       availability: text,

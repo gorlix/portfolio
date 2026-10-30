@@ -1,7 +1,6 @@
 name: SuperFlow
 repo: https://github.com/gorlix/SuperFlow
-language:
-  todo: Linguaggio principale
+language: Java
 method: vibecoded
 status: wip
 featured: false

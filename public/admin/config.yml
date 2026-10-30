@@ -376,9 +376,6 @@ collections:
                   - name: vibecoded
                     i18n: true
                     widget: string
-          - name: todoLabel
-            i18n: duplicate
-            widget: string
           - name: labels
             i18n: true
             widget: object
@@ -557,9 +554,6 @@ collections:
               - name: contatti
                 i18n: true
                 widget: string
-          - name: todoLabel
-            i18n: duplicate
-            widget: string
           - name: labels
             i18n: true
             widget: object
@@ -876,9 +870,6 @@ collections:
             widget: object
             fields:
               - name: projects
-                i18n: true
-                widget: string
-              - name: automationsTodo
                 i18n: true
                 widget: string
               - name: trigger

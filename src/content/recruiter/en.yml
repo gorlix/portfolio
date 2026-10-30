@@ -20,7 +20,6 @@ projects:
     by-hand: Written by hand.
     ai-copilot: Built with an AI assistant as a copilot.
     vibecoded: Largely generated with AI (vibe coding).
-todoLabel: "TODO(Alessandro)"
 labels:
   location: Location
   availability: Availability

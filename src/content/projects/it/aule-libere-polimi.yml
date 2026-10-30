@@ -1,7 +1,6 @@
 name: AuleLiberePoliMi
 repo: https://github.com/gorlix/AuleLiberePoliMi
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived

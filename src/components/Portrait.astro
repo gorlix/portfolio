@@ -2,11 +2,9 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { isTodo, type Todo as TodoValue } from '../lib/schemas/common';
-import TodoNote from './Todo.astro';
 
 interface Props {
   photo: { src: string; alt: string } | TodoValue;
-  todoLabel: string;
 }
 
 /** Lato del ritratto in px (deve coincidere con `.portrait` sotto): spazio sempre riservato, nessun layout shift. */
@@ -17,7 +15,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 
-const { photo, todoLabel } = Astro.props;
+const { photo } = Astro.props;
 const asset = isTodo(photo) ? undefined : images[photo.src]?.default;
 if (!isTodo(photo) && !asset) throw new Error(`Foto non trovata: ${photo.src}`);
 ---
@@ -35,9 +33,7 @@ if (!isTodo(photo) && !asset) throw new Error(`Foto non trovata: ${photo.src}`);
         quality={80}
         loading="eager"
       />
-    ) : (
-      isTodo(photo) && <TodoNote label={todoLabel} hint={photo.todo} />
-    )
+    ) : null
   }
 </div>
 

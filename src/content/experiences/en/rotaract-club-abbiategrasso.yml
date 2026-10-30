@@ -6,7 +6,8 @@ start:
 end:
   todo: "End date (not in CV)"
 results:
-  todo: "What was done (not in CV)"
+  - "I have served as secretary and prefect, among other roles."
+  - "Volunteering in service of the Abbiategrasso community."
 stack: []
 kind: volunteer
 scenery: ["garden"]

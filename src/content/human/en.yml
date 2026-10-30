@@ -52,7 +52,6 @@ intros:
   interessi: The messier side of me, which is also the more fun one.
   beneficenza: Some of my time goes to other people, with fewer jokes.
   contatti: If you made it this far, write to me. I do reply, promise.
-todoLabel: "TODO(Alessandro)"
 labels:
   ongoing: ongoing
   results: Results
@@ -116,7 +115,6 @@ homelab:
   projects: "Projects"
 domotica:
   projects: Public projects
-  automationsTodo: List of automations to show (even a rough one)
   trigger: Trigger
   conditions: Conditions
   actions: Actions
