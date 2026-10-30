@@ -66,14 +66,16 @@ Le scelte qui sotto sono il **default concordato**. Claude Code può proporre al
 
 ### 3.3 Repository e CI/CD
 
-- **Repository GitHub**, privato durante lo sviluppo. Se diventa pubblico al lancio (decisione aperta, §15), va controllato che non contenga dati personali non approvati.
-- **GitHub Actions:** lint, typecheck, test, build, Lighthouse, gitleaks. Deploy automatico su Cloudflare, con **anteprima per ogni branch**.
+- **Repository GitHub**, oggi **pubblico**: ogni file va quindi trattato come pubblicato (nessun dato personale non approvato, nessun segreto).
+- **GitHub Actions:** lint, typecheck, test, build, Lighthouse, gitleaks. Deploy automatico su Cloudflare, con **anteprima per ogni branch**. Lighthouse gira su ogni PR verso `main` e su ogni push su `main`.
 - **Renovate** per gli aggiornamenti delle dipendenze (Alessandro lo usa già nell'homelab). Per le dipendenze principali, aggiornamenti non automatici: devono passare i test.
 - Nel repo: `PORTFOLIO_SPEC.md` in radice e un `CLAUDE.md` breve che lo richiama e riassume le regole d'oro (nessun contenuto inventato, nessun dato reale dell'infrastruttura, zero JS su recruiter e agent).
 
 ### 3.4 Infrastruttura e hosting
 
-- **Cloudflare Pages** per il sito statico (o l'equivalente con asset statici su Workers, se Claude Code lo ritiene più indicato). Dominio già posseduto: `TODO(Alessandro): dominio`; DNS su Cloudflare.
+- **Cloudflare Pages** per il sito statico (o l'equivalente con asset statici su Workers, se Claude Code lo ritiene più indicato). Il sito è **online su `alessandrogorla.it` dal 2026-10-30**; ogni merge su `main` viene pubblicato automaticamente su Cloudflare Pages.
+- **CMS:** pannello **Sveltia** su `/admin/`, git-based, per modificare i YAML IT/EN di `src/content/` (configurazione generata dagli schemi Zod). Oggi è attiva solo la **fase 1, in locale** (nessun login); la **fase 2**, modifica da remoto con login GitHub, **non è attiva**. Dettagli in `docs/CMS.md`.
+- **Immagine Open Graph statica** `public/og.png` (1200×630), rigenerabile con `pnpm make:og`; i tag social usano quella per ogni pagina.
 - **Header di sicurezza e CSP** tramite file `_headers`; reindirizzamenti con `_redirects`. CSP restrittiva: niente script o stili da domini esterni.
 - **Email dedicata** sul dominio con **Cloudflare Email Routing** (inoltro alla casella personale): nessuna casella nuova da gestire, e l'indirizzo personale non finisce nei file per macchine.
 - **Nessun modulo di contatto e nessun backend**: solo link `mailto:`. Meno superficie d'attacco, nessuna gestione di spam o dati degli utenti.
@@ -183,7 +185,7 @@ Root (testo puro, per macchine):
 4. **Certificazioni tecniche in evidenza** (le accessorie più in basso, piccole).
 5. **Progetti scelti** (3–4, con homelab e Home Assistant in testa).
 6. **Formazione.**
-7. **Contatti** + pulsante **CV (PDF)** sempre visibile.
+7. **Contatti** + pulsante **CV (PDF)** sempre visibile. Oggi su `main` esiste un solo PDF, in italiano (`public/cv/alessandro-gorla-it.pdf`): anche la pagina EN punta a quello, finché il CV in inglese (PR #70) non sarà mergiato.
 - In fondo e nel menu: "Conoscimi meglio" → `/human`, "Vista macchina" → `/agent`.
 
 **Dati chiave:** *Alessandro Gorla — DevOps & Home Automation — Milano — Hybrid Milano, remote ovunque.*
@@ -362,9 +364,9 @@ Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui
 - **Open source (`/human/lavori/open-source/`, PORT-89):** ultima tappa della strada dei Lavori (una mini-skyline e la scheda "Open source" con "Approfondisci"; non e un'esperienza del CV, quindi non finisce in `/recruiter`). La pagina e una **citta low-poly** vista di lato: un quartiere per gruppo, un edificio per repository, **piu alto se ha piu stelle** (scala logaritmica), il pinguino la attraversa camminando e alla fine saluta. Una scheda per gruppo con nome, descrizione, linguaggio, stelle e link. Selezione nei dati (`openSource` dei progetti); le stelle sono lette dall'API GitHub **al build**, con riserva nei dati se non risponde, mai dal browser.
 - **Certificazioni (immersiva, PORT-87):** una **parete-bacheca** low-poly con slot esagonali e un pinguino che legge davanti, a destra (nelle schede resta fuori campo). I badge nascono dai dati `certifications`: `status: in-progress` = **esagono in costruzione** (contorno intero e liquido a metà, con un'onda lenta che si agita mentre si scorre; con reduced-motion è fermo), `earned` = **pieno**, senza toccare il codice; `rank` dà l'ordine, `scenery: cluster` mette accanto piccoli cubi collegati (generici, niente logo). Prima schermata: bacheca e intro. Poi una **scheda per ogni tecnica** (nome, ente, stato, data o data prevista, link di verifica), con la camera sull'esagono; la scheda **"Altro che ho imparato"** allarga la camera sulla fila dei badge piccoli delle accessorie. Uscita: vista della bacheca, dissolvenza verso Sport. Nessun comando. Reduced-motion: un fotogramma per momento. Fallback: poster con avviso; senza JS schede sul fondo semplice. Le tecniche compaiono **anche come piccoli badge nella prima schermata** dell'Umano e in evidenza nel recruiter.
 - **Sport (immersiva, PORT-88, sostituisce le tre micro-scene):** una **grande montagna low-poly ispirata al Monte Bianco** (cupola sommitale innevata e arrotondata, spalle ampie, creste e guglie rocciose, ghiacciai) con **tre versanti** e una sola scena `sport`. Prima schermata: montagna intera, tutto si muove piano. **Sci** (versante centrale): un pinguino scende a curve e lascia la traccia ("la curva perfetta"). **Montagna** (versante sinistro): due pinguini con lo zaino salgono il sentiero; la loro posizione è funzione pura dello scroll, si girano nel verso del moto e a scroll fermo stanno fermi. **Tennis** e **Pallavolo** (versante destro, due campi vicini): la pallina rimbalza nel campo in terra rossa; due pinguini si passano il pallone con un bagher sopra la rete ("passato da pallavolista"). Uscita: ritorno alla montagna intera, dissolvenza verso Interessi. Sciatore e palle sono cicli lenti legati al tempo, fermi fuori schermo; reduced-motion: un fotogramma fermo per momento. Terreno, alberi, campi e rifugi sono una sola mesh colorata per faccia, generata nel browser. Sotto-segmenti della barra del tempo: uno per attività. Fallback: poster con avviso; senza JS schede sul fondo semplice.
-- **Interessi** *(una sola sezione)*: stampa 3D, tastiera **ZSA Moonlander** con layout personalizzato (layer gaming e layout ibrido US/IT, link Oryx), ebook reader **Supernote** e relativi tool, **Obsidian**, **Rust** (in apprendimento), e **il cibo / i posti dove si mangia bene** (con una battuta; link già presente nel README). La sezione Umano "deve essere Alessandro a pieno": più dettagli personali che omissioni.
+- **Interessi** *(una sola sezione; su `main` micro-scena con un oggetto low-poly per argomento, versione immersiva in lavorazione)*: stampa 3D, tastiera **ZSA Moonlander** con layout personalizzato (layer gaming e layout ibrido US/IT, link Oryx), ebook reader **Supernote** e relativi tool, **Obsidian**, **Rust** (in apprendimento), e **il cibo / i posti dove si mangia bene** (con una battuta; link già presente nel README). La sezione Umano "deve essere Alessandro a pieno": più dettagli personali che omissioni.
 - **Beneficenza (immersiva, PORT-93):** tono più sobrio, meno movimento. Un **territorio low-poly** visto dall'alto, con tre quartieri (uno per distretto del Multidistretto: forme generiche, nessun nome né logo) e un pannello con la sagoma di un sito; tutto è una mesh colorata per faccia. Prima schermata: territorio con le luci spente e intro. Scheda **Rotaract Abbiategrasso**: la camera scende sul quartiere con il giardino teal, le luci si collegano piano e un pinguino sta fermo accanto. Scheda dei siti del **Distretto 2050** e del **primo multidistretto italiano** (progetti concreti, con link ai due sorgenti): si collegano gli altri due quartieri e tre archi raggiungono il pannello, i cui blocchi si accendono. Uscita: vista d'insieme, dissolvenza verso Contatti. Tutto dipende dallo scroll; l'unico ciclo d'ambiente è il respiro lento delle luci, fermo fuori schermo e con reduced-motion. Due sotto-segmenti nella barra del tempo. Nessun comando. Una battuta leggera al massimo. Reduced-motion: un fotogramma per momento. Fallback: poster con avviso; senza JS schede sul fondo semplice.
-- **Contatti (chiusura):** scena finale tranquilla; ritorno al terminale con un saluto; email dedicata, LinkedIn, GitHub, dev.to, X, pulsante CV.
+- **Contatti (chiusura):** su `main` una micro-scena: un piccolo terminale low-poly con lo schermo che si accende, le righe di prompt una dopo l'altra e il cursore fermo. Pianificata la scena immersiva (una scrivania con un terminale, PORT-99), **non ancora fatta**. Scena finale tranquilla; ritorno al terminale con un saluto; email dedicata, LinkedIn, GitHub, dev.to, X, pulsante CV.
 
 ---
 
@@ -395,7 +397,7 @@ Tutte: prima persona, tono di Alessandro (ironico, preciso, un po' maniacale sui
 10. Navigazione dall'Umano al terminale d'ingresso come menu persistente o solo all'inizio/alla fine.
 11. Titolo e posizione delle certificazioni accessorie.
 12. Modelli 3D: default procedurali nel codice; confermare se Alessandro vuole modellare o usare asset esterni (es. in Blender).
-13. Repository: resta privato o diventa pubblico dopo il lancio.
+13. ~~Repository: resta privato o diventa pubblico dopo il lancio.~~ **Deciso:** resta pubblico.
 14. Analitica: nessuna o Cloudflare Web Analytics.
 15. Email dedicata con Cloudflare Email Routing e nessun modulo di contatto: confermare.
 
