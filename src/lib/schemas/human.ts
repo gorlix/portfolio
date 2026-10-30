@@ -76,7 +76,6 @@ export const humanSchema = z.strictObject({
     stack: text,
     issuer: text,
     verify: text,
-    technicalCertifications: text,
     supplementaryCertifications: text,
     repository: text,
     language: text,
@@ -108,6 +107,13 @@ export const humanSchema = z.strictObject({
     volunteer: text,
     /** Titolo dei 2-3 punti del CV mostrati nella scheda. */
     highlights: text,
+    posterSubject: text,
+  }),
+  /** Bacheca delle Certificazioni (PORT-87): stato e data nelle schede. */
+  certifications: z.strictObject({
+    earned: text,
+    /** Davanti alla data prevista di una certificazione in corso. */
+    expected: text,
     posterSubject: text,
   }),
   /** Pagina di approfondimento Trimind (PORT-82): connettivi provvisori, i fatti stanno nel CV. */
@@ -263,7 +269,6 @@ export const humanTranslatable = [
   'labels.stack',
   'labels.issuer',
   'labels.verify',
-  'labels.technicalCertifications',
   'labels.supplementaryCertifications',
   'labels.repository',
   'labels.language',
@@ -277,6 +282,9 @@ export const humanTranslatable = [
   'work.volunteer',
   'work.highlights',
   'work.posterSubject',
+  'certifications.earned',
+  'certifications.expected',
+  'certifications.posterSubject',
   'trimind.titleSuffix',
   'trimind.metaDescription',
   'trimind.eyebrow',

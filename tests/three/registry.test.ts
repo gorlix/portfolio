@@ -45,7 +45,7 @@ describe('tipi di scena', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('immersive');
     expect(sceneKind('trimind')).toBe('immersive');
-    expect(sceneKind('certificazioni')).toBe('micro');
+    expect(sceneKind('certificazioni')).toBe('immersive');
     expect(sceneKind('interessi')).toBe('micro');
     expect(sceneKind('homelab')).toBe('immersive');
     expect(sceneKind('domotica')).toBe('immersive');

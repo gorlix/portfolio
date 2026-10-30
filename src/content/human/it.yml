@@ -59,7 +59,6 @@ labels:
   stack: Stack
   issuer: Ente
   verify: Verifica
-  technicalCertifications: Certificazioni tecniche
   supplementaryCertifications: Altro che ho imparato
   repository: Repository
   language: Linguaggio
@@ -75,7 +74,7 @@ scenes:
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
   lavori: "Un albero low-poly: il tronco è la linea del tempo e da lì spuntano le esperienze, una foglia a destra e una a sinistra"
   trimind: "La mappa low-poly di Trimind: un server chiuso con i suoi container e un solo tunnel verso la nuvola, i backup che scadono, la pipeline, i pannelli di monitoraggio e i test che diventano verdi"
-  certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
+  certificazioni: "Una parete-bacheca low-poly con slot esagonali, due esagoni in costruzione e una fila di badge piccoli, con un pinguino che legge davanti"
   sci: "Una montagna low-poly con una linea che scende disegnando curve mentre scorri"
   tennis: "Una pallina che segna la riga di un campo in terra rossa, solleva la terra e arriva verso di te"
   pallavolo: "Due personaggi low-poly che si passano la palla con un bagher"
@@ -175,6 +174,10 @@ work:
   volunteer: "volontariato"
   highlights: "In breve"
   posterSubject: "dell'albero dei lavori"
+certifications:
+  earned: "conseguita"
+  expected: "Data prevista"
+  posterSubject: "della bacheca"
 trimind:
   titleSuffix: "Trimind, nel dettaglio"
   metaDescription: "Il mio lavoro per Trimind in cinque momenti: infrastruttura, backup, CI/CD, osservabilità e multi-provider, qualità."
