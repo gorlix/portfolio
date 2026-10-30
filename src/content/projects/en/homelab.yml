@@ -1,6 +1,7 @@
 name: homelab
 repo: https://github.com/gorlix/homelab
 language: HCL
+method: ai-copilot
 status: active
 featured: true
 rank: 1

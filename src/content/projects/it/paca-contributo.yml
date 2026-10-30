@@ -1,6 +1,7 @@
 name: "Paca"
 repo: https://github.com/Paca-AI/paca/pull/454
 language: Go
+method: ai-copilot
 status: archived
 featured: true
 rank: 2
