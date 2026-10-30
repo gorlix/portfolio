@@ -16,7 +16,8 @@ import {
 } from 'three';
 import type { WorkCourse } from '../../../lib/work';
 import { pixelRatioFor } from '../capabilities';
-import { buildCourse, cardFraming, fitDistance, type Prop, runnerAt } from '../lavori/course';
+import { cardFraming, fitDistance } from '../framing';
+import { buildCourse, type Prop, runnerAt } from '../lavori/course';
 import { createPenguin } from '../penguin';
 import { blendAt } from '../story';
 import { firstToken } from '../tokens';

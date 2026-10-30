@@ -15,6 +15,14 @@ export const entranceSchema = z.strictObject({
   hints: z.strictObject({ keys: text, lang: text }),
   /** Domanda che introduce le scelte. */
   question: text,
+  /** Cornice tmux: nome sessione, titoli dei pane ed etichette del pane informativo (statico). */
+  tmux: z.strictObject({
+    session: text,
+    mainPane: text,
+    infoPane: text,
+    infoRole: text,
+    infoLocation: text,
+  }),
   /** Ordine = ordine di visualizzazione e tasti 1/2/3. `path` e il percorso senza prefisso lingua. */
   choices: z
     .array(
@@ -35,5 +43,8 @@ export const entranceTranslatable = [
   'command',
   'greeting.*',
   'question',
+  'tmux.mainPane',
+  'tmux.infoRole',
+  'tmux.infoLocation',
   'choices.*.label',
 ];

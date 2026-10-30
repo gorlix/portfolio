@@ -10,6 +10,17 @@ export const uiSchema = z.strictObject({
     it: text,
     en: text,
   }),
+  notFound: z.strictObject({
+    title: text,
+    message: text,
+    home: text,
+  }),
 });
 
-export const uiTranslatable = ['skipToContent', 'languageSwitcher.label'];
+export const uiTranslatable = [
+  'skipToContent',
+  'languageSwitcher.label',
+  'notFound.title',
+  'notFound.message',
+  'notFound.home',
+];

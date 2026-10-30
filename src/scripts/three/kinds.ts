@@ -6,7 +6,6 @@ import type { SceneKind } from './capabilities';
  * Modulo senza dipendenze, letto sia da Scene.astro (in build) sia dal bootstrap.
  */
 export const microScenes = [
-  'certificazioni',
   'beneficenza',
   'contatti',
   'interessi',
@@ -27,6 +26,7 @@ export const immersiveScenes = [
   'lavori',
   'trimind',
   'opensource',
+  'certificazioni',
 ] as const;
 
 export function sceneKind(name: string): SceneKind {

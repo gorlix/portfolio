@@ -218,6 +218,19 @@ collections:
               - name: en
                 i18n: duplicate
                 widget: string
+          - name: notFound
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: message
+                i18n: true
+                widget: string
+              - name: home
+                i18n: true
+                widget: string
       - name: entrance
         label: Entrance
         file: src/content/entrance/{{locale}}.yml
@@ -253,6 +266,25 @@ collections:
           - name: question
             i18n: true
             widget: string
+          - name: tmux
+            i18n: true
+            widget: object
+            fields:
+              - name: session
+                i18n: duplicate
+                widget: string
+              - name: mainPane
+                i18n: true
+                widget: string
+              - name: infoPane
+                i18n: duplicate
+                widget: string
+              - name: infoRole
+                i18n: true
+                widget: string
+              - name: infoLocation
+                i18n: true
+                widget: string
           - name: choices
             i18n: true
             widget: list
@@ -547,9 +579,6 @@ collections:
               - name: verify
                 i18n: true
                 widget: string
-              - name: technicalCertifications
-                i18n: true
-                widget: string
               - name: supplementaryCertifications
                 i18n: true
                 widget: string
@@ -702,6 +731,19 @@ collections:
                   - name: lead
                     i18n: true
                     widget: text
+          - name: certifications
+            i18n: true
+            widget: object
+            fields:
+              - name: earned
+                i18n: true
+                widget: string
+              - name: expected
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
           - name: trimind
             i18n: true
             widget: object
@@ -1469,6 +1511,19 @@ collections:
         options:
           - earned
           - in-progress
+      - name: rank
+        i18n: duplicate
+        required: false
+        widget: number
+        value_type: int
+        min: 1
+        max: 9007199254740991
+      - name: scenery
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - cluster
   - name: education
     label: Education
     folder: src/content/education

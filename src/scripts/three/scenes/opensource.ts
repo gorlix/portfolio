@@ -16,7 +16,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { pixelRatioFor } from '../capabilities';
-import { cardFraming, fitDistance } from '../lavori/course';
+import { cardFraming, fitDistance } from '../framing';
 import { buildCity, CROSSING, type DistrictInput, ROWS, walkerAt } from '../opensource/city';
 import { createPenguin } from '../penguin';
 import { blendAt } from '../story';
