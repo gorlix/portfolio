@@ -9,6 +9,6 @@ featured: false
 description: "Paca plugin (com.gorlix.gitlab) integrating GitLab projects, merge requests and branches with Paca projects and tasks; a fork of paca-plugin-github."
 openSource:
   group: paca
-  description: "A fork of paca-plugin-github ported to GitLab: projects, merge requests and branches linked to Paca tasks."
+  description: "GitLab integration, born as my port of paca-plugin-github: Paca-AI forked it to bring it in natively, with 4 more PRs of mine."
   stars: 1
   contribution: false
