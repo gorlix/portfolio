@@ -20,6 +20,28 @@ const centre = (page: Page, moment: string) =>
   }, moment);
 
 for (const route of ['/human/', '/en/human/']) {
+  // Certificazioni (PORT-87): una scheda per tecnica nell'ordine dei dati, poi le accessorie.
+  test(`${route}: Certificazioni segue lo schema immersivo`, async ({ page }) => {
+    await page.goto(route);
+    const certs = page.locator('#certificazioni');
+    const names = await certs
+      .locator('[data-moment]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.moment));
+    expect(names).toEqual(['overview', 'rhcsa', 'cka', 'others', 'exit']);
+    await expect(certs.locator('.card[data-status="in-progress"]')).toHaveCount(2);
+
+    await page.locator('nav[data-timeline] a[href="#certificazioni"]').first().click();
+    const canvas = certs.locator('[data-scene="certificazioni"] canvas');
+    await expect(canvas).toBeAttached();
+    await expect(certs).toHaveAttribute('data-phase', 'hero');
+    await certs.locator('[data-moment="cka"]').evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      window.scrollBy(0, rect.top + rect.height / 2 - window.innerHeight / 2);
+    });
+    await expect(certs).toHaveAttribute('data-moment', 'cka');
+    await expect(certs).toHaveAttribute('data-phase', 'cards');
+  });
+
   test(`${route}: prima schermata e una scheda per momento, nell'ordine dello storyboard`, async ({
     page,
   }) => {

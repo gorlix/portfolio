@@ -1,5 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
+import certificazioniPosterDesktopSrc from '../../assets/human/certificazioni-poster-desktop.png';
+import certificazioniPosterMobileSrc from '../../assets/human/certificazioni-poster-mobile.png';
 import domoticaPosterDesktopSrc from '../../assets/human/domotica-poster-desktop.png';
 import domoticaPosterMobileSrc from '../../assets/human/domotica-poster-mobile.png';
 import lavoriPosterDesktopSrc from '../../assets/human/lavori-poster-desktop.png';
@@ -59,6 +61,8 @@ const [
   lavoriPosterMobile,
   domoticaPosterDesktop,
   domoticaPosterMobile,
+  certificazioniPosterDesktop,
+  certificazioniPosterMobile,
 ] = await Promise.all([
   poster(posterDesktopSrc),
   poster(posterMobileSrc),
@@ -66,6 +70,8 @@ const [
   poster(lavoriPosterMobileSrc),
   poster(domoticaPosterDesktopSrc),
   poster(domoticaPosterMobileSrc),
+  poster(certificazioniPosterDesktopSrc),
+  poster(certificazioniPosterMobileSrc),
 ]);
 const posterReasons = ['webgl', 'savedata', 'error', 'nojs'] as const;
 /** Avviso del poster con il soggetto della sezione ("della scrivania", "della casa"). */
@@ -99,8 +105,21 @@ const W = page.work;
 /** Punti del CV nella scheda: fino a tre; con una pagina di approfondimento due, il resto sta li. */
 const highlights = (detail: boolean) => (detail ? 2 : 3);
 const isTechnical = (c: (typeof certifications)[number]) => c.data.kind !== 'supplementary';
-const technicalCerts = certifications.filter(isTechnical);
+/** Le tecniche in bacheca: ordine dai dati (`rank`), a parita per nome del file. */
+const technicalCerts = certifications
+  .filter(isTechnical)
+  .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
 const supplementaryCerts = certifications.filter((c) => !isTechnical(c));
+const C = page.certifications;
+/** Bacheca: solo quello che serve al 3D; i testi stanno nelle schede. */
+const certBoard = {
+  technical: technicalCerts.map((c) => ({
+    slug: c.slug,
+    status: c.data.status,
+    ...(c.data.scenery && { scenery: c.data.scenery }),
+  })),
+  supplementary: supplementaryCerts.map((c) => ({ slug: c.slug, status: c.data.status })),
+};
 const projectsIn = (section: string) =>
   projects
     .filter((p) => p.data.section === section)
@@ -128,7 +147,11 @@ const period = (start: unknown, end: unknown) => {
 };
 /** Sezioni col layout immersivo (spec §7.3, PORT-76): per ora solo il pilota Homelab. */
 const immersive = (id: string) =>
-  id === 'homelab' || id === 'home' || id === 'domotica' || id === 'lavori';
+  id === 'homelab' ||
+  id === 'home' ||
+  id === 'domotica' ||
+  id === 'lavori' ||
+  id === 'certificazioni';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -235,6 +258,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 />
               </picture>
               <Scene scene="domotica" label={page.scenes.domotica} accent="domotica" data={domotica} />
+            </div>
+          )}
+          {s.id === 'certificazioni' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={certificazioniPosterMobile.src} />
+                <img
+                  src={certificazioniPosterDesktop.src}
+                  width={certificazioniPosterDesktop.options.width}
+                  height={certificazioniPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="certificazioni" label={page.scenes.certificazioni} accent="certificazioni" data={certBoard} />
             </div>
           )}
           {s.id === 'home' ? (
@@ -695,36 +734,55 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'certificazioni' && (
             <>
-              <Scene
-                scene="certificazioni"
-                label={page.scenes.certificazioni}
-                accent="certificazioni"
-                data={{ technical: technicalCerts.length, supplementary: supplementaryCerts.length }}
-              />
-              <h3>{L.technicalCertifications}</h3>
-              <ul class="plain">
-                {technicalCerts.map(({ data: c }) => (
-                  <li>
-                    <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
-                    <span class="meta">
-                      {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
-                      {' · '}
-                      {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
-                    </span>
-                    {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
-                  </li>
-                ))}
-              </ul>
-              {supplementaryCerts.length > 0 && (
-                <>
-                  <h3 class="small">{L.supplementaryCertifications}</h3>
-                  <ul class="plain small">
-                    {supplementaryCerts.map(({ data: c }) => (
-                      <li>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
+                <p class="poster-note" role="status">
+                  {posterNotice(C.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+                </p>
+              </div>
+
+              <div class="cards">
+                {technicalCerts.map(({ slug, data: c }) => {
+                  const inProgress = c.status === 'in-progress';
+                  return (
+                    <article class="card job cert" data-moment={slug} data-status={c.status}>
+                      <h3>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</h3>
+                      <p class="org">
+                        <strong>
+                          {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                        </strong>
+                        <span class="chip">{inProgress ? L.ongoing : C.earned}</span>
+                      </p>
+                      <p class="meta">
+                        {inProgress && `${C.expected}: `}
+                        {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+                      </p>
+                      {!isTodo(c.verifyUrl) && <p><a href={c.verifyUrl}>{L.verify}</a></p>}
+                    </article>
+                  );
+                })}
+                {supplementaryCerts.length > 0 && (
+                  <article class="card cert" data-moment="others">
+                    <h3>{L.supplementaryCertifications}</h3>
+                    <ul class="plain small">
+                      {supplementaryCerts.map(({ data: c }) => (
+                        <li>
+                          <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
+                          <span class="cert-meta">
+                            <span class="meta">
+                              {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                            </span>
+                            <span class="meta">
+                              {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                )}
+              </div>
+              <div class="exit" data-moment="exit" aria-hidden="true"></div>
             </>
           )}
 
@@ -853,7 +911,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   /* Sezioni interattive (spec §7.3): titolo in alto a sinistra su un gradiente del colore di sezione. */
   section[data-section="lavori"] > h2,
   section[data-section="homelab"] > h2,
-  section[data-section="domotica"] > h2 {
+  section[data-section="domotica"] > h2,
+  section[data-section="certificazioni"] > h2 {
     display: inline-block;
     padding: 0.25rem 2rem 0.25rem 0.5rem;
     background: linear-gradient(to right, color-mix(in srgb, var(--accent) 24%, transparent), transparent);
@@ -1238,6 +1297,17 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     border-radius: 999px;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
+  }
+  .cert .chip {
+    border-color: var(--accent);
+  }
+  .cert .meta {
+    margin-top: 0.25rem;
+  }
+  .cert-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
   }
   .deeper {
     margin: 1rem 0 0;

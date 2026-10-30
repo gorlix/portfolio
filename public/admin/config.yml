@@ -560,9 +560,6 @@ collections:
               - name: verify
                 i18n: true
                 widget: string
-              - name: technicalCertifications
-                i18n: true
-                widget: string
               - name: supplementaryCertifications
                 i18n: true
                 widget: string
@@ -635,6 +632,19 @@ collections:
                 i18n: true
                 widget: string
               - name: highlights
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+          - name: certifications
+            i18n: true
+            widget: object
+            fields:
+              - name: earned
+                i18n: true
+                widget: string
+              - name: expected
                 i18n: true
                 widget: string
               - name: posterSubject
@@ -1406,6 +1416,19 @@ collections:
         options:
           - earned
           - in-progress
+      - name: rank
+        i18n: duplicate
+        required: false
+        widget: number
+        value_type: int
+        min: 1
+        max: 9007199254740991
+      - name: scenery
+        i18n: duplicate
+        required: false
+        widget: select
+        options:
+          - cluster
   - name: education
     label: Education
     folder: src/content/education
