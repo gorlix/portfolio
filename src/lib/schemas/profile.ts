@@ -1,12 +1,12 @@
 import { z } from 'astro/zod';
-import { orTodo, text, url } from './common';
+import { text, url } from './common';
 
 export const profileSchema = z.strictObject({
   name: text,
-  role: orTodo(text),
+  role: text,
   location: text,
-  availability: orTodo(text),
-  tagline: orTodo(text),
+  availability: text,
+  tagline: text,
   /** Lingue parlate, nell'ordine in cui compaiono. */
   languages: z.array(z.strictObject({ name: text, level: text })).min(1),
   /** Unico punto dati per mailto e file per macchine. */
@@ -14,13 +14,13 @@ export const profileSchema = z.strictObject({
   links: z.strictObject({
     github: url,
     linkedin: url,
-    devto: orTodo(url),
+    devto: url,
     x: url,
   }),
   /** Percorso del CV (PDF) per lingua, sotto `public/` (es. `/cv/alessandro-gorla-it.pdf`). */
-  cv: orTodo(text),
+  cv: text,
   /** Foto reale per `/recruiter`: file in `src/assets/` (percorso dalla radice del repo) e testo alternativo. */
-  photo: orTodo(z.strictObject({ src: text, alt: text })),
+  photo: z.strictObject({ src: text, alt: text }),
 });
 
 export const profileTranslatable = [

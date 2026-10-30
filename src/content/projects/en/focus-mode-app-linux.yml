@@ -2,8 +2,7 @@ name: focus-mode-app-linux
 repo: https://github.com/gorlix/focus-mode-app-linux
 language: Python
 method: ai-copilot
-status:
-  todo: active / wip / archived
+status: wip
 featured: false
 description: Syncs Android Do Not Disturb through Home Assistant; migration from Python to
   Rust/Tauri in progress.

@@ -9,18 +9,12 @@ type Json = Record<string, unknown>;
 type CmsField = Record<string, unknown> & { name: string; widget: string };
 
 /** Etichette dell'interfaccia del CMS (non sono contenuti del sito). */
-const todoHint =
-  'Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito.';
 const dateHint = 'Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).';
 /** Nomi di campo con testo lungo: widget a piu righe. Scelta per nome, mai dai contenuti. */
 const longText = /^(tagline|text|description|lead|summary|note|.*(Description|Note|Lead))$/;
 /** Campo usato come titolo e nome file delle voci, in ordine di preferenza. */
 const identifierCandidates = ['name', 'title', 'company', 'institution'];
 
-const isTodoBranch = (node: Json): boolean => {
-  const props = node.properties as Record<string, unknown> | undefined;
-  return node.type === 'object' && !!props && Object.keys(props).join() === 'todo';
-};
 const isNullBranch = (node: Json): boolean => node.type === 'null';
 
 /** Percorso con `*` per gli elementi di array, come in `translatable`. */
@@ -37,14 +31,12 @@ interface Ctx {
 function mapField(name: string, node: Json, required: boolean, path: string[], ctx: Ctx): CmsField {
   let schema = node;
   let optional = !required;
-  let hasTodo = false;
 
   if (Array.isArray(schema.anyOf)) {
     const flat = (nodes: Json[]): Json[] =>
       nodes.flatMap((b) => (Array.isArray(b.anyOf) ? flat(b.anyOf as Json[]) : [b]));
     const branches = flat(schema.anyOf as Json[]).filter((b) => {
-      if (isTodoBranch(b)) hasTodo = true;
-      else if (isNullBranch(b)) optional = true;
+      if (isNullBranch(b)) optional = true;
       else return true;
       return false;
     });
@@ -59,12 +51,10 @@ function mapField(name: string, node: Json, required: boolean, path: string[], c
     if (types.length !== schema.type.length) optional = true;
     schema = { ...schema, type: types[0] };
   }
-  if (hasTodo) optional = true;
 
   const base: Json = { name, i18n: i18nFlag(path, ctx.translatable) };
   if (optional) base.required = false;
   const hints: string[] = [];
-  if (hasTodo) hints.push(todoHint);
 
   const finish = (field: Json): CmsField => {
     if (schema.default !== undefined) field.default = schema.default;
