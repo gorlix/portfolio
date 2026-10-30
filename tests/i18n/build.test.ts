@@ -184,6 +184,26 @@ describe('build SEO', () => {
     }
   });
 
+  it("ogni pagina punta all'immagine Open Graph 1200x630 con URL assoluto", () => {
+    for (const { url, html } of pages) {
+      expect(meta(html, 'property', 'og:image'), url).toBe(`${site}/og.png`);
+      expect(meta(html, 'name', 'twitter:image'), url).toBe(`${site}/og.png`);
+      expect(meta(html, 'name', 'twitter:card'), url).toBe('summary_large_image');
+      expect(meta(html, 'property', 'og:image:width'), url).toBe('1200');
+      expect(meta(html, 'property', 'og:image:height'), url).toBe('630');
+      expect(meta(html, 'property', 'og:image:alt'), url).toBeTruthy();
+    }
+  });
+
+  it('public/og.png e un PNG 1200x630 leggero', () => {
+    const file = join(root, 'public/og.png');
+    const png = readFileSync(file);
+    expect(png.subarray(1, 4).toString()).toBe('PNG');
+    expect(png.readUInt32BE(16)).toBe(1200);
+    expect(png.readUInt32BE(20)).toBe(630);
+    expect(statSync(file).size).toBeLessThan(150 * 1024);
+  });
+
   it('la sitemap elenca esattamente le pagine generate', () => {
     const xml = readFileSync(join(outDir, 'sitemap.xml'), 'utf8');
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).sort();
