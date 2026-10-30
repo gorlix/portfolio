@@ -17,11 +17,13 @@ import { pixelRatioFor } from '../capabilities';
 import {
   type BoardData,
   buildBoard,
-  clipBand,
+  buildLiquid,
   hexagon,
   hexRing,
+  type Liquid,
   prism,
   viewOf,
+  waveAt,
 } from '../certificazioni/board';
 import { fitDistance } from '../framing';
 import { createPenguin } from '../penguin';
@@ -32,7 +34,8 @@ import type { SceneContext, SceneInstance } from '../types';
 /*
  * Scena Certificazioni (spec §13), immersiva (PORT-87): una parete-bacheca con slot esagonali e un
  * pinguino che legge davanti. Le certificazioni in corso sono esagoni in costruzione (contorno
- * intero, riempimento a meta), quelle ottenute esagoni pieni: lo decide il campo `status` dei dati
+ * intero, liquido fino a meta che ondeggia piano e si agita con lo scroll), quelle ottenute esagoni
+ * pieni: lo decide il campo `status` dei dati
  * (../certificazioni/board.ts). La camera passa da un esagono all'altro seguendo le schede, poi si
  * allarga sulla fila dei badge piccoli. Solo forme generiche, tutto procedurale, colori dai token.
  */
@@ -46,9 +49,16 @@ const PLATE_Z = 0.2;
 const CORE_Z = 0.32;
 const RING_Z = 0.3;
 const FILL_Z = 0.16;
-const BUILD_LINE_Z = 0.22;
-/** Quota del riempimento di un esagono in costruzione: a meta. */
+/** Quota del liquido in un esagono in costruzione: a meta. */
 const FILL_LEVEL = 0;
+const FILL_RADIUS = 0.82;
+const LIQUID_COLUMNS = 20;
+const CREST = 0.05;
+/** Onda a riposo e onda in piu quando lo scroll agita il liquido. */
+const WAVE = 0.035;
+const SLOSH = 0.075;
+/** Velocita con cui il liquido si agita e si calma (1/s). */
+const SETTLE = 2.5;
 
 const mix = (a: number, b: number, t: number): number => a + (b - a) * t;
 
@@ -149,11 +159,8 @@ export function mount({
   const plateShape = solid(prism(hexagon(1), SLOT_Z, PLATE_Z));
   const coreShape = solid(prism(hexagon(0.6), PLATE_Z, CORE_Z));
   const ringShape = solid(hexRing(1, 0.84, SLOT_Z, RING_Z));
-  const fillShape = solid(prism(clipBand(hexagon(0.82), -2, FILL_LEVEL), SLOT_Z, FILL_Z));
-  // Linea di lavoro in cima al riempimento: e lei a pulsare piano.
-  const lineShape = solid(
-    prism(clipBand(hexagon(0.82), FILL_LEVEL, FILL_LEVEL + 0.06), SLOT_Z, BUILD_LINE_Z),
-  );
+  /** Liquidi in scena: ognuno ha la sua geometria e la sua fase, non ondeggiano all'unisono. */
+  const liquids: { geometry: BufferGeometry; moving: Liquid['moving']; phase: number }[] = [];
   for (const slot of board.slots) {
     const hex = new Group();
     hex.position.set(slot.x, slot.y, 0);
@@ -163,11 +170,20 @@ export function mount({
     if (slot.state === 'full') {
       hex.add(new Mesh(plateShape, m.plate), new Mesh(coreShape, m.full));
     } else if (slot.state === 'building') {
-      hex.add(
-        new Mesh(ringShape, m.full),
-        new Mesh(fillShape, m.plate),
-        new Mesh(lineShape, m.glow),
+      const { triangles, bodyVertices, moving } = buildLiquid(
+        FILL_RADIUS,
+        FILL_LEVEL,
+        LIQUID_COLUMNS,
+        CREST,
+        SLOT_Z,
+        FILL_Z,
       );
+      const geometry = solid(triangles);
+      // Corpo nel colore tenue, cresta e pelo dell'acqua accesi.
+      geometry.addGroup(0, bodyVertices, 0);
+      geometry.addGroup(bodyVertices, triangles.length / 3 - bodyVertices, 1);
+      hex.add(new Mesh(ringShape, m.full), new Mesh(geometry, [m.plate, m.glow]));
+      liquids.push({ geometry, moving, phase: liquids.length * 1.9 });
     }
   }
 
@@ -227,6 +243,8 @@ export function mount({
   let storyTarget = 0;
   let story = 0;
   let clock = 0;
+  /** Quanto il liquido e agitato: sale mentre il racconto si muove, poi torna a zero. */
+  let slosh = 0;
   let size = { width: 1, height: 1 };
   const names = moments.length > 0 ? moments : ['overview'];
 
@@ -256,10 +274,18 @@ export function mount({
     );
   };
 
-  /** Il pinguino legge e la linea di lavoro pulsa: movimenti lenti, fermi con reduced-motion. */
+  /** Il pinguino legge e il liquido ondeggia: movimenti lenti, fermi con reduced-motion. */
   const breathe = (): void => {
     head.rotation.set(0.28 + 0.04 * Math.sin(clock * 0.9), 0.1 * Math.sin(clock * 0.45), 0);
     m.glow.emissiveIntensity = 0.55 + 0.25 * Math.sin(clock * 1.6);
+    const amplitude = WAVE + SLOSH * slosh;
+    for (const { geometry, moving, phase } of liquids) {
+      const position = geometry.getAttribute('position');
+      for (const { vertex, x, drop } of moving) {
+        position.setY(vertex, FILL_LEVEL + waveAt(x, clock, phase, amplitude) - drop);
+      }
+      position.needsUpdate = true;
+    }
   };
 
   // --- Ciclo ------------------------------------------------------------------------------------
@@ -278,6 +304,7 @@ export function mount({
     clock += dt;
     const gap = storyTarget - story;
     story = Math.abs(gap) < EPSILON ? storyTarget : story + gap * Math.min(1, dt * STORY_CATCH_UP);
+    slosh += (Math.min(1, Math.abs(gap) * 3) - slosh) * Math.min(1, dt * SETTLE);
     draw();
     frame = requestAnimationFrame(tick);
   };

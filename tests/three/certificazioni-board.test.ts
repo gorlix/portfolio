@@ -3,12 +3,14 @@ import {
   BIG,
   type BoardData,
   buildBoard,
+  buildLiquid,
   clipBand,
   hexagon,
   hexRing,
   prism,
   SMALL,
   viewOf,
+  waveAt,
 } from '../../src/scripts/three/certificazioni/board';
 import { SIDE_BY_SIDE_PX } from '../../src/scripts/three/framing';
 
@@ -97,6 +99,33 @@ describe('inquadrature', () => {
   it('con i cubi accanto inquadra la coppia, non solo esagono', () => {
     const cka = board.slots.find((s) => s.slug === 'cka');
     expect(viewOf('cka', board, 1440, 900).x).toBeGreaterThan(cka?.x ?? 0);
+  });
+});
+
+describe('liquido', () => {
+  const liquid = buildLiquid(0.82, 0, 20, 0.05, 0.06, 0.16);
+
+  it('i vertici in movimento sono quelli del pelo e della cresta, mai il fondo', () => {
+    const fixed = new Set(liquid.moving.map((v) => v.vertex));
+    const vertices = liquid.triangles.length / 3;
+    expect(fixed.size).toBeLessThan(vertices);
+    for (const { x, drop } of liquid.moving) {
+      expect(Math.abs(x)).toBeLessThanOrEqual(0.72);
+      expect([0, 0.05]).toContain(drop);
+    }
+  });
+
+  it('il fondo segue il contorno dell esagono', () => {
+    const ys = liquid.triangles.filter((_, i) => i % 3 === 1);
+    expect(Math.min(...ys)).toBeCloseTo(-0.82);
+  });
+
+  it('l onda, anche agitata, resta tra i fianchi verticali', () => {
+    for (let x = -0.71; x <= 0.71; x += 0.05) {
+      for (let t = 0; t < 20; t += 0.7) {
+        expect(Math.abs(waveAt(x, t, 1.9, 0.11))).toBeLessThanOrEqual(0.41);
+      }
+    }
   });
 });
 

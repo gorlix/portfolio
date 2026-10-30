@@ -187,6 +187,69 @@ export function prism(polygon: Polygon, z0: number, z1: number): number[] {
   return out;
 }
 
+export interface Liquid {
+  /** Triangoli (xyz piatti): prima il corpo, poi cresta e pelo dell'acqua. */
+  triangles: number[];
+  /** Vertici del corpo: da qui in poi i triangoli sono della cresta. */
+  bodyVertices: number;
+  /** Vertici che seguono l'onda: quota = onda in `x` meno `drop`. */
+  moving: { vertex: number; x: number; drop: number }[];
+}
+
+type LiquidVertex = readonly [x: number, y: number, z: number, drop?: number];
+
+/** Altezza dell'onda in `x`: due sinusoidi che scorrono in versi opposti, mai ripetitive. */
+export function waveAt(x: number, time: number, phase: number, amplitude: number): number {
+  return (
+    amplitude *
+    (0.6 * Math.sin(4 * x + 1.4 * time + phase) + 0.4 * Math.sin(7 * x - 0.9 * time + 2 * phase))
+  );
+}
+
+/**
+ * Liquido dentro un esagono: colonne strette dal fondo al pelo dell'acqua, la cui quota si sposta a
+ * ogni fotogramma senza ricostruire la geometria. Il pelo deve restare tra i fianchi verticali
+ * dell'esagono (|quota| < raggio / 2), dove la larghezza non cambia.
+ */
+export function buildLiquid(
+  radius: number,
+  level: number,
+  columns: number,
+  crest: number,
+  z0: number,
+  z1: number,
+): Liquid {
+  const half = (radius * Math.sqrt(3)) / 2;
+  const floorAt = (x: number): number => -radius + (Math.abs(x) * radius) / (2 * half);
+  const body: LiquidVertex[] = [];
+  const top: LiquidVertex[] = [];
+  const quad = (
+    list: LiquidVertex[],
+    a: LiquidVertex,
+    b: LiquidVertex,
+    c: LiquidVertex,
+    d: LiquidVertex,
+  ) => list.push(a, b, c, a, c, d);
+  for (let k = 0; k < columns; k += 1) {
+    const x0 = -half + (2 * half * k) / columns;
+    const x1 = -half + (2 * half * (k + 1)) / columns;
+    const below0: LiquidVertex = [x0, 0, z1, crest];
+    const below1: LiquidVertex = [x1, 0, z1, crest];
+    const surface0: LiquidVertex = [x0, 0, z1, 0];
+    const surface1: LiquidVertex = [x1, 0, z1, 0];
+    quad(body, [x0, floorAt(x0), z1], [x1, floorAt(x1), z1], below1, below0);
+    quad(top, below0, below1, surface1, surface0);
+    quad(top, surface0, surface1, [x1, 0, z0, 0], [x0, 0, z0, 0]);
+  }
+  const triangles: number[] = [];
+  const moving: Liquid['moving'] = [];
+  [...body, ...top].forEach(([x, y, z, drop], vertex) => {
+    if (drop !== undefined) moving.push({ vertex, x, drop });
+    triangles.push(x, drop === undefined ? y : level - drop, z);
+  });
+  return { triangles, bodyVertices: body.length, moving };
+}
+
 /** Contorno esagonale: sei trapezi fusi in un solo solido, da `inner` a `outer`. */
 export function hexRing(outer: number, inner: number, z0: number, z1: number): number[] {
   const out = hexagon(outer);
