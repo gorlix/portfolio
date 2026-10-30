@@ -40,8 +40,8 @@ for (const [file, validate] of Object.entries(validators)) {
   }
   for (const p of validate(text)) errors.push(`${file}: ${p}`);
 }
-// Ogni pagina HTML porta il suo JSON-LD valido.
-for (const path of site(walk(dist)).filter((f) => f.endsWith('.html')))
+// Ogni pagina HTML porta il suo JSON-LD valido (la 404 non e una pagina del sito).
+for (const path of site(walk(dist)).filter((f) => f.endsWith('.html') && !f.endsWith('/404.html')))
   for (const p of validateJsonLd(readFileSync(path, 'utf8')))
     errors.push(`${relative(dist, path)}: JSON-LD: ${p}`);
 for (const path of site(walk(dist)).filter((f) => textExt.has(extname(f)))) {
