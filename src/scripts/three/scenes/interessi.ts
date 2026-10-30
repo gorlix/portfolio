@@ -77,7 +77,7 @@ export function mount({
 
   const scene = new Scene();
   // Near non troppo piccolo: la camera sta sempre oltre 10 unita, piu precisione di profondita.
-  const camera = new PerspectiveCamera(FOV, 1, 3, 240);
+  const camera = new PerspectiveCamera(FOV, 1, 3, 520);
 
   const owned: { dispose(): void }[] = [];
   const own = <T extends { dispose(): void }>(resource: T): T => {

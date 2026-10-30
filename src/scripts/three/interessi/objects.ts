@@ -59,7 +59,7 @@ export interface Bench {
 }
 
 /** Fianco del piano: largo ben oltre ogni inquadratura, cosi il bordo non si vede mai. */
-const REACH = 90;
+const REACH = 320;
 const BENCH_BACK = -7;
 const BENCH_FRONT = 50;
 const PLANK = 3;
@@ -122,7 +122,7 @@ function buildRoom(m: Mesher, p: BenchPalette): void {
   m.box(0, -1, WALL + 0.15, REACH * 3, 3.2, 0.3, p.wallLow);
   // Pannello forato dietro agli oggetti, con qualche attrezzo generico appeso.
   m.box(0, 3.6, WALL + 0.15, REACH * 3, 12, 0.3, p.wallLow);
-  for (let col = -40; col <= 40; col += 1) {
+  for (let col = -40; col <= 110; col += 1) {
     for (let row = 0; row < 6; row += 1) {
       m.box(col * 2, 4.5 + row * 2, WALL + 0.34, 0.2, 0.2, 0.08, p.wall);
     }
