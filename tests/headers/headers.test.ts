@@ -48,6 +48,15 @@ describe('_headers', () => {
     },
   );
 
+  it.each([...entrancePaths, ...lightPaths, ...heavyPaths])(
+    'pagina %s: no-transform, Cloudflare non inietta script',
+    (path) => {
+      expect(rules.find((r) => r.path === path)?.headers['Cache-Control']).toContain(
+        'no-transform',
+      );
+    },
+  );
+
   it('ogni percorso ha una sola regola', () => {
     const paths = rules.map((r) => r.path);
     expect(new Set(paths).size).toBe(paths.length);

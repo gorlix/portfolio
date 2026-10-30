@@ -3,6 +3,7 @@
 # CSP: se piu regole corrispondono allo stesso percorso, Pages UNISCE i valori dello stesso header
 # e due CSP si intersecano. Per questo la CSP NON sta sotto /* ma e dichiarata per percorso:
 # ogni percorso ha esattamente una regola CSP (verificato da tests/headers).
+# no-transform sulle pagine: Cloudflare non inietta script nell'HTML (Bot Fight Mode, Email Obfuscation).
 # Percorsi leggeri: nessuno script, salvo `/` e `/en/` (solo lo script facoltativo del terminale, dello stesso sito). /human e l'unico a poter caricare script, worker e analitica.
 # HSTS volutamente assente: il dominio ospita anche sottodomini non gestiti da questo repo.
 
@@ -17,21 +18,27 @@
   Cache-Control: public, max-age=31536000, immutable
 
 /
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /en/
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /recruiter/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /en/recruiter/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /agent/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /en/agent/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 # File per macchine nella root: testo puro, Content-Type esplicito, nulla da eseguire o caricare.
@@ -67,9 +74,11 @@ https://:version.:project.pages.dev/*
 # Percorso immersivo: unico con script e beacon Cloudflare Web Analytics (iniezione automatica spenta).
 
 /human/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /en/human/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Content-Security-Policy: default-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 # Pannello CMS (Sveltia, servito dal sito): unico percorso con script e stili propri, mai indicizzato.
