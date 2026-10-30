@@ -56,7 +56,7 @@ const hash = (i: number, j: number): number => {
  * Gouter a destra.
  */
 const DOMES = [
-  [3, -16, 19, 36, 13, 17.5, 1.3],
+  [3, -16, 23, 36, 13, 17.5, 1.15],
   [-9, -14, 11, 17, 12, 13.5, 1.3],
   [17, -16, 14, 15, 12, 12.5, 1.1],
 ] as const;
@@ -415,7 +415,7 @@ export function terrainBuffers(pal: TerrainPalette): {
     else if (mean(dt) < 0.9) c = pal.soil;
     else if (up < 0.5 && y > 1.5) c = pal.rock;
     else if (y > 7 + salt) {
-      c = up < 0.62 && y < 14.5 ? pal.rock : glacier(cx, cz, y) ? pal.ice : pal.snow;
+      c = up < 0.62 && y < 11 ? pal.rock : glacier(cx, cz, y) ? pal.ice : pal.snow;
     } else if (y > 3.5 && up > 0.62 && glacier(cx, cz, y)) c = pal.ice;
     else if (y > 5) c = up < 0.7 || salt < 0.1 ? pal.rock : pal.snow;
     else c = y > 1 && salt < 0.22 ? pal.forest : pal.meadow;

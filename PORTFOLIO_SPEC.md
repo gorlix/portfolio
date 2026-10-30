@@ -90,7 +90,7 @@ Valori gzip, controllati a ogni build da `pnpm check:budget` (`scripts/budget.ts
 | `/recruiter`, `/agent` (primo caricamento / JS) | 15 KB / 0 | ~6 KB / 0 |
 | `/human` primo caricamento, **senza 3D** / JS | 32 KB / 6 KB | ~16 KB / 2,8 KB |
 | `three` (chunk unico, solo su `/human`, solo vicino a una scena) | 144 KB (da 140 in PORT-81, deciso da Alessandro) | ~140 KB |
-| ogni scena (Homelab / Domotica / Lavori / Certificazioni) | 16 KB | 6,2 / 5,1 / 3,3 / 2,6 KB |
+| ogni scena (Homelab / Domotica / Lavori / Certificazioni / Sport) | 16 KB | 6,2 / 5,1 / 3,3 / 2,6 / 6,4 KB |
 | codice condiviso delle scene (orbit, pannello, token, pinguino, inquadrature) | 4 KB | 1,5 / 1,5 KB (pannello / pinguino) |
 | bootstrap 3D / barra del tempo / terminale | 4,5 / 2 / 2 KB | 4,1 / 0,7 / 1,3 KB |
 

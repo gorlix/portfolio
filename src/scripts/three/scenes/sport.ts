@@ -5,6 +5,7 @@ import {
   BufferGeometry,
   Color,
   DirectionalLight,
+  Group,
   IcosahedronGeometry,
   type Material,
   Mesh,
@@ -63,6 +64,17 @@ const TENNIS_CONTACT = 0.75;
 const FACE = Math.PI / 2 - 0.45;
 
 const skiTrack = track(PISTE);
+/** Nuvole: x, y, z, grandezza; ogni nuvola e fatta di tre sbuffi (dx, dy, grandezza). */
+const CLOUDS = [
+  [-20, 17, -10, 1],
+  [24, 16, -8, 0.8],
+  [6, 22, -20, 1.2],
+] as const;
+const PUFFS = [
+  [-2.2, 0, 0.8],
+  [0, 0.4, 1],
+  [2.4, -0.1, 0.7],
+] as const;
 
 export function mount({
   canvas,
@@ -92,6 +104,10 @@ export function mount({
   const tint = (names: readonly `--${string}`[]) => new Color(firstToken(container, names));
   const surface = tint(['--surface', '--bg-alt']);
   const text = tint(['--text']);
+  // Luce e neve tra testo (freddo) e rosewater (caldo): insieme la neve sembra bianca.
+  const rosewater = tint(['--ctp-rosewater', '--text']);
+  const light = text.clone().lerp(rosewater, 0.45);
+  const white = text.clone().lerp(rosewater, 0.3);
   const paint = (color: Color, emissive = 0): Material =>
     own(
       new MeshStandardMaterial({
@@ -107,7 +123,7 @@ export function mount({
   const clay = tint(['--ctp-peach', '--text']).lerp(tint(['--ctp-red', '--text']), 0.45);
 
   const { positions, colors } = terrainBuffers({
-    snow: channels(text),
+    snow: channels(white),
     ice: channels(tint(['--ctp-sky', '--text']).lerp(text, 0.55)),
     rock: channels(soft(tint(['--ctp-overlay1', '--ctp-subtext0', '--text']), 0.7)),
     meadow: channels(soft(tint(['--ctp-green', '--text']), 0.55)),
@@ -115,7 +131,7 @@ export function mount({
     soil: channels(soft(tint(['--ctp-rosewater', '--text']), 0.5)),
     clay: channels(clay),
     court: channels(tint(['--sec-sport', '--ctp-blue', '--text'])),
-    line: channels(text),
+    line: channels(white),
     wood: channels(soft(tint(['--ctp-peach', '--text']), 0.45)),
     roof: channels(tint(['--ctp-red', '--text'])),
   });
@@ -175,10 +191,10 @@ export function mount({
   const handle = own(new BoxGeometry(0.05, 0.3, 0.05));
   tennis.forEach((player) => {
     const stick = new Mesh(handle, framePaint);
-    stick.position.y = -0.7;
+    stick.position.y = -0.56;
     const head = new Mesh(pebble, framePaint);
-    head.position.y = -1.0;
-    head.scale.set(0.1, 0.42, 0.34);
+    head.position.y = -0.88;
+    head.scale.set(0.08, 0.4, 0.32);
     player.joints.flipperR.add(stick, head);
   });
   const placeCourt = (players: Penguin[], court: typeof TENNIS, margin: number): void => {
@@ -198,8 +214,23 @@ export function mount({
   const volleyBall = new Mesh(own(new IcosahedronGeometry(0.22, 1)), paint(text));
   scene.add(tennisBall, volleyBall);
 
-  const ambient = new AmbientLight(text, 0.9);
-  const sun = new DirectionalLight(text, 1.7);
+  // Nuvole basse attorno alla vetta: tre sbuffi schiacciati che vanno e vengono piano.
+  const cloudPaint = paint(soft(white, 0.8));
+  const clouds = CLOUDS.map(([x, y, z, s]) => {
+    const cloud = new Group();
+    for (const [dx, dy, k] of PUFFS) {
+      const puff = new Mesh(pebble, cloudPaint);
+      puff.position.set(dx * s, dy * s, 0);
+      puff.scale.set(5 * k * s, 1.5 * k * s, 3 * k * s);
+      cloud.add(puff);
+    }
+    cloud.position.set(x, y, z);
+    scene.add(cloud);
+    return cloud;
+  });
+
+  const ambient = new AmbientLight(light, 1);
+  const sun = new DirectionalLight(light, 2);
   sun.position.set(-30, 40, 30);
   scene.add(ambient, sun);
 
@@ -255,7 +286,7 @@ export function mount({
     );
     tennis.forEach((player, i) => {
       player.setPose('stand');
-      player.joints.flipperR.rotation.x = -1.2 * (rally.swing[i] ?? 0) - 0.3;
+      player.joints.flipperR.rotation.set(-0.8 - 1 * (rally.swing[i] ?? 0), 0, 0.5);
     });
 
     // Pallavolo: il pallone passa sopra la rete, da un bagher all'altro.
@@ -298,6 +329,9 @@ export function mount({
       size.height,
     );
     placeCharacters();
+    clouds.forEach((cloud, i) => {
+      cloud.position.x = (CLOUDS[i]?.[0] ?? 0) + Math.sin(time * 0.05 + i * 2) * 5;
+    });
   };
 
   // --- Ciclo ------------------------------------------------------------------------------------
