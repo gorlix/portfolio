@@ -14,7 +14,7 @@ export const shotsFor = (portrait: boolean): Record<string, Shot> => {
     return {
       overview: whole,
       'rotaract-abbiategrasso': { target: club, from: [0.15, 1.3, 1], spanH: 14, spanW: 19 },
-      'mdio-website': { target: [SITE.x, 0, -3], from: [0, 1.3, 1], spanH: 32, spanW: 53 },
+      'mdio-website': { target: [SITE.x, 0, -1.5], from: [0, 1.3, 1], spanH: 32, spanW: 60 },
       exit: whole,
     };
   }
