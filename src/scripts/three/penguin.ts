@@ -57,6 +57,9 @@ export interface Penguin {
   dispose(): void;
 }
 
+/** Lunghezza di un passo: la fase della camminata dipende dallo spazio, non dal tempo. */
+export const STRIDE = 0.45;
+
 const TAU = Math.PI * 2;
 /** Perno del corpo (a meta altezza) e centro della testa, rispetto al corpo. */
 const BODY_Y = 0.4;

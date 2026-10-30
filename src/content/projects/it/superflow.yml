@@ -5,3 +5,8 @@ method: vibecoded
 status: wip
 featured: false
 description: Ruota attorno al Supernote Manta.
+openSource:
+  group: supernote
+  description: "Plugin di automazione per i dispositivi Supernote, scritto in Java."
+  stars: 10
+  contribution: false

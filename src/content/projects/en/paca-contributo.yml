@@ -8,3 +8,8 @@ status:
 featured: true
 rank: 2
 description: "Contribution to Paca (GitHub Actions): pull request accepted and shipped in v0.15.0 of the open source AI-agent project management project (1.8k GitHub stars), with a CI smoke test; GitLab integration plugin published alongside."
+openSource:
+  group: paca
+  description: "I contribute to Paca: a non-lossy Agent Skills installer (PR #454, v0.15.0) and linked repository descriptions."
+  stars: 2005
+  contribution: true

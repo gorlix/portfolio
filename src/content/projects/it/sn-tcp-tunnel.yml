@@ -6,3 +6,8 @@ status:
   todo: active / wip / archived
 featured: false
 description: Ruota attorno al Supernote Manta.
+openSource:
+  group: supernote
+  description: "Plugin per Supernote: lo schermo sul proiettore con il solo cavo USB, tramite un tunnel TCP su ADB."
+  stars: 10
+  contribution: false

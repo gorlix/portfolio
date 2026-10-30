@@ -6,3 +6,8 @@ status:
   todo: active / wip / archived
 featured: false
 description: "Telegram bot for Morgen Calendar users: create an event in natural language with a single command, see today's and tomorrow's agenda and get a daily summary at the time you choose. Multiple calendars are supported."
+openSource:
+  group: community
+  description: "Telegram bot for Morgen Calendar: creates events from natural language and shows the agenda."
+  stars: 1
+  contribution: false

@@ -1,5 +1,6 @@
 import type { Scenery } from '../../../lib/schemas/experiences';
 import type { Level } from '../../../lib/work';
+import { STRIDE } from '../penguin';
 
 /*
  * Percorso dei Lavori (PORT-83). Logica PURA, senza three: dai livelli (uno per esperienza,
@@ -66,8 +67,6 @@ export const LEVEL_MARGIN = 1.6;
 /** Varco tra due livelli, superato con un saltello, e altezza del saltello. */
 export const GAP = 0.6;
 export const HOP_HEIGHT = 0.3;
-/** Lunghezza di un passo: la fase della camminata dipende dallo spazio, non dal tempo. */
-export const STRIDE = 0.45;
 /** Battute per unita di cammino; durata di saltello e saluto. */
 const PACE = { walk: 0.3, hop: 0.5, wave: 1.6 };
 /** Tratto fermo attorno a ogni momento, per parte: la scheda letta al centro ha il pinguino fermo. */

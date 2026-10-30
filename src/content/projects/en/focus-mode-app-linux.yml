@@ -8,3 +8,8 @@ featured: false
 description: Syncs Android Do Not Disturb through Home Assistant; migration from Python to
   Rust/Tauri in progress.
 section: domotica
+openSource:
+  group: homelab
+  description: "Study mode for KDE Plasma: automatically blocks distracting apps and web apps."
+  stars: 2
+  contribution: false

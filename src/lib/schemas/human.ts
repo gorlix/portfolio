@@ -1,5 +1,6 @@
 import { z } from 'astro/zod';
 import { humanSectionIds, text, url } from './common';
+import { openSourceGroups } from './projects';
 
 /** Oggetti della scrivania con un popup, nell'ordine dell'elenco. */
 export const hardwareIds = [
@@ -93,6 +94,7 @@ export const humanSchema = z.strictObject({
     scrivania: text,
     interessi: text,
     trimind: text,
+    opensource: text,
   }),
   /** Sezione Lavori ad albero (PORT-81): schede in stile CV, una per foglia. */
   work: z.strictObject({
@@ -104,6 +106,42 @@ export const humanSchema = z.strictObject({
     /** Titolo dei 2-3 punti del CV mostrati nella scheda. */
     highlights: text,
     posterSubject: text,
+    /** Ultima tappa dei Lavori (PORT-89): rimanda alla pagina Open source, non e un'esperienza. */
+    openSource: z.strictObject({
+      title: text,
+      summary: text,
+    }),
+  }),
+  /** Pagina Open source (PORT-89): i repository stanno nei progetti, qui i connettivi. */
+  openSource: z.strictObject({
+    titleSuffix: text,
+    metaDescription: text,
+    /** Titolo della sezione (dopo `~/lavori/`). */
+    heading: text,
+    eyebrow: text,
+    intro: text,
+    /** Link di ritorno ai Lavori (intestazione e fine pagina). */
+    back: text,
+    scrollHint: text,
+    posterSubject: text,
+    /** Da dove vengono le stelle: sono lette quando il sito viene pubblicato. */
+    starsNote: text,
+    /** `{n}`: nome accessibile delle stelle. */
+    starsLabel: text,
+    /** Marca dei repository di altri a cui ho contribuito. */
+    contribution: text,
+    /** `{n}` e `{total}`: indicatore del momento nella scheda. */
+    step: text,
+    /** Un gruppo per quartiere, nell'ordine in cui il pinguino li attraversa. */
+    groups: z
+      .array(
+        z.strictObject({
+          id: z.enum(openSourceGroups),
+          title: text,
+          lead: text,
+        }),
+      )
+      .min(1),
   }),
   /** Bacheca delle Certificazioni (PORT-87): stato e data nelle schede. */
   certifications: z.strictObject({
@@ -275,11 +313,28 @@ export const humanTranslatable = [
   'labels.cv',
   'scenes.homelab',
   'scenes.trimind',
+  'scenes.opensource',
   'work.deeper',
   'work.deeperLabel',
   'work.volunteer',
   'work.highlights',
   'work.posterSubject',
+  'work.openSource.title',
+  'work.openSource.summary',
+  'openSource.titleSuffix',
+  'openSource.metaDescription',
+  'openSource.heading',
+  'openSource.eyebrow',
+  'openSource.intro',
+  'openSource.back',
+  'openSource.scrollHint',
+  'openSource.posterSubject',
+  'openSource.starsNote',
+  'openSource.starsLabel',
+  'openSource.contribution',
+  'openSource.step',
+  'openSource.groups.*.title',
+  'openSource.groups.*.lead',
   'certifications.earned',
   'certifications.expected',
   'certifications.posterSubject',

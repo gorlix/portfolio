@@ -5,3 +5,8 @@ method: vibecoded
 status: wip
 featured: false
 description: Built around the Supernote Manta.
+openSource:
+  group: supernote
+  description: "Automation plugin for Supernote devices, written in Java."
+  stars: 10
+  contribution: false

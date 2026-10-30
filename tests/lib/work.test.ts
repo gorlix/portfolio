@@ -3,8 +3,11 @@ import {
   chronological,
   defaultScenery,
   detailPath,
+  groupRepos,
   inLavori,
+  OPEN_SOURCE_LEVEL,
   splitResult,
+  withOpenSource,
   workCourse,
 } from '../../src/lib/work';
 
@@ -98,5 +101,54 @@ describe('esperienze fuori dai Lavori', () => {
       inLavori(items).map((e) => ({ ...e, end: null, kind: 'work' as const })),
     );
     expect(course.levels.map((l) => l.slug)).toEqual(['lavoro']);
+  });
+});
+
+describe('tappa e pagina Open source', () => {
+  const entry = (name: string, group: 'paca' | 'hardware', stars: number) => ({
+    name,
+    repo: `https://github.com/gorlix/${name}`,
+    language: 'Go',
+    openSource: { group, description: 'd', stars, contribution: false },
+  });
+  const groups = [
+    { id: 'hardware', title: 'H' },
+    { id: 'paca', title: 'P' },
+    { id: 'portfolio', title: 'Q' },
+  ] as const;
+
+  it('la tappa chiude il percorso, dopo le esperienze', () => {
+    const course = withOpenSource({ levels: [] });
+    expect(course.levels.map((l) => l.slug)).toEqual([OPEN_SOURCE_LEVEL]);
+    expect(course.levels[0]).toMatchObject({ detail: true, scenery: ['skyline'] });
+  });
+
+  it('segue i gruppi dei dati, ordina per stelle vive, toglie i gruppi vuoti', () => {
+    const out = groupRepos(
+      groups,
+      [
+        entry('a', 'paca', 1),
+        entry('b', 'paca', 9),
+        entry('c', 'hardware', 2),
+        { name: 'fuori', language: todo },
+      ],
+      new Map([['https://github.com/gorlix/a', 50]]),
+    );
+    expect(out.map((g) => g.id)).toEqual(['hardware', 'paca']);
+    expect(out[1]?.repos.map((r) => [r.name, r.stars])).toEqual([
+      ['a', 50],
+      ['b', 9],
+    ]);
+  });
+
+  it('un repository incompleto ferma la build', () => {
+    const none = new Map<string, number>();
+    expect(() =>
+      groupRepos(groups, [{ ...entry('a', 'paca', 1), repo: undefined }], none),
+    ).toThrow();
+    expect(() =>
+      groupRepos(groups, [{ ...entry('a', 'paca', 1), language: todo }], none),
+    ).toThrow();
+    expect(() => groupRepos([groups[0]], [entry('a', 'paca', 1)], none)).toThrow();
   });
 });

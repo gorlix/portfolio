@@ -6,3 +6,8 @@ status:
   todo: active / wip / archived
 featured: false
 description: "Bot Telegram per chi usa Morgen Calendar: crea un evento in linguaggio naturale con un solo comando, mostra l'agenda di oggi e di domani e invia un riepilogo giornaliero all'ora scelta. Si possono usare più calendari."
+openSource:
+  group: community
+  description: "Bot Telegram per Morgen Calendar: crea eventi in linguaggio naturale e mostra l'agenda."
+  stars: 1
+  contribution: false

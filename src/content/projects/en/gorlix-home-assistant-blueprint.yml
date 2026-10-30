@@ -1,0 +1,14 @@
+name: "Gorlix-Home-Assistant-Blueprint"
+repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint
+language: YAML
+method:
+  todo: "by hand / with AI / vibecoded (not in the CV)"
+status:
+  todo: "active / wip / archived (not in the CV)"
+featured: false
+description: "Home Assistant blueprints for the Android Companion app: calendar alarms, notifications with buttons and Do Not Disturb."
+openSource:
+  group: homelab
+  description: "Home Assistant blueprints for the Companion app: calendar alarms, notifications with buttons, Do Not Disturb."
+  stars: 0
+  contribution: false

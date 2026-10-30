@@ -102,6 +102,8 @@ describe('build i18n', () => {
         '/en/human/': 2,
         '/human/lavori/trimind/': 1,
         '/en/human/lavori/trimind/': 1,
+        '/human/lavori/open-source/': 1,
+        '/en/human/lavori/open-source/': 1,
       };
       expect(scripts.length, url).toBe(expected[url] ?? 0);
       for (const tag of scripts) {
@@ -326,6 +328,7 @@ describe('coerenza file per macchine, JSON-LD e pagine (PORT-71)', () => {
       'agent',
       'home',
       'human',
+      'opensource',
       'recruiter',
       'trimind',
     ]);

@@ -625,6 +625,9 @@ collections:
               - name: trimind
                 i18n: true
                 widget: string
+              - name: opensource
+                i18n: true
+                widget: string
           - name: work
             i18n: true
             widget: object
@@ -644,6 +647,78 @@ collections:
               - name: posterSubject
                 i18n: true
                 widget: string
+              - name: openSource
+                i18n: true
+                widget: object
+                fields:
+                  - name: title
+                    i18n: true
+                    widget: string
+                  - name: summary
+                    i18n: true
+                    widget: text
+          - name: openSource
+            i18n: true
+            widget: object
+            fields:
+              - name: titleSuffix
+                i18n: true
+                widget: string
+              - name: metaDescription
+                i18n: true
+                widget: text
+              - name: heading
+                i18n: true
+                widget: string
+              - name: eyebrow
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
+              - name: back
+                i18n: true
+                widget: string
+              - name: scrollHint
+                i18n: true
+                widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+              - name: starsNote
+                i18n: true
+                widget: text
+              - name: starsLabel
+                i18n: true
+                widget: string
+              - name: contribution
+                i18n: true
+                widget: string
+              - name: step
+                i18n: true
+                widget: string
+              - name: groups
+                i18n: true
+                widget: list
+                min: 1
+                fields:
+                  - name: id
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - supernote
+                      - claude-code
+                      - paca
+                      - homelab
+                      - hardware
+                      - community
+                      - portfolio
+                  - name: title
+                    i18n: true
+                    widget: string
+                  - name: lead
+                    i18n: true
+                    widget: text
           - name: certifications
             i18n: true
             widget: object
@@ -1380,6 +1455,7 @@ collections:
             - site
             - bridge
             - garden
+            - skyline
   - name: certifications
     label: Certifications
     folder: src/content/certifications
@@ -1547,6 +1623,36 @@ collections:
           - interessi
           - beneficenza
           - contatti
+      - name: openSource
+        i18n: true
+        required: false
+        widget: object
+        fields:
+          - name: group
+            i18n: duplicate
+            widget: select
+            options:
+              - supernote
+              - claude-code
+              - paca
+              - homelab
+              - hardware
+              - community
+              - portfolio
+          - name: description
+            i18n: true
+            widget: text
+          - name: stars
+            i18n: duplicate
+            widget: number
+            value_type: int
+            min: 0
+            max: 9007199254740991
+          - name: contribution
+            i18n: duplicate
+            required: false
+            widget: boolean
+            default: false
   - name: automations
     label: Automations
     folder: src/content/automations

@@ -1,0 +1,14 @@
+name: "supernote-plugin-dev"
+repo: https://github.com/gorlix/supernote-plugin-dev
+language: Markdown
+method:
+  todo: "by hand / with AI / vibecoded (not in the CV)"
+status:
+  todo: "active / wip / archived (not in the CV)"
+featured: false
+description: "Agent Skill for building, debugging and extending plugins for Supernote devices with the sn-plugin-lib SDK."
+openSource:
+  group: supernote
+  description: "Agent Skill for building and debugging Supernote plugins with the sn-plugin-lib SDK, for Claude Code."
+  stars: 7
+  contribution: false
