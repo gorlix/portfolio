@@ -1,4 +1,8 @@
 section: beneficenza
-links: []
-title: Sito del primo multidistretto italiano (MDIO-website)
-text: "Come Delegato IT del Distretto 2050 curo il sito del primo multidistretto italiano: build e deploy automatici con GitHub Actions, hosting e DNS gestiti in autonomia. Una sola battuta: se qualcosa non va, di solito è il DNS."
+links:
+  - label: Sorgente del sito del multidistretto
+    url: https://github.com/gorlix/MDIO-website
+  - label: Sorgente del sito del Distretto 2050
+    url: https://github.com/Rotaract-2050/website
+title: Siti del Distretto 2050 e del primo multidistretto italiano
+text: "Come Delegato IT del Distretto 2050 curo due siti, quello del Distretto e quello del primo multidistretto italiano: build e deploy automatici con GitHub Actions, hosting e DNS gestiti in autonomia. Se qualcosa non va, di solito è il DNS."
