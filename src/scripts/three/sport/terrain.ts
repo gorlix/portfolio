@@ -29,6 +29,8 @@ export interface Court extends Point {
   width: number;
 }
 
+/** Da qui verso la camera il prato piano ha qualche albero. */
+const FRONT_Z = 19;
 /** Campi su un ripiano a quota 0, bordi allineati alla griglia (colorano facce intere). */
 export const TENNIS: Court = { x: 19, z: 12, length: 10, width: 6 };
 export const VOLLEY: Court = { x: 19, z: 4, length: 8, width: 4 };
@@ -510,16 +512,27 @@ export function terrainBuffers(pal: TerrainPalette): {
     if (Math.abs(x - SHELF.x) < SHELF.hx + 1 && Math.abs(z - SHELF.z) < SHELF.hz + 1) return false;
     return HUTS.every(([c]) => Math.hypot(x - c.x, z - c.z) > 3.5);
   };
-  for (let j = 4; j < NZ - 8; j += 1) {
+  for (let j = 4; j < NZ; j += 1) {
     for (let i = 8; i < NX - 8; i += 1) {
       if (hash(i, j) > 0.5) continue;
       const x = X0 + i + 0.5 + (hash(j, i) - 0.5) * 0.7;
       const z = Z0 + j + 0.5 + (hash(i + 7, j) - 0.5) * 0.7;
       const y = heightAt(x, z);
       const steep = Math.hypot(heightAt(x + 0.6, z) - y, heightAt(x, z + 0.6) - y) / 0.6;
-      if (y < 0.4 || y > 5.2 - hash(j, i + 3) * 1.2 || steep > 0.75 || !clear(x, z, i, j)) continue;
+      // Sul prato piano solo davanti ai campi: un bosco basso che chiude il primo piano.
+      const skip = y < 0.4 && (z < FRONT_Z || hash(i + 5, j) > 0.7);
+      if (skip || y > 5.2 - hash(j, i + 3) * 1.2 || steep > 0.75 || !clear(x, z, i, j)) continue;
       const s = 0.8 + hash(i + 3, j + 5) * 0.5;
       cone(pal.forest, x, z, low(x, z, 0.7 * s) - 0.1, 0.75 * s, 2.5 * s, 5, hash(i, j + 9) * 6);
+    }
+  }
+  // Oltre la griglia il bosco continua sul prato: l'inquadratura verticale arriva fin qui.
+  for (let j = 0; j < 16; j += 1) {
+    for (let i = 0; i < 40; i += 1) {
+      if (hash(i + 11, j) > 0.55) continue;
+      const x = -30 + i * 1.7 + hash(j, i + 2);
+      const z = Z0 + NZ + 1 + j * 1.7 + hash(i + 2, j);
+      cone(pal.forest, x, z, -0.1, 0.8, 2.6, 5, hash(i, j) * 6);
     }
   }
   return { positions: P.slice(0, n), colors: C.slice(0, n) };

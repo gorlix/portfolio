@@ -812,7 +812,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   <article class="card" id={`sport-${slug}`} data-moment={slug}>
                     <h3>{t.title}</h3>
                     {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
-                    <p>{isTodo(t.text) ? <Todo label={page.todoLabel} hint={t.text.todo} /> : t.text}</p>
+                    {!isTodo(t.text) && <p>{t.text}</p>}
                     {t.links.length > 0 && (
                       <ul class="plain inline">
                         {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
