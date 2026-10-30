@@ -1,10 +1,8 @@
 name: "sp-grafana-bridge"
 repo: https://github.com/gorlix/sp-grafana-bridge
 language: JavaScript
-method:
-  todo: "by hand / with AI / vibecoded (not in the CV)"
-status:
-  todo: "active / wip / archived (not in the CV)"
+method: ai-copilot
+status: archived
 featured: false
 description: "Bridge that exports Super Productivity tasks to InfluxDB v2 to analyse them in Grafana."
 openSource:

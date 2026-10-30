@@ -1,5 +1,4 @@
 import type { Automation } from './schemas/automations';
-import { isTodo } from './schemas/common';
 
 /*
  * Modello della sezione Domotica, unico per l'elenco testuale e per la scena 3D (spec §12.2).
@@ -46,7 +45,3 @@ export function domoticaModel(rooms: DomoticaRoomInput[], entries: DomoticaEntry
     automations: sorted.map(({ slug, data }) => ({ slug, name: data.name, room: data.room })),
   };
 }
-
-/** Un'automazione si mostra solo se ha almeno un passo noto: la scheda tutta `todo` resta nascosta. */
-export const hasPublicSteps = (a: Automation): boolean =>
-  !isTodo(a.trigger) || !isTodo(a.conditions) || !isTodo(a.actions);

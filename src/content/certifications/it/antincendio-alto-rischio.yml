@@ -1,9 +1,3 @@
 name: "Antincendio alto rischio (liv. 3)"
-issuer:
-  todo: "Ente (non nel CV)"
-date:
-  todo: "Data (non nel CV)"
-verifyUrl:
-  todo: "Link di verifica (non nel CV)"
 kind: supplementary
 status: earned

@@ -5,7 +5,7 @@ import { getEntries, getSingleton } from '../../lib/data';
 import { formatDate } from '../../lib/format';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
-import { isTodo, type Locale } from '../../lib/schemas/common';
+import type { Locale } from '../../lib/schemas/common';
 
 export const getStaticPaths = localeStaticPaths;
 
@@ -36,7 +36,7 @@ const skillGroups = [
 
 /** Esperienze dalla piu recente; le date ancora segnaposto restano in fondo. */
 const sortedExperiences = [...experiences].sort((a, b) => {
-  const start = (e: typeof a) => (isTodo(e.data.start) ? '' : e.data.start);
+  const start = (e: typeof a) => e.data.start ?? '';
   return start(b).localeCompare(start(a));
 });
 
@@ -47,17 +47,17 @@ const featuredProjects = projects
   .filter((p) => p.data.featured)
   .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
 
-const period = (start: unknown, end: unknown, paused = false) => {
-  if (isTodo(start) || isTodo(end)) return null;
-  const to = end === null ? (paused ? L.paused : L.ongoing) : formatDate(end as string, locale);
-  return start === undefined ? to : `${formatDate(start as string, locale)} – ${to}`;
+const period = (start: string | undefined, end: string | null | undefined, paused = false) => {
+  if (start === undefined || end === undefined) return null;
+  const to = end === null ? (paused ? L.paused : L.ongoing) : formatDate(end, locale);
+  return `${formatDate(start, locale)} – ${to}`;
 };
 
 const certMeta = (c: (typeof certifications)[number]['data']) =>
   [
     c.status === 'in-progress' ? L.ongoing : null,
-    isTodo(c.issuer) ? null : `${L.issuer}: ${c.issuer}`,
-    c.status === 'in-progress' || isTodo(c.date) ? null : formatDate(c.date, locale),
+    c.issuer === undefined ? null : `${L.issuer}: ${c.issuer}`,
+    c.status === 'in-progress' || c.date === undefined ? null : formatDate(c.date, locale),
   ]
     .filter(Boolean)
     .join(' · ');
@@ -65,7 +65,7 @@ const certMeta = (c: (typeof certifications)[number]['data']) =>
 const profiles = [
   { name: 'GitHub', url: profile.links.github },
   { name: 'LinkedIn', url: profile.links.linkedin },
-  ...(isTodo(profile.links.devto) ? [] : [{ name: 'dev.to', url: profile.links.devto }]),
+  { name: 'dev.to', url: profile.links.devto },
 ];
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const jsonLd = await loadJsonLd({
@@ -91,7 +91,7 @@ const jsonLd = await loadJsonLd({
         {page.sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
         <li><a href={here('/human')}>{page.links.human}</a></li>
         <li><a href={here('/agent')}>{page.links.agent}</a></li>
-        {!isTodo(profile.cv) && <li><a href={profile.cv} download>{L.cv}</a></li>}
+        <li><a href={profile.cv} download>{L.cv}</a></li>
       </ul>
     </nav>
   </Fragment>
@@ -101,29 +101,21 @@ const jsonLd = await loadJsonLd({
       <Portrait photo={profile.photo} />
       <div class="intro">
         <h1 id="h-profilo">{profile.name}</h1>
-        {!isTodo(profile.role) && <p class="role">{profile.role}</p>}
-        {!isTodo(profile.tagline) && <p class="tagline">{profile.tagline}</p>}
+        <p class="role">{profile.role}</p>
+        <p class="tagline">{profile.tagline}</p>
         <dl class="facts">
           <div>
             <dt>{L.location}</dt>
             <dd>{profile.location}</dd>
           </div>
-          {
-            !isTodo(profile.availability) && (
-              <div>
-                <dt>{L.availability}</dt>
-                <dd>{profile.availability}</dd>
-              </div>
-            )
-          }
+          <div>
+            <dt>{L.availability}</dt>
+            <dd>{profile.availability}</dd>
+          </div>
         </dl>
-        {
-          !isTodo(profile.cv) && (
-            <p class="cta">
-              <a class="button" href={profile.cv} download>{L.cv}</a>
-            </p>
-          )
-        }
+        <p class="cta">
+          <a class="button" href={profile.cv} download>{L.cv}</a>
+        </p>
       </div>
     </section>
 
@@ -150,7 +142,7 @@ const jsonLd = await loadJsonLd({
           const when = period(e.start, e.end);
           return (
             <article class="item">
-              <h3>{[isTodo(e.role) ? '' : e.role, isTodo(e.company) ? '' : e.company].filter(Boolean).join(' · ')}</h3>
+              <h3>{[e.role, e.company].filter(Boolean).join(' · ')}</h3>
               {
                 (e.summary || when) && (
                   <p class="meta">
@@ -160,16 +152,10 @@ const jsonLd = await loadJsonLd({
                   </p>
                 )
               }
+              <h4>{L.results}</h4>
+              <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
               {
-                !isTodo(e.results) && (
-                  <>
-                    <h4>{L.results}</h4>
-                    <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
-                  </>
-                )
-              }
-              {
-                !isTodo(e.stack) && e.stack.length > 0 && (
+                e.stack.length > 0 && (
                   <>
                     <h4>{L.stack}</h4>
                     <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
@@ -189,9 +175,9 @@ const jsonLd = await loadJsonLd({
         {
           technicalCerts.map(({ data: c }) => (
             <li>
-              <strong>{isTodo(c.name) ? '' : c.name}</strong>
+              <strong>{c.name}</strong>
               {certMeta(c) && <span class="meta">{certMeta(c)}</span>}
-              {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
+              {c.verifyUrl !== undefined && <a href={c.verifyUrl}>{L.verify}</a>}
             </li>
           ))
         }
@@ -203,8 +189,8 @@ const jsonLd = await loadJsonLd({
             <ul class="plain small">
               {supplementaryCerts.map(({ data: c }) => (
                 <li>
-                  {isTodo(c.name) ? '' : c.name}
-                  {!isTodo(c.issuer) && <span class="meta"> · {c.issuer}</span>}
+                  {c.name}
+                  {c.issuer !== undefined && <span class="meta"> · {c.issuer}</span>}
                 </li>
               ))}
             </ul>
@@ -220,18 +206,18 @@ const jsonLd = await loadJsonLd({
         featuredProjects.map(({ data: p }) => (
           <article class="item">
             <h3>{p.name}</h3>
-            {!isTodo(p.description) && <p>{p.description}</p>}
+            <p>{p.description}</p>
             {
-              (!isTodo(p.language) || p.repo) && (
+              (p.language !== undefined || p.repo) && (
                 <p class="meta">
-                  {!isTodo(p.language) && `${L.language}: ${p.language}`}
-                  {!isTodo(p.language) && p.repo && ' · '}
+                  {p.language !== undefined && `${L.language}: ${p.language}`}
+                  {p.language !== undefined && p.repo && ' · '}
                   {p.repo && <a href={p.repo}>{L.repository}</a>}
                 </p>
               )
             }
             {
-              !isTodo(p.method) && (
+              p.method !== undefined && (
                 <p class="meta">
                   {page.projects.methodLabel}: {page.projects.methods[p.method]}
                 </p>
@@ -249,8 +235,8 @@ const jsonLd = await loadJsonLd({
           const when = period(ed.start, ed.end, ed.paused);
           return (
             <article class="item">
-              <h3>{isTodo(ed.degree) ? '' : ed.degree}</h3>
-              <p class="meta">{[isTodo(ed.institution) ? '' : ed.institution, when].filter(Boolean).join(' · ')}</p>
+              <h3>{ed.degree}</h3>
+              <p class="meta">{[ed.institution, when].filter(Boolean).join(' · ')}</p>
             </article>
           );
         })

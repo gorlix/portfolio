@@ -1,10 +1,8 @@
 name: "paca-plugin-gitlab"
 repo: https://github.com/gorlix/paca-plugin-gitlab
 language: Go
-method:
-  todo: "by hand / with AI / vibecoded (not in the CV)"
-status:
-  todo: "active / wip / archived (not in the CV)"
+method: ai-copilot
+status: active
 featured: false
 description: "Paca plugin (com.gorlix.gitlab) integrating GitLab projects, merge requests and branches with Paca projects and tasks; a fork of paca-plugin-github."
 openSource:

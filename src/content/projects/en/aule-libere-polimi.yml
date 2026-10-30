@@ -2,10 +2,9 @@ name: AuleLiberePoliMi
 repo: https://github.com/gorlix/AuleLiberePoliMi
 language: Python
 method: ai-copilot
-status:
-  todo: active / wip / archived
+status: active
 featured: false
-description: Project adopted when the original author left it; runs on the homelab.
+description: "Telegram bot that finds free classrooms at Politecnico di Milano by campus, day and time slot, with power outlets shown. I adopted it when the author stopped maintaining it; it now runs on my homelab."
 openSource:
   group: community
   description: "A fork I keep maintaining of the PoliMi free classrooms Telegram bot: inline mode, analytics, keyboard, dependencies."
