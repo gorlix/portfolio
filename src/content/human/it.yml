@@ -58,6 +58,7 @@ labels:
   stack: Stack
   issuer: Ente
   verify: Verifica
+  credentialId: ID credenziale
   supplementaryCertifications: Altro che ho imparato
   repository: Repository
   language: Linguaggio

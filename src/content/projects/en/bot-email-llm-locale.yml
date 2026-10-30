@@ -1,8 +1,5 @@
 name: "Email bot with a local LLM"
-language:
-  todo: "Main language (not in CV)"
-method:
-  todo: "by hand / with AI / vibecoded (not in CV)"
+method: ai-copilot
 status: wip
 featured: true
 rank: 5

@@ -30,6 +30,7 @@ labels:
   stack: Stack
   issuer: Ente
   verify: Verifica
+  credentialId: ID credenziale
   technicalCertifications: Certificazioni tecniche
   supplementaryCertifications: Altre certificazioni
   repository: Repository

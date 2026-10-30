@@ -1,9 +1,6 @@
 name: "Intervento idrogeologico"
-issuer:
-  todo: "Ente (non nel CV)"
-date:
-  todo: "Data (non nel CV)"
-verifyUrl:
-  todo: "Link di verifica (non nel CV)"
+issuer: "CCV-MI"
+date: "2022-05"
+credentialId: "3762-2461"
 kind: supplementary
 status: earned

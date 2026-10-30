@@ -11,15 +11,9 @@ import {
   workCourse,
 } from '../../src/lib/work';
 
-const todo = { todo: 'data mancante' };
-
 describe('percorso dei lavori', () => {
   it('ordina dal piu vecchio, con le date ignote in fondo all albero', () => {
-    const items = [
-      { slug: 'b', start: '2026-04' },
-      { slug: 'c', start: todo },
-      { slug: 'a', start: '2026-01' },
-    ];
+    const items = [{ slug: 'b', start: '2026-04' }, { slug: 'c' }, { slug: 'a', start: '2026-01' }];
     expect(chronological(items).map((e) => e.slug)).toEqual(['c', 'a', 'b']);
   });
 
@@ -41,7 +35,7 @@ describe('percorso dei lavori', () => {
         detail: 'trimind',
         scenery: ['container', 'flag'],
       },
-      { slug: 'club', start: todo, end: todo, kind: 'volunteer' },
+      { slug: 'club', kind: 'volunteer' },
       { slug: 'distretto', start: '2026-01', end: '2026-06', kind: 'work' },
     ]);
     expect(course.levels).toEqual([
@@ -126,12 +120,7 @@ describe('tappa e pagina Open source', () => {
   it('segue i gruppi dei dati, ordina per stelle vive, toglie i gruppi vuoti', () => {
     const out = groupRepos(
       groups,
-      [
-        entry('a', 'paca', 1),
-        entry('b', 'paca', 9),
-        entry('c', 'hardware', 2),
-        { name: 'fuori', language: todo },
-      ],
+      [entry('a', 'paca', 1), entry('b', 'paca', 9), entry('c', 'hardware', 2), { name: 'fuori' }],
       new Map([['https://github.com/gorlix/a', 50]]),
     );
     expect(out.map((g) => g.id)).toEqual(['hardware', 'paca']);
@@ -147,7 +136,7 @@ describe('tappa e pagina Open source', () => {
       groupRepos(groups, [{ ...entry('a', 'paca', 1), repo: undefined }], none),
     ).toThrow();
     expect(() =>
-      groupRepos(groups, [{ ...entry('a', 'paca', 1), language: todo }], none),
+      groupRepos(groups, [{ ...entry('a', 'paca', 1), language: undefined }], none),
     ).toThrow();
     expect(() => groupRepos([groups[0]], [entry('a', 'paca', 1)], none)).toThrow();
   });

@@ -4,7 +4,7 @@ language: Java
 method: vibecoded
 status: wip
 featured: false
-description: Built around the Supernote Manta.
+description: "Automation plugin for Supernote: turns areas of handwritten notes into digital actions. Alpha, still in development."
 openSource:
   group: supernote
   description: "Automation plugin for Supernote devices, written in Java."

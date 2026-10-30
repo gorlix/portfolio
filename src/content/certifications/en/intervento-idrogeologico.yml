@@ -1,9 +1,6 @@
 name: "Hydrogeological intervention"
-issuer:
-  todo: "Issuer (not in CV)"
-date:
-  todo: "Date (not in CV)"
-verifyUrl:
-  todo: "Verification link (not in CV)"
+issuer: "CCV-MI"
+date: "2022-05"
+credentialId: "3762-2461"
 kind: supplementary
 status: earned
