@@ -6,3 +6,8 @@ status:
   todo: active / wip / archived
 featured: false
 description: Built around the Supernote Manta.
+openSource:
+  group: supernote
+  description: "Inserts blank writing space on a Supernote page: tap a line and everything below it slides."
+  stars: 9
+  contribution: false

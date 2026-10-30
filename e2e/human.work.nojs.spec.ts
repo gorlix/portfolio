@@ -38,3 +38,21 @@ for (const [route, lang] of [
     await expect(page.locator('#trimind .outro a')).toBeVisible();
   });
 }
+
+for (const [route, lang] of [
+  ['/human/lavori/open-source/', 'it'],
+  ['/en/human/lavori/open-source/', 'en'],
+] as const) {
+  test(`${route} senza JS: schede dei repository, un h1, ritorno ai lavori`, async ({ page }) => {
+    const response = await page.goto(route);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', lang);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.locator('#open-source .stage')).toBeHidden();
+    const cards = page.locator('#open-source .card');
+    expect(await cards.count()).toBeGreaterThan(0);
+    for (const card of await cards.all()) await expect(card).toBeVisible();
+    expect(await page.locator('#open-source .repos h3 a').count()).toBeGreaterThan(0);
+    await expect(page.locator('#open-source .outro a')).toBeVisible();
+  });
+}

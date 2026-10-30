@@ -25,6 +25,7 @@ export const immersiveScenes = [
   'domotica',
   'lavori',
   'trimind',
+  'opensource',
   'certificazioni',
 ] as const;
 

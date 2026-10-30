@@ -7,3 +7,8 @@ status:
 featured: false
 description: Lato Home Assistant della sincronizzazione con il Non Disturbare di Android.
 section: domotica
+openSource:
+  group: homelab
+  description: "Integrazione custom di Home Assistant per monitorare e controllare il demone Focus Mode di Linux."
+  stars: 1
+  contribution: false

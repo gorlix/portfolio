@@ -6,7 +6,7 @@ import { isTodo, type Locale, locales, type Todo } from '../schemas/common';
 export type Bilingual<T = string> = Record<Locale, T>;
 
 export interface MachinePage {
-  id: 'home' | 'human' | 'trimind' | 'recruiter' | 'agent';
+  id: 'home' | 'human' | 'trimind' | 'opensource' | 'recruiter' | 'agent';
   urls: Bilingual;
 }
 
@@ -53,6 +53,7 @@ const pageDefs: [MachinePage['id'], string][] = [
   ['home', '/'],
   ['human', '/human'],
   ['trimind', '/human/lavori/trimind'],
+  ['opensource', '/human/lavori/open-source'],
   ['recruiter', '/recruiter'],
   ['agent', '/agent'],
 ];

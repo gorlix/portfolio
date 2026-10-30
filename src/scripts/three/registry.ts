@@ -11,6 +11,7 @@ export const sceneLoaders = {
   domotica: () => import('./scenes/domotica'),
   lavori: () => import('./scenes/lavori'),
   trimind: () => import('./scenes/trimind'),
+  opensource: () => import('./scenes/opensource'),
   certificazioni: () => import('./scenes/certificazioni'),
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),

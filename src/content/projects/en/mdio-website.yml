@@ -1,0 +1,14 @@
+name: "MDIO-website"
+repo: https://github.com/gorlix/MDIO-website
+language: JavaScript
+method:
+  todo: "by hand / with AI / vibecoded (not in the CV)"
+status:
+  todo: "active / wip / archived (not in the CV)"
+featured: false
+description: "Source of the official website of the Rotaract Multidistretto Italia Ovest (MDIO)."
+openSource:
+  group: community
+  description: "Source of the official website of the Rotaract Multidistretto Italia Ovest (Districts 2041, 2042 and 2050)."
+  stars: 1
+  contribution: false

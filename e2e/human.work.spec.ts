@@ -62,7 +62,7 @@ for (const [route, detail] of [
 
   test(`${route}: "Approfondisci" solo sulle esperienze con pagina dedicata`, async ({ page }) => {
     await page.goto(route);
-    const links = lavori(page).locator('.deeper a');
+    const links = lavori(page).locator('.card:not([data-kind="open-source"]) .deeper a');
     await expect(links).toHaveCount(1);
     await expect(links).toHaveAttribute('href', detail);
     await expect(lavori(page).locator('.chip').first()).toBeVisible();

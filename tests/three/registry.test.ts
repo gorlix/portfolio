@@ -16,6 +16,7 @@ describe('registro delle scene', () => {
       'domotica',
       'lavori',
       'trimind',
+      'opensource',
       'certificazioni',
       'beneficenza',
       'contatti',
@@ -45,6 +46,7 @@ describe('tipi di scena', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('immersive');
     expect(sceneKind('trimind')).toBe('immersive');
+    expect(sceneKind('opensource')).toBe('immersive');
     expect(sceneKind('certificazioni')).toBe('immersive');
     expect(sceneKind('interessi')).toBe('micro');
     expect(sceneKind('homelab')).toBe('immersive');

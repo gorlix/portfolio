@@ -1,0 +1,14 @@
+name: "paca-plugin-project-skills"
+repo: https://github.com/gorlix/paca-plugin-project-skills
+language: Go
+method:
+  todo: "by hand / with AI / vibecoded (not in the CV)"
+status:
+  todo: "active / wip / archived (not in the CV)"
+featured: false
+description: "Paca plugin that lets a project register its own Agent Skills (agentskills.io format) and serve them to compliant clients."
+openSource:
+  group: paca
+  description: "Paca plugin: a project registers its own Agent Skills through CRUD, served to any compliant client."
+  stars: 1
+  contribution: false

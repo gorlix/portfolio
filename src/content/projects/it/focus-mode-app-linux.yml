@@ -8,3 +8,8 @@ featured: false
 description: Sincronizza il Non Disturbare di Android con Home Assistant; migrazione da Python a
   Rust/Tauri in corso.
 section: domotica
+openSource:
+  group: homelab
+  description: "Modalità Studio per KDE Plasma: blocca automaticamente app e webapp che distraggono."
+  stars: 2
+  contribution: false
