@@ -1,4 +1,4 @@
-import { blendAt } from '../story';
+export { cameraAt, eyeOf, norm, type Shot, type Vec } from '../framing';
 
 /*
  * Racconto della montagna di Sport (PORT-88). Logica PURA, senza three: ordine dei momenti,
@@ -147,45 +147,3 @@ export const volleyBallY = (shot: number, contact: number, peak: number): number
  */
 export const climbAt = (story: number, moment: number): number =>
   Math.min(1, Math.max(0, (story - (moment - 1)) / 2));
-
-// --- Inquadrature ----------------------------------------------------------------------------
-
-export type Vec = readonly [number, number, number];
-
-export interface Shot {
-  /** Punto guardato. */
-  target: Vec;
-  /** Direzione dal punto alla camera (non serve normalizzarla). */
-  from: Vec;
-  /** Altezza e larghezza da tenere in vista (unita). */
-  spanH: number;
-  spanW: number;
-}
-
-/** Lunghezza di un vettore. */
-export const norm = ([x, y, z]: Vec): number => Math.hypot(x, y, z);
-
-/** Posizione della camera di un'inquadratura alla distanza data. */
-export function eyeOf({ target, from }: Shot, distance: number): Vec {
-  const k = distance / norm(from);
-  return [target[0] + from[0] * k, target[1] + from[1] * k, target[2] + from[2] * k];
-}
-
-/** Occhio e punto guardato alla posizione del racconto: fermi sulla scheda, morbidi tra due. */
-export function cameraAt(
-  shots: readonly Shot[],
-  distances: readonly number[],
-  story: number,
-): { eye: Vec; target: Vec; from: number; to: number; t: number } {
-  const { from, to, t } = blendAt(story, shots.length);
-  const a = shots[from] as Shot;
-  const b = shots[to] as Shot;
-  const eyeA = eyeOf(a, distances[from] as number);
-  const eyeB = eyeOf(b, distances[to] as number);
-  const mixVec = (u: Vec, v: Vec): Vec => [
-    u[0] + (v[0] - u[0]) * t,
-    u[1] + (v[1] - u[1]) * t,
-    u[2] + (v[2] - u[2]) * t,
-  ];
-  return { eye: mixVec(eyeA, eyeB), target: mixVec(a.target, b.target), from, to, t };
-}
