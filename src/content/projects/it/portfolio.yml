@@ -1,10 +1,8 @@
 name: "portfolio"
 repo: https://github.com/gorlix/portfolio
 language: TypeScript
-method:
-  todo: "a mano / con AI / vibecoded (non nel CV)"
-status:
-  todo: "active / wip / archived (non nel CV)"
+method: ai-copilot
+status: active
 featured: false
 description: "Il repository di questo sito, scritto in TypeScript."
 openSource:

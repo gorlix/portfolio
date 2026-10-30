@@ -23,7 +23,7 @@ Ogni criterio rimanda al test che lo verifica in CI (check obbligatori su `main`
 | Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion) | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts`                                               |
 | Analitica solo su `/human`, solo con token valido                                    | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`                                                      |
 | Colori solo come token, contrasto                                                    | `pnpm check:theme`                                                                                             |
-| Dati mancanti (`todo`) mai visibili sul sito, in nessun file per macchine            | `tests/i18n/build.test.ts` (nessun `TODO(Alessandro)`), `e2e/recruiter.nojs.spec.ts`, `e2e/human.nojs.spec.ts` |
+| Nessun segnaposto `TODO` visibile sul sito, in nessun file per macchine              | `tests/i18n/build.test.ts` (nessun `TODO(Alessandro)`), `e2e/recruiter.nojs.spec.ts`, `e2e/human.nojs.spec.ts` |
 
 ## Verifiche manuali (le fa Alessandro; esito da annotare qui)
 

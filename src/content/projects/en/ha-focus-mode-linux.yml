@@ -2,8 +2,7 @@ name: ha-focus-mode-linux
 repo: https://github.com/gorlix/ha-focus-mode-linux
 language: Python
 method: ai-copilot
-status:
-  todo: active / wip / archived
+status: wip
 featured: false
 description: Home Assistant side of the Android Do Not Disturb sync.
 section: domotica

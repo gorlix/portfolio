@@ -15,7 +15,7 @@ Nessun login, nessun server: Sveltia usa la File System Access API di Chrome/Edg
 Cose da sapere:
 
 - Il CMS **riscrive il file YAML intero**: ordine dei campi e virgolette sono normalizzati (virgolette doppie), i **commenti YAML si perdono** (oggi solo `infrastructure`). Controlla sempre `git diff`.
-- I campi ancora da fornire (`{ todo: ... }`) compaiono come campo vuoto non obbligatorio con un suggerimento: compilandolo il segnaposto sparisce. Se non lo tocchi, resta com'e.
+- I dati non noti (data, ente, link di verifica, linguaggio, metodo) sono campi facoltativi: lasciati vuoti, la riga non compare sul sito. Non esiste piu un segnaposto `todo`.
 - I campi **non traducibili** (URL, id, numeri...) sono modificabili solo in IT e copiati in EN (`i18n: duplicate`); quelli traducibili sono liberi nelle due lingue. L'elenco e quello degli schemi (`translatable` in `src/lib/schemas/*`).
 - L'upload di media non fa parte della fase 1: foto in `src/assets/` e CV in `public/cv/` si gestiscono da file. `media_folder` punta a `public/cv` solo perche Sveltia ne richiede uno.
 - `/admin` non compare in sitemap, `llms.txt` o pagine del sito; `robots.txt` lo chiude e la pagina ha `noindex`.

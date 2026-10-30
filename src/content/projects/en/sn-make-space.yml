@@ -2,10 +2,9 @@ name: sn_make_space
 repo: https://github.com/gorlix/sn_make_space
 language: PowerShell
 method: vibecoded
-status:
-  todo: active / wip / archived
+status: active
 featured: false
-description: Built around the Supernote Manta.
+description: 'Supernote plugin that adds blank space where you need it: tap a line and the rest of the page slides up or down. Like OneNote''s "Insert extra writing space", but on a Supernote.'
 openSource:
   group: supernote
   description: "Inserts blank writing space on a Supernote page: tap a line and everything below it slides."

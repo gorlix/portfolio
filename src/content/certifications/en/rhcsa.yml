@@ -1,9 +1,5 @@
 name: "RHCSA (Red Hat Certified System Administrator)"
 issuer: "Red Hat"
-date:
-  todo: "Date (not in CV)"
-verifyUrl:
-  todo: "Verification link (not in CV)"
 kind: technical
 status: in-progress
 rank: 1

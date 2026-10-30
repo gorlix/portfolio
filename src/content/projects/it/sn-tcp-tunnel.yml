@@ -2,10 +2,9 @@ name: sn-tcp-tunnel
 repo: https://github.com/gorlix/sn-tcp-tunnel
 language: PowerShell
 method: vibecoded
-status:
-  todo: active / wip / archived
+status: active
 featured: false
-description: Ruota attorno al Supernote Manta.
+description: "Plugin Supernote per proiettare lo schermo senza WiFi: bastano il cavo USB e ADB. Utile dove la rete è lenta, limitata o assente, come in aula."
 openSource:
   group: supernote
   description: "Plugin per Supernote: lo schermo sul proiettore con il solo cavo USB, tramite un tunnel TCP su ADB."
