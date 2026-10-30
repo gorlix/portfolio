@@ -5,7 +5,7 @@ method: ai-copilot
 status: archived
 featured: true
 rank: 2
-description: "Contributo a Paca (GitHub Actions): pull request accettata e rilasciata nella v0.15.0 del progetto open source di project management con agenti AI (1,8k stelle su GitHub), con smoke test in CI; plugin di integrazione con GitLab pubblicato a corredo."
+description: "Contributo a Paca (GitHub Actions): pull request accettata e rilasciata nella v0.15.0 del progetto open source di project management con agenti AI (2k stelle su GitHub), con smoke test in CI; plugin di integrazione con GitLab pubblicato a corredo."
 openSource:
   group: paca
   description: "6 PR mergiate: installer delle Agent Skills (v0.15.0), descrizioni dei repository collegati e fix all'integrazione git."
