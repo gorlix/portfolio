@@ -109,6 +109,8 @@ export function mount({
     ink: channels(tint(['--bg-deep', '--bg'])),
     accent: channels(accent),
     alt: channels(alt),
+    print: channels(tint(['--ctp-teal', '--text'])),
+    printAlt: channels(tint(['--ctp-sapphire', '--text'])),
     key: channels(key),
     rust: channels(peach.clone().lerp(red, 0.45)),
     rustAlt: channels(peach.clone().lerp(red, 0.15)),

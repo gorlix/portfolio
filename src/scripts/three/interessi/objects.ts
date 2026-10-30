@@ -21,6 +21,8 @@ export interface BenchPalette {
   ink: Rgb;
   accent: Rgb;
   alt: Rgb;
+  print: Rgb;
+  printAlt: Rgb;
   key: Rgb;
   rust: Rgb;
   rustAlt: Rgb;
@@ -164,40 +166,30 @@ function buildPrinter(bench: Bench, x: number, p: BenchPalette): void {
   }
   m.box(x, 7.7, z, 6.36, 0.36, 0.36, p.frame);
   bench.gantry.box(x, -0.1, z, 5.7, 0.2, 0.3, p.metal);
-  bench.head.box(x, -0.32, z, 0.8, 0.7, 0.8, p.accent);
+  bench.head.box(x, -0.32, z, 0.8, 0.7, 0.8, p.frame);
   bench.head.box(x, -0.55, z, 0.24, 0.3, 0.24, p.ink);
+  // Il pezzo: una piramide a gradoni, squadrata, uno strato sull'altro.
   for (let i = 0; i < LAYERS; i += 1) {
-    const k = i / (LAYERS - 1);
-    const r = 1.05 + 0.45 * Math.sin(k * Math.PI * 1.6);
+    const r = 2.1 - 0.3 * Math.floor(i / 3);
     const y = BED_Y - 0.02 + i * LAYER;
-    bench.print.mesh.lathe(
-      [
-        [r, y],
-        [r, y + LAYER],
-      ] as readonly Ring[],
-      8,
-      i % 2 ? p.alt : p.accent,
-      {
-        x,
-        z,
-      },
-    );
+    const rings: readonly Ring[] = [
+      [r, y],
+      [r, y + LAYER],
+    ];
+    bench.print.mesh.lathe(rings, 4, i % 2 ? p.printAlt : p.print, { x, z, ry: Math.PI / 4 });
   }
   // Il pezzo storto: gli strati scivolano, succede.
-  for (let i = 0; i < 7; i += 1) {
-    const y = 0 + i * LAYER;
-    m.lathe(
-      [
-        [0.62, y],
-        [0.62, y + LAYER],
-      ],
-      7,
-      i % 2 ? p.alt : p.accent,
-      {
-        x: x + 2.1 + i * i * 0.022,
-        z: 2.1,
-      },
-    );
+  for (let i = 0; i < 6; i += 1) {
+    const y = i * LAYER;
+    const rings: readonly Ring[] = [
+      [1.1, y],
+      [1.1, y + LAYER],
+    ];
+    m.lathe(rings, 4, i % 2 ? p.printAlt : p.print, {
+      x: x + 2.1 + i * i * 0.03,
+      z: 2.1,
+      ry: Math.PI / 4,
+    });
   }
 }
 
