@@ -1,5 +1,3 @@
-import { isTodo } from '../schemas/common';
-
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -7,7 +5,7 @@ const matches = (path: string, patterns: readonly string[]) => patterns.includes
 
 /**
  * Confronta la voce IT con la EN. Restituisce l'elenco delle differenze (vuoto = parita):
- * stessa struttura; campi non traducibili identici; segnaposto `todo` solo se da entrambe le parti.
+ * stessa struttura; campi non traducibili identici.
  * `path` usa `*` al posto degli indici di array, come `translatable`.
  */
 export function diffLocales(
@@ -17,12 +15,6 @@ export function diffLocales(
   path = '',
 ): string[] {
   const label = path || '(radice)';
-
-  if (isTodo(it) || isTodo(en)) {
-    return isTodo(it) && isTodo(en)
-      ? []
-      : [`${label}: segnaposto todo presente in una sola lingua`];
-  }
 
   if (Array.isArray(it) || Array.isArray(en)) {
     if (!Array.isArray(it) || !Array.isArray(en)) return [`${label}: array in una sola lingua`];

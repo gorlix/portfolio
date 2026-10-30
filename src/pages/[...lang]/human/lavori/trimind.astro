@@ -9,7 +9,7 @@ import { getEntries, getSingleton } from '../../../../lib/data';
 import { formatDate } from '../../../../lib/format';
 import { localeStaticPaths, localizedPath } from '../../../../lib/i18n';
 import { loadJsonLd } from '../../../../lib/machine/page-jsonld';
-import { isTodo, type Locale } from '../../../../lib/schemas/common';
+import type { Locale } from '../../../../lib/schemas/common';
 import { detailPath, splitResult } from '../../../../lib/work';
 
 /*
@@ -29,7 +29,7 @@ const [page, profile, experiences] = await Promise.all([
 ]);
 
 const job = experiences.find((e) => e.data.detail === 'trimind')?.data;
-if (!job || isTodo(job.results) || isTodo(job.stack) || isTodo(job.company) || isTodo(job.role)) {
+if (!job) {
   throw new Error('trimind: esperienza con `detail: trimind` assente o incompleta');
 }
 const { results, stack } = job;
@@ -43,7 +43,7 @@ if (told.some((i) => i >= results.length) || new Set(told).size !== results.leng
 }
 
 const period =
-  isTodo(job.start) || isTodo(job.end)
+  job.start === undefined || job.end === undefined
     ? null
     : `${formatDate(job.start, locale)} – ${job.end === null ? L.ongoing : formatDate(job.end, locale)}`;
 const step = (n: number) =>

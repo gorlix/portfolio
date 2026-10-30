@@ -115,7 +115,7 @@ export function renderAgentMd(m: MachineModel): string {
 
 /** profile.json: schema.org Person con `inLanguage` e URL gemelli. */
 export function renderProfileJson(m: MachineModel): string {
-  const sameAs = [m.links.github, m.links.linkedin, m.links.x, m.links.devto].filter(Boolean);
+  const sameAs = [m.links.github, m.links.linkedin, m.links.devto, m.links.x].filter(Boolean);
   const home = m.pages[0];
   const profile = {
     '@context': 'https://schema.org',

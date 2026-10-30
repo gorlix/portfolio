@@ -1,10 +1,8 @@
 name: "supernote-plugin-dev"
 repo: https://github.com/gorlix/supernote-plugin-dev
 language: Markdown
-method:
-  todo: "by hand / with AI / vibecoded (not in the CV)"
-status:
-  todo: "active / wip / archived (not in the CV)"
+method: ai-copilot
+status: active
 featured: false
 description: "Agent Skill for building, debugging and extending plugins for Supernote devices with the sn-plugin-lib SDK."
 openSource:

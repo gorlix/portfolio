@@ -37,10 +37,9 @@ for (const [route, lang] of [
       const projects = page.locator('#progetti article');
       await expect(projects).toHaveCount(5);
       await expect(projects.first().getByRole('heading', { level: 3 })).toHaveText('homelab');
-      // Il metodo dei progetti non e ancora dichiarato: la riga non compare finche Alessandro non lo fornisce.
-      await expect(page.locator('#progetti article', { hasText: 'Paca' })).not.toContainText(
-        lang === 'en' ? 'Method' : 'Metodo',
-      );
+      for (const article of await projects.all()) {
+        await expect(article).toContainText(lang === 'en' ? 'Method' : 'Metodo');
+      }
     });
 
     test('apertura: ritratto, frase e CV (segnaposto finche mancano i file) anche nel menu', async ({

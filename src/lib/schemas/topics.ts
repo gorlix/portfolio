@@ -1,5 +1,5 @@
 import { z } from 'astro/zod';
-import { orTodo, text, url } from './common';
+import { text, url } from './common';
 
 /** Sport, interessi e beneficenza: stessa forma, `section` decide dove compaiono. */
 export const topicSchema = z.strictObject({
@@ -8,7 +8,7 @@ export const topicSchema = z.strictObject({
   /** Frase breve (spec §13), prima del testo: opzionale. */
   tagline: text.optional(),
   /** Testo in prima persona: e copy di Alessandro, finche manca resta un `todo`. */
-  text: orTodo(text),
+  text,
   links: z.array(z.strictObject({ label: text, url })),
 });
 

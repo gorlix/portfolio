@@ -1,10 +1,8 @@
 name: "Gorlix-Home-Assistant-Blueprint"
 repo: https://github.com/gorlix/Gorlix-Home-Assistant-Blueprint
 language: YAML
-method:
-  todo: "a mano / con AI / vibecoded (non nel CV)"
-status:
-  todo: "active / wip / archived (non nel CV)"
+method: ai-copilot
+status: active
 featured: false
 description: "Blueprint di Home Assistant per l'app Companion Android: sveglie dal calendario, notifiche con pulsanti e Non Disturbare."
 openSource:

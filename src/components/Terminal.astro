@@ -1,7 +1,7 @@
 ---
 import { getSingleton } from '../lib/data';
 import { defaultLocale, localizedPath } from '../lib/i18n';
-import { isTodo, type Locale } from '../lib/schemas/common';
+import type { Locale } from '../lib/schemas/common';
 
 interface Props {
   locale: Locale;
@@ -21,7 +21,7 @@ const { tmux } = entrance;
 const info = [
   { label: tmux.infoRole, value: profile.role },
   { label: tmux.infoLocation, value: profile.location },
-].filter((row): row is { label: string; value: string } => !isTodo(row.value));
+];
 ---
 
 <section class="tmux" aria-labelledby="terminal-title" data-terminal data-default-locale={defaultLocale}>

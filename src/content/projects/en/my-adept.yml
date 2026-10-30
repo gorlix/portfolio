@@ -2,8 +2,7 @@ name: my-adept
 repo: https://github.com/gorlix/my-adept
 language: C
 method: by-hand
-status:
-  todo: active / wip / archived
+status: active
 featured: false
 description: Firmware for the Ploopy Adept trackball.
 openSource:
