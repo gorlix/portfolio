@@ -168,11 +168,11 @@ function buildRoom(m: Mesher, p: BenchPalette): void {
   const sun: [number, number][] = [];
   for (let i = 0; i < 16; i += 1) {
     const angle = (i * Math.PI) / 8;
-    sun.push([Math.cos(angle) * 7, Math.sin(angle) * 7]);
+    sun.push([Math.cos(angle) * 5, Math.sin(angle) * 5]);
   }
-  m.extrude(sun, 1, p.sun, { x: 14, y: 16, z: SKY_Z + 3 });
-  ridge(m, SKY_Z + 7, 13, 0.03, p.hillFar);
-  ridge(m, SKY_Z + 14, 9, 0.047, p.hillNear);
+  m.extrude(sun, 1, p.sun, { x: 78, y: 11, z: SKY_Z + 3 });
+  ridge(m, SKY_Z + 7, 9, 0.03, p.hillFar);
+  ridge(m, SKY_Z + 14, 3, 0.047, p.hillNear);
   const planks = Math.ceil((BENCH_FRONT - BENCH_BACK) / PLANK);
   for (let i = 0; i < planks; i += 1) {
     const tint = i % 2 ? p.wood : p.woodAlt;

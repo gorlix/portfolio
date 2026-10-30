@@ -59,7 +59,7 @@ const HEAD_REACH = 1.3;
 const PRINT_START = 0.3;
 const LID_OPEN = 1.9;
 /** Cielo: quanto ogni fascia tende al caldo, dall'orizzonte al buio. */
-const SKY = [0.6, 0.48, 0.36, 0.26, 0.18, 0.12, 0.07, 0.03];
+const SKY = [0.36, 0.26, 0.18, 0.12, 0.08, 0.05, 0.03, 0.01];
 
 export function mount({
   canvas,
@@ -107,7 +107,7 @@ export function mount({
     wallLow: channels(tint(['--surface-hi', '--surface'])),
     sky: SKY.map((k) => channels(night.clone().lerp(glow, k))),
     sun: channels(tint(['--ctp-yellow', '--text']).lerp(peach, 0.5)),
-    hillFar: channels(night.clone().lerp(tint(['--ctp-mauve', '--text']), 0.3)),
+    hillFar: channels(night.clone().lerp(tint(['--ctp-mauve', '--text']), 0.2)),
     hillNear: channels(night.clone().lerp(tint(['--ctp-mauve', '--text']), 0.12)),
     mat: channels(soft(accent, 0.2)),
     frame: channels(tint(['--bg-deep', '--bg'])),

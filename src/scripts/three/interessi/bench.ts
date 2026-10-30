@@ -71,7 +71,14 @@ export function shotsFor(portrait: boolean): Record<string, Shot> {
     table.overview = { target: [-30, 8.2, 2], from: [-1, 0.55, 0.22], spanH: 40, spanW: 15 };
     interessiOrder.forEach((slug, i) => {
       const x = stationX(i) + (slug === 'food' ? 0.5 : -1);
-      table[slug] = { target: [x, 1, -2.8], from: [-0.12, 1, 0.6], spanH: 12, spanW: 17 };
+      // La scheda del tablet e la piu alta: oggetto un po' piu piccolo, pinguino sempre in vista.
+      const tall = slug === 'supernote';
+      table[slug] = {
+        target: [x, 1, tall ? -2 : -2.8],
+        from: [-0.12, 1, 0.6],
+        spanH: 12,
+        spanW: tall ? 20 : 17,
+      };
     });
     table.exit = { target: [LAST_X + 5, 1, 0], from: [-0.2, 0.75, 1], spanH: 12, spanW: 15 };
     return table;
@@ -80,8 +87,10 @@ export function shotsFor(portrait: boolean): Record<string, Shot> {
   table.overview = { target: [-20, 2, 1], from: [-1, 0.4, 0.7], spanH: 32, spanW: 66 };
   interessiOrder.forEach((slug, i) => {
     const x = stationX(i) + (slug === 'food' ? 0.4 : -1.4);
-    table[slug] = { target: [x, 2, 0.6], from: [-0.1, 0.55, 1], spanH: 13, spanW: 20 };
+    // Bassa, cosi dietro l'oggetto si vede il cielo; la tastiera e piatta e chiede piu altezza.
+    const rise = slug === 'zsa-moonlander' ? 0.42 : 0.26;
+    table[slug] = { target: [x, 4, 0.6], from: [-0.1, rise, 1], spanH: 13, spanW: 20 };
   });
-  table.exit = { target: [LAST_X + 3, 2.5, 1], from: [-0.15, 0.4, 1], spanH: 13, spanW: 27 };
+  table.exit = { target: [LAST_X + 3, 2.5, 1], from: [-0.15, 0.24, 1], spanH: 13, spanW: 27 };
   return table;
 }
