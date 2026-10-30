@@ -590,13 +590,7 @@ collections:
               - name: contatti
                 i18n: true
                 widget: string
-              - name: sci
-                i18n: true
-                widget: string
-              - name: tennis
-                i18n: true
-                widget: string
-              - name: pallavolo
+              - name: sport
                 i18n: true
                 widget: string
               - name: scrivania
@@ -624,6 +618,13 @@ collections:
               - name: highlights
                 i18n: true
                 widget: string
+              - name: posterSubject
+                i18n: true
+                widget: string
+          - name: sport
+            i18n: true
+            widget: object
+            fields:
               - name: posterSubject
                 i18n: true
                 widget: string

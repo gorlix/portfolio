@@ -92,9 +92,7 @@ export const humanSchema = z.strictObject({
     certificazioni: text,
     beneficenza: text,
     contatti: text,
-    sci: text,
-    tennis: text,
-    pallavolo: text,
+    sport: text,
     scrivania: text,
     interessi: text,
     trimind: text,
@@ -108,6 +106,10 @@ export const humanSchema = z.strictObject({
     volunteer: text,
     /** Titolo dei 2-3 punti del CV mostrati nella scheda. */
     highlights: text,
+    posterSubject: text,
+  }),
+  /** Sezione Sport immersiva (PORT-88): la grande montagna; le schede sono i topic `sport`. */
+  sport: z.strictObject({
     posterSubject: text,
   }),
   /** Pagina di approfondimento Trimind (PORT-82): connettivi provvisori, i fatti stanno nel CV. */
@@ -357,8 +359,7 @@ export const humanTranslatable = [
   'scenes.certificazioni',
   'scenes.beneficenza',
   'scenes.contatti',
-  'scenes.sci',
-  'scenes.tennis',
-  'scenes.pallavolo',
+  'scenes.sport',
+  'sport.posterSubject',
   'scenes.scrivania',
 ];

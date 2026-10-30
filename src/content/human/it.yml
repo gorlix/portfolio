@@ -76,9 +76,7 @@ scenes:
   lavori: "Un albero low-poly: il tronco è la linea del tempo e da lì spuntano le esperienze, una foglia a destra e una a sinistra"
   trimind: "La mappa low-poly di Trimind: un server chiuso con i suoi container e un solo tunnel verso la nuvola, i backup che scadono, la pipeline, i pannelli di monitoraggio e i test che diventano verdi"
   certificazioni: "Badge esagonali che compaiono uno alla volta mentre scorri, poi una fila di badge piccoli"
-  sci: "Una montagna low-poly con una linea che scende disegnando curve mentre scorri"
-  tennis: "Una pallina che segna la riga di un campo in terra rossa, solleva la terra e arriva verso di te"
-  pallavolo: "Due personaggi low-poly che si passano la palla con un bagher"
+  sport: "Una grande montagna low-poly innevata, ispirata al Monte Bianco: al centro una pista da sci con un pinguino che scende a curve, a sinistra un sentiero con due pinguini che salgono, a destra un campo da tennis e uno da pallavolo"
 farewell:
   command: "$ logout"
   message: "Grazie di essere passato. Se vuoi rifare il giro, la porta è qui:"
@@ -175,6 +173,8 @@ work:
   volunteer: "volontariato"
   highlights: "In breve"
   posterSubject: "dell'albero dei lavori"
+sport:
+  posterSubject: "della montagna"
 trimind:
   titleSuffix: "Trimind, nel dettaglio"
   metaDescription: "Il mio lavoro per Trimind in cinque momenti: infrastruttura, backup, CI/CD, osservabilità e multi-provider, qualità."

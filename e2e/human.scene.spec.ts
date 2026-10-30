@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // Caricamento pigro del 3D su /human: il bootstrap e i chunk three/homelab
 // si richiedono solo vicino alla sezione e solo se il dispositivo lo permette.
 const isThree = (url: string) =>
-  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|scrivania|penguin|beneficenza|contatti|interessi|sci|tennis|pallavolo)\./.test(
+  /\/_astro\/(three|homelab|domotica|lavori|certificazioni|scrivania|penguin|beneficenza|contatti|interessi|sport)\./.test(
     url,
   );
 // Scene che aspettano il gesto o la vicinanza: tutte tranne la scrivania della Home, che parte da
@@ -17,8 +17,6 @@ const nearScene = (page: Page) =>
     const el = document.querySelector('[data-scene="homelab"]') as HTMLElement;
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - window.innerHeight);
   });
-
-const sportSlug = { sci: 'ski', tennis: 'tennis', pallavolo: 'volleyball' } as const;
 
 for (const route of ['/human/', '/en/human/']) {
   test(`${route}: la scena si carica solo vicino alla sezione`, async ({ page }) => {
@@ -560,54 +558,34 @@ for (const route of ['/human/', '/en/human/']) {
     await expect(page).toHaveURL(route.startsWith('/en') ? /\/en\/$/ : /\/$/);
   });
 
-  // Micro-scene Sport (PORT-62): tre scene vicine, una sola attiva per volta.
-  const sportScenes = ['sci', 'tennis', 'pallavolo'] as const;
-  const sport = (page: Page, name: string) => page.locator(`[data-scene="${name}"]`);
-  const placeSport = (page: Page, name: string, fraction: number) =>
-    sport(page, name).evaluate((el, f) => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, top - window.innerHeight * f);
-    }, fraction);
-
-  for (const name of sportScenes) {
-    test(`${route}: la scena ${name} sta nel suo articolo e avanza con lo scroll`, async ({
-      page,
-    }) => {
-      await page.goto(route);
-      await expect(
-        page.locator(`article#sport-${sportSlug[name]} [data-scene="${name}"]`),
-      ).toHaveCount(1);
-      // Le tre scene sono vicine: per essere attiva deve stare al centro, non sul bordo.
-      await placeSport(page, name, 0.6);
-      await expect.poll(() => sport(page, name).getAttribute('data-scene-state')).toBe('running');
-      await expect(sport(page, name).locator('canvas')).toBeAttached();
-      const read = async () =>
-        Number((await sport(page, name).getAttribute('data-scene-progress')) ?? Number.NaN);
-      const start = await read();
-      await placeSport(page, name, 0.25);
-      await expect.poll(read).toBeGreaterThan(start);
+  // Sport immersiva (PORT-88): una sola scena, un momento per attivita, ogni scheda col suo ancoraggio.
+  const sport = (page: Page) => page.locator('[data-scene="sport"]');
+  const centreCard = (page: Page, slug: string) =>
+    page.locator(`#sport-${slug}`).evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      window.scrollTo(0, box.top + window.scrollY + box.height / 2 - window.innerHeight / 2);
     });
 
-    test(`${route}: ${name} con reduced-motion e un fotogramma statico`, async ({ browser }) => {
-      const context = await browser.newContext({ reducedMotion: 'reduce' });
-      const page = await context.newPage();
-      await page.goto(route, { waitUntil: 'networkidle' });
-      await placeSport(page, name, 0.5);
-      await expect.poll(() => sport(page, name).getAttribute('data-scene-state')).toBe('static');
-      expect(await sport(page, name).getAttribute('data-scene-progress')).toBeNull();
-      await context.close();
-    });
-  }
-
-  test(`${route}: delle tre scene Sport una sola e in esecuzione`, async ({ page }) => {
+  test(`${route}: Sport segue le schede, dalla pista ai campi`, async ({ page }) => {
     await page.goto(route);
-    await placeSport(page, 'tennis', 0.5);
-    await expect.poll(() => sport(page, 'tennis').getAttribute('data-scene-state')).toBe('running');
-    await page.waitForTimeout(300);
-    const states = await Promise.all(
-      sportScenes.map((n) => sport(page, n).getAttribute('data-scene-state')),
-    );
-    expect(states.filter((x) => x === 'running')).toHaveLength(1);
-    expect(states[1]).toBe('running');
+    await centreCard(page, 'ski');
+    await expect.poll(() => sport(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(sport(page).locator('canvas')).toBeAttached();
+    const section = page.locator('#sport');
+    for (const slug of ['ski', 'hiking', 'tennis', 'volleyball']) {
+      await centreCard(page, slug);
+      await expect(section).toHaveAttribute('data-phase', 'cards');
+      await expect(section).toHaveAttribute('data-moment', slug);
+    }
+  });
+
+  test(`${route}: Sport con reduced-motion e un fotogramma statico`, async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await centreCard(page, 'tennis');
+    await expect.poll(() => sport(page).getAttribute('data-scene-state')).toBe('static');
+    await expect(page.locator('#sport .poster img')).toBeHidden();
+    await context.close();
   });
 }

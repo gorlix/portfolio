@@ -29,7 +29,7 @@ for (const colorScheme of ['dark', 'light'] as const) {
       const page = await context.newPage();
       await page.goto(route);
       // Scene immersive presenti nella pagina (/human ne ha piu d'una, gli approfondimenti una).
-      for (const id of ['lavori', 'homelab', 'domotica', 'trimind']) {
+      for (const id of ['lavori', 'homelab', 'domotica', 'sport', 'trimind']) {
         if ((await page.locator(`[data-scene="${id}"]`).count()) === 0) continue;
         await page.evaluate((sceneId) => {
           const el = document.querySelector(`[data-scene="${sceneId}"]`) as HTMLElement;

@@ -10,9 +10,6 @@ export const microScenes = [
   'beneficenza',
   'contatti',
   'interessi',
-  'sci',
-  'tennis',
-  'pallavolo',
 ] as const;
 
 /**
@@ -20,7 +17,14 @@ export const microScenes = [
  * e guidato dalle schede mentre si scorre. Le altre sezioni restano com'erano finche il loro
  * storyboard non e approvato.
  */
-export const immersiveScenes = ['scrivania', 'homelab', 'domotica', 'lavori', 'trimind'] as const;
+export const immersiveScenes = [
+  'scrivania',
+  'homelab',
+  'domotica',
+  'lavori',
+  'trimind',
+  'sport',
+] as const;
 
 export function sceneKind(name: string): SceneKind {
   if ((immersiveScenes as readonly string[]).includes(name)) return 'immersive';

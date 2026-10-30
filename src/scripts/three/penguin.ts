@@ -14,7 +14,7 @@ import {
 } from 'three';
 
 /*
- * Pinguino low-poly generico (personaggio delle micro-scene Sport e della scena Lavori). Solo
+ * Pinguino low-poly generico (personaggio delle scene Sport e Lavori). Solo
  * primitive con flatShading e solo three: niente token, niente DOM. I colori arrivano dal chiamante.
  * Origine tra i piedi, in piedi lungo +Y, fronte verso +Z, alto ~1,0. Le pose sono funzioni pure di
  * (posa, fase): nessun tempo, nessun caso. `root.position` e del chiamante: il rimbalzo va su un
