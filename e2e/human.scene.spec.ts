@@ -399,7 +399,7 @@ for (const route of ['/human/', '/en/human/']) {
   test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
     await page.goto(route);
     await placeMicro(page, 0.9);
-    // Qui la scena attiva puo essere la precedente: conta che questa riceva l'avanzamento.
+    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
     await expect(micro(page).locator('canvas')).toBeAttached();
     await expect.poll(() => progress(page)).toBeGreaterThanOrEqual(0);
     const start = await progress(page);
