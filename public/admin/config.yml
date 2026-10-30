@@ -395,6 +395,9 @@ collections:
               - name: verify
                 i18n: true
                 widget: string
+              - name: credentialId
+                i18n: true
+                widget: string
               - name: technicalCertifications
                 i18n: true
                 widget: string
@@ -559,6 +562,9 @@ collections:
                 i18n: true
                 widget: string
               - name: verify
+                i18n: true
+                widget: string
+              - name: credentialId
                 i18n: true
                 widget: string
               - name: supplementaryCertifications
@@ -1465,6 +1471,10 @@ collections:
         required: false
         widget: string
         type: url
+      - name: credentialId
+        i18n: duplicate
+        required: false
+        widget: string
       - name: kind
         i18n: duplicate
         widget: select

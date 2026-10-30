@@ -777,6 +777,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                         <p class="meta">{inProgress && `${C.expected}: `}{formatDate(c.date, locale)}</p>
                       )}
                       {c.verifyUrl !== undefined && <p><a href={c.verifyUrl}>{L.verify}</a></p>}
+                      {c.credentialId !== undefined && <p class="meta">{L.credentialId}: {c.credentialId}</p>}
                     </article>
                   );
                 })}
@@ -787,10 +788,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                       {supplementaryCerts.map(({ data: c }) => (
                         <li>
                           <strong>{c.name}</strong>
-                          {(c.issuer !== undefined || c.date !== undefined) && (
+                          {(c.issuer !== undefined || c.date !== undefined || c.credentialId !== undefined) && (
                             <span class="cert-meta">
                               {c.issuer !== undefined && <span class="meta">{L.issuer}: {c.issuer}</span>}
                               {c.date !== undefined && <span class="meta">{formatDate(c.date, locale)}</span>}
+                              {c.credentialId !== undefined && <span class="meta">{L.credentialId}: {c.credentialId}</span>}
                             </span>
                           )}
                         </li>

@@ -58,6 +58,7 @@ labels:
   stack: Stack
   issuer: Issuer
   verify: Verify
+  credentialId: Credential ID
   supplementaryCertifications: Other things I learned
   repository: Repository
   language: Language

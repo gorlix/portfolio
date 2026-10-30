@@ -1,6 +1,7 @@
 name: "MDIO-website"
 repo: https://github.com/gorlix/MDIO-website
 language: JavaScript
+method: vibecoded
 status: archived
 featured: false
 description: "Sorgente del sito web ufficiale del Multidistretto Italia Ovest (MDIO) del Rotaract."

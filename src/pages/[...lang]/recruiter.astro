@@ -178,6 +178,7 @@ const jsonLd = await loadJsonLd({
               <strong>{c.name}</strong>
               {certMeta(c) && <span class="meta">{certMeta(c)}</span>}
               {c.verifyUrl !== undefined && <a href={c.verifyUrl}>{L.verify}</a>}
+              {c.credentialId !== undefined && <span class="meta">{L.credentialId}: {c.credentialId}</span>}
             </li>
           ))
         }
@@ -191,6 +192,7 @@ const jsonLd = await loadJsonLd({
                 <li>
                   {c.name}
                   {c.issuer !== undefined && <span class="meta"> · {c.issuer}</span>}
+                  {c.credentialId !== undefined && <span class="meta"> · {L.credentialId}: {c.credentialId}</span>}
                 </li>
               ))}
             </ul>
