@@ -1,4 +1,6 @@
 section: beneficenza
-links: []
+links:
+  - label: Il sorgente su GitHub
+    url: https://github.com/gorlix/MDIO-website
 title: Sito del primo multidistretto italiano (MDIO-website)
-text: "Come Delegato IT del Distretto 2050 curo il sito del primo multidistretto italiano: build e deploy automatici con GitHub Actions, hosting e DNS gestiti in autonomia. Una sola battuta: se qualcosa non va, di solito è il DNS."
+text: "Come Delegato IT del Distretto 2050 curo il sito del primo multidistretto italiano: build e deploy automatici con GitHub Actions, hosting e DNS gestiti in autonomia. Se qualcosa non va, di solito è il DNS."

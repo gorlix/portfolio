@@ -1,4 +1,6 @@
 section: beneficenza
-links: []
+links:
+  - label: Source on GitHub
+    url: https://github.com/gorlix/MDIO-website
 title: Website of the first Italian multi-district (MDIO-website)
-text: "As IT Delegate of District 2050 I look after the website of the first Italian multi-district: automatic build and deploy with GitHub Actions, hosting and DNS handled on my own. One joke only: if something breaks, it's usually the DNS."
+text: "As IT Delegate of District 2050 I look after the website of the first Italian multi-district: automatic build and deploy with GitHub Actions, hosting and DNS handled on my own. If something breaks, it's usually the DNS."

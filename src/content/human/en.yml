@@ -67,7 +67,7 @@ labels:
 scenes:
   homelab: "Two low-poly platforms, Home and Production, with the homelab nodes and a beam of light joining them"
   domotica: "Low-poly house seen from above, with rooms lighting up when an automation runs"
-  beneficenza: "A network of dots that slowly move closer and link up around a centre"
+  beneficenza: "A low-poly landscape seen from above: the lights of a neighbourhood slowly link up, with a penguin standing still nearby, then three neighbourhoods join a panel shaped like a website"
   contatti: "A small terminal that switches on, with prompt lines appearing one after another"
   scrivania: "My low-poly desk: a monitor with a terminal, a split keyboard, a 3D printer and a mini server with blinking LEDs"
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
@@ -215,6 +215,8 @@ certifications:
   posterSubject: "of the board"
 sport:
   posterSubject: "of the mountain"
+beneficenza:
+  posterSubject: "of the landscape"
 trimind:
   titleSuffix: "Trimind, in depth"
   metaDescription: "My work for Trimind in five moments: infrastructure, backups, CI/CD, observability and multi-provider, quality."

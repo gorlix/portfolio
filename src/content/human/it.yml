@@ -67,7 +67,7 @@ labels:
 scenes:
   homelab: "Due piattaforme low-poly, Casa e Produzione, con i nodi dell'homelab e un fascio di luce che le collega"
   domotica: "Casa low-poly vista dall'alto, con le stanze che si illuminano quando parte un'automazione"
-  beneficenza: "Una rete di punti che si avvicinano piano e si collegano al centro"
+  beneficenza: "Un territorio low-poly visto dall'alto: le luci di un quartiere si collegano piano, con un pinguino fermo accanto, poi tre quartieri si uniscono a un pannello con la sagoma di un sito"
   contatti: "Un piccolo terminale che si accende, con le righe di prompt che compaiono una dopo l'altra"
   scrivania: "La mia scrivania low-poly: monitor col terminale, tastiera split, stampante 3D e mini-server con le spie che lampeggiano"
   interessi: "Piccoli oggetti low-poly, uno per interesse (stampante 3D, tastiera split, tablet e-ink, gemma, ingranaggio, piatto), che compaiono mentre scorri"
@@ -215,6 +215,8 @@ certifications:
   posterSubject: "della bacheca"
 sport:
   posterSubject: "della montagna"
+beneficenza:
+  posterSubject: "del territorio"
 trimind:
   titleSuffix: "Trimind, nel dettaglio"
   metaDescription: "Il mio lavoro per Trimind in cinque momenti: infrastruttura, backup, CI/CD, osservabilità e multi-provider, qualità."
