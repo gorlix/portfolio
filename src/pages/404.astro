@@ -1,0 +1,20 @@
+---
+// Pages la serve con stato 404 per ogni indirizzo inesistente: senza, risponde 200 con la home.
+// Un solo file per entrambe le lingue, perche Pages non sa da quale lingua arriva il visitatore.
+import Base from '../layouts/Base.astro';
+import { getSingleton } from '../lib/data';
+
+const it = (await getSingleton('ui', 'it')).notFound;
+const en = (await getSingleton('ui', 'en')).notFound;
+---
+
+<Base locale="it" path="/" title={`${it.title} · ${en.title}`} description={it.message} notFound>
+  <h1>{it.title}</h1>
+  <p>{it.message}</p>
+  <p><a href="/">{it.home}</a></p>
+  <div lang="en">
+    <h2>{en.title}</h2>
+    <p>{en.message}</p>
+    <p><a href="/en/">{en.home}</a></p>
+  </div>
+</Base>

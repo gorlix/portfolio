@@ -22,17 +22,29 @@ const urlOf = (file: string) => `/${relative(outDir, file).replace(/index\.html$
 const attr = (tag: string, name: string) => tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
 
 let pages: { url: string; html: string }[] = [];
+let notFound = '';
 
 beforeAll(async () => {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
   await build({ root, outDir, logLevel: 'error' });
   pages = walk(outDir)
-    .filter((f) => f.endsWith('.html') && !isAdmin(f))
+    .filter((f) => f.endsWith('.html') && !isAdmin(f) && !f.endsWith('/404.html'))
     .map((f) => ({ url: urlOf(f), html: readFileSync(f, 'utf8') }));
+  notFound = readFileSync(join(outDir, '404.html'), 'utf8');
 }, 60_000);
 
 afterAll(() => rmSync(outDir, { recursive: true, force: true }));
+
+describe('pagina 404', () => {
+  it('parla entrambe le lingue, senza script, canonical ne hreflang', () => {
+    expect(notFound).toContain('Pagina non trovata');
+    expect(notFound).toContain('Page not found');
+    expect(notFound).toContain('href="/en/"');
+    expect(notFound).toContain('<meta name="robots" content="noindex"');
+    expect(notFound).not.toMatch(/<script|rel="canonical"|hreflang/);
+  });
+});
 
 describe('build i18n', () => {
   it('genera almeno una pagina e ognuna ha la gemella nell altra lingua', () => {
@@ -250,7 +262,12 @@ describe('Web Analytics solo su /human (PORT-72)', () => {
       else process.env.PUBLIC_CF_ANALYTICS_TOKEN = previous;
     }
     withToken = walk(analyticsOut)
-      .filter((f) => f.endsWith('.html') && relative(analyticsOut, f).split('/')[0] !== 'admin')
+      .filter(
+        (f) =>
+          f.endsWith('.html') &&
+          relative(analyticsOut, f).split('/')[0] !== 'admin' &&
+          !f.endsWith('/404.html'),
+      )
       .map((f) => ({
         url: `/${relative(analyticsOut, f).replace(/index\.html$/, '')}`,
         html: readFileSync(f, 'utf8'),
