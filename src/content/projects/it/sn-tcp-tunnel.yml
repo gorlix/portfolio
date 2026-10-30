@@ -1,7 +1,6 @@
 name: sn-tcp-tunnel
 repo: https://github.com/gorlix/sn-tcp-tunnel
-language:
-  todo: Linguaggio principale
+language: PowerShell
 method: vibecoded
 status:
   todo: active / wip / archived

@@ -1,7 +1,6 @@
 name: "Paca"
 repo: https://github.com/Paca-AI/paca/pull/454
-language:
-  todo: "Main language (not in CV)"
+language: Go
 method:
   todo: "by hand / with AI / vibecoded (not in CV)"
 status:

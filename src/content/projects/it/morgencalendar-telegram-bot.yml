@@ -1,7 +1,6 @@
 name: MorgenCalendar-Telegram-Bot
 repo: https://github.com/gorlix/MorgenCalendar-Telegram-Bot
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived

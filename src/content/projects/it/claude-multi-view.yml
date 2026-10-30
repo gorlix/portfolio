@@ -1,7 +1,6 @@
 name: "claude-multi-view"
 repo: https://github.com/gorlix/claude-multi-view
-language:
-  todo: "Linguaggio principale (non nel CV)"
+language: TypeScript
 method:
   todo: "a mano / con AI / vibecoded (non nel CV)"
 status:

@@ -1,7 +1,6 @@
 name: focus-mode-app-linux
 repo: https://github.com/gorlix/focus-mode-app-linux
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived

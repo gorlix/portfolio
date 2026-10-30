@@ -1,7 +1,6 @@
 name: "claude-chat-verticali"
 repo: https://github.com/gorlix/claude-chat-verticali
-language:
-  todo: "Linguaggio principale (non nel CV)"
+language: TypeScript
 method:
   todo: "a mano / con AI / vibecoded (non nel CV)"
 status:
