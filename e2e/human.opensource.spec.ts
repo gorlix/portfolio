@@ -77,3 +77,32 @@ test('senza WebGL: poster, avviso e schede', async ({ page }) => {
   await expect(section(page).locator('.poster-note [data-reason="webgl"]')).toBeVisible();
   await expect(section(page).locator('.card').first()).toBeVisible();
 });
+
+test.describe('telefono', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test('ogni repository delle schede lunghe si raggiunge scorrendo dentro la scheda', async ({
+    page,
+  }) => {
+    await page.goto('/human/lavori/open-source/');
+    for (const card of await section(page).locator('.card').all()) {
+      const moment = (await card.getAttribute('data-moment')) as string;
+      await centre(page, moment);
+      const last = card.locator('.repos > li').last();
+      const overflow = await card.evaluate((el) => el.scrollHeight - el.clientHeight);
+      if (overflow <= 0) continue;
+      // Rotellina sulla scheda: scorre la scheda, non la pagina.
+      await card.scrollIntoViewIfNeeded();
+      const box = await card.boundingBox();
+      await page.mouse.move((box?.x ?? 0) + 40, (box?.y ?? 0) + 40);
+      await page.mouse.wheel(0, overflow + 40);
+      await expect.poll(() => card.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+      // Da tastiera: il fuoco sull'ultimo link lo porta in vista dentro la scheda.
+      await card.evaluate((el) => {
+        el.scrollTop = 0;
+      });
+      await last.locator('a').focus();
+      await expect(last.locator('a')).toBeInViewport({ ratio: 1 });
+    }
+  });
+});
