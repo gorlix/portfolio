@@ -1,5 +1,4 @@
 section: beneficenza
 links: []
 title: Sito del primo multidistretto italiano (MDIO-website)
-text:
-  todo: Testo in prima persona (copy di Alessandro)
+text: "Come Delegato IT del Distretto 2050 curo il sito del primo multidistretto italiano: build e deploy automatici con GitHub Actions, hosting e DNS gestiti in autonomia. Una sola battuta: se qualcosa non va, di solito è il DNS."

@@ -20,7 +20,6 @@ projects:
     by-hand: Scritto a mano.
     ai-copilot: Sviluppato con un assistente AI come copilota.
     vibecoded: Generato in gran parte con AI (vibe coding).
-todoLabel: "TODO(Alessandro)"
 labels:
   location: Sede
   availability: Disponibilità

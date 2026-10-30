@@ -50,14 +50,12 @@ for (const [route, lang] of [
       await expect(page.locator('section#homelab')).toBeInViewport();
     });
 
-    test('il contenuto testuale c’è: homelab (tabella), segnaposto e contatti', async ({
+    test('il contenuto testuale c’è: homelab (tabella) e contatti, nessun segnaposto', async ({
       page,
     }) => {
       await page.goto(route);
       await expect(page.locator('#homelab table tbody tr')).toHaveCount(3);
-      await expect(
-        page.getByText('TODO(Alessandro)').filter({ visible: true }).first(),
-      ).toBeVisible();
+      await expect(page.getByText(/TODO/)).toHaveCount(0);
       await expect(page.locator('#contatti a[href^="mailto:"]')).toHaveCount(1);
     });
 
