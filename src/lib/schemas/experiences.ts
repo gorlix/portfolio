@@ -20,6 +20,7 @@ export const sceneryKinds = [
   'site',
   'bridge',
   'garden',
+  'skyline',
 ] as const;
 export type Scenery = (typeof sceneryKinds)[number];
 

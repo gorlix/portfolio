@@ -1,0 +1,14 @@
+name: "portfolio"
+repo: https://github.com/gorlix/portfolio
+language: TypeScript
+method:
+  todo: "a mano / con AI / vibecoded (non nel CV)"
+status:
+  todo: "active / wip / archived (non nel CV)"
+featured: false
+description: "Il repository di questo sito, scritto in TypeScript."
+openSource:
+  group: portfolio
+  description: "Il sito che stai guardando: Astro e TypeScript, con i contenuti in YAML italiano e inglese."
+  stars: 0
+  contribution: false

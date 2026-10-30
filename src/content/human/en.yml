@@ -75,6 +75,7 @@ scenes:
   interessi: "Small low-poly objects, one per interest (3D printer, split keyboard, e-ink tablet, gem, gear, plate), appearing as you scroll"
   lavori: "A low-poly tree: the trunk is the timeline and the jobs sprout from it, one leaf to the right and one to the left"
   trimind: "The low-poly map of Trimind: a closed server with its containers and a single tunnel to the cloud, expiring backups, the pipeline, monitoring panels and tests turning green"
+  opensource: "A low-poly city with one district for each group of repositories and a penguin walking through it, taller where there are more stars"
   certificazioni: "Hexagonal badges appearing one at a time as you scroll, then a row of small badges"
   sci: "A low-poly mountain with a line that carves down in turns as you scroll"
   tennis: "A ball that hits the line of a clay court, kicks up the clay and flies towards you"
@@ -175,6 +176,44 @@ work:
   volunteer: "volunteering"
   highlights: "In short"
   posterSubject: "of the work tree"
+  openSource:
+    title: "Open source"
+    summary: "Last stop: my public repositories, grouped by district. Open the page and follow the penguin."
+openSource:
+  titleSuffix: "Open source, in depth"
+  metaDescription: "My public repositories gathered in a low-poly city: Supernote, Claude Code, Paca, homelab, hardware, bots and this site."
+  heading: "open-source"
+  eyebrow: "Public repositories"
+  intro: "Everything I have put online, by district. Scroll: the penguin makes the rounds and the buildings grow with the stars."
+  back: "← back to work"
+  scrollHint: "Scroll for the first district."
+  posterSubject: "of the repository city"
+  starsNote: "Stars are read from GitHub when the site is published."
+  starsLabel: "{n} stars"
+  contribution: "contribution"
+  step: "{n} of {total}"
+  groups:
+    - id: supernote
+      title: "Supernote"
+      lead: "An e-ink tablet, a plugin SDK and me, unable to leave things as they are."
+    - id: claude-code
+      title: "Claude Code"
+      lead: "I studied how the agent loop thinks, then built around it the tools I was missing."
+    - id: paca
+      title: "Paca"
+      lead: "The project I use to keep tasks in order, and which at some point I started fixing myself."
+    - id: homelab
+      title: "Homelab and home automation"
+      lead: "My home as infrastructure: if it can be automated, it ends up in a repository."
+    - id: hardware
+      title: "Hardware"
+      lead: "A trackball with tailor-made firmware: precision comes one key at a time."
+    - id: community
+      title: "Bots and community"
+      lead: "Bots and sites for the places I spend time in: PoliMi, Rotaract, my own calendar."
+    - id: portfolio
+      title: "This site"
+      lead: "The repository you are walking through right now, penguin included."
 trimind:
   titleSuffix: "Trimind, in depth"
   metaDescription: "My work for Trimind in five moments: infrastructure, backups, CI/CD, observability and multi-provider, quality."

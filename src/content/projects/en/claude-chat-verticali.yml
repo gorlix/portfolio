@@ -1,7 +1,6 @@
 name: "claude-chat-verticali"
 repo: https://github.com/gorlix/claude-chat-verticali
-language:
-  todo: "Main language (not in CV)"
+language: TypeScript
 method:
   todo: "by hand / with AI / vibecoded (not in CV)"
 status:
@@ -9,3 +8,8 @@ status:
 featured: true
 rank: 3
 description: 'Claude Code plugin that splits long chats into "verticals" dedicated to a single task, with automatic handoff between sessions; born from studying how agent loops work.'
+openSource:
+  group: claude-code
+  description: "Claude Code mod: one chat per vertical, handoff with a brief in tmux and a way back to the parent chat."
+  stars: 0
+  contribution: false

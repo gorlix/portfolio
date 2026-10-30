@@ -1,9 +1,13 @@
 name: my-adept
 repo: https://github.com/gorlix/my-adept
-language:
-  todo: Linguaggio principale
+language: C
 method: by-hand
 status:
   todo: active / wip / archived
 featured: false
 description: Firmware for the Ploopy Adept trackball.
+openSource:
+  group: hardware
+  description: "QMK firmware for the Ploopy Adept trackball, made for Linux with KDE Plasma and Wayland."
+  stars: 3
+  contribution: false

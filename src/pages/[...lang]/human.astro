@@ -20,7 +20,16 @@ import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import { isTodo, type Locale } from '../../lib/schemas/common';
-import { chronological, detailPath, inLavori, splitResult, workCourse } from '../../lib/work';
+import {
+  chronological,
+  detailPath,
+  inLavori,
+  OPEN_SOURCE_LEVEL,
+  OPEN_SOURCE_PATH,
+  splitResult,
+  withOpenSource,
+  workCourse,
+} from '../../lib/work';
 import { createDomoticaSim, SIM_SEED, sparkPoints } from '../../scripts/three/domotica/sim';
 
 export const getStaticPaths = localeStaticPaths;
@@ -93,7 +102,7 @@ const work = chronological(
     experiences.map((e) => ({ ...e, start: e.data.start, humanSection: e.data.humanSection })),
   ),
 );
-const course = workCourse(work.map((e) => ({ slug: e.slug, ...e.data })));
+const course = withOpenSource(workCourse(work.map((e) => ({ slug: e.slug, ...e.data }))));
 const newestFirst = [...work].reverse();
 const W = page.work;
 /** Punti del CV nella scheda: fino a tre; con una pagina di approfondimento due, il resto sta li. */
@@ -392,6 +401,19 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                     </article>
                   );
                 })}
+                <article class="card job" data-moment={OPEN_SOURCE_LEVEL} data-kind="open-source">
+                  <h3>{W.openSource.title}</h3>
+                  <p class="summary">{W.openSource.summary}</p>
+                  <p class="deeper">
+                    <a
+                      class="button"
+                      href={here(OPEN_SOURCE_PATH)}
+                      aria-label={W.deeperLabel.replace('{company}', W.openSource.title)}
+                    >
+                      {W.deeper} <span aria-hidden="true">→</span>
+                    </a>
+                  </p>
+                </article>
               </div>
               <div class="exit" data-moment="exit" aria-hidden="true"></div>
             </>

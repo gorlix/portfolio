@@ -1,7 +1,6 @@
 name: homelab
 repo: https://github.com/gorlix/homelab
-language:
-  todo: Linguaggio principale
+language: HCL
 method:
   todo: a mano / con AI / vibecoded
 status:
@@ -10,3 +9,8 @@ featured: true
 rank: 1
 description: "Homelab as code on 3 Proxmox nodes across 2 sites: VM provisioning with OpenTofu, configuration with Ansible, Docker Compose services behind a Traefik reverse proxy, centralized SSO with Authentik, automatic updates with Renovate, 3-2-1 backup strategy. Architectural decisions documented in 8 ADRs. A continuous, hands-on test bed for the same skills used in production at Trimind."
 section: homelab
+openSource:
+  group: homelab
+  description: "Documentation and infrastructure as code for my homelab: self-hosted services and home automation."
+  stars: 0
+  contribution: false

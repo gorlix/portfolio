@@ -41,4 +41,11 @@ export function localeStaticPaths() {
  * `/recruiter`, `/agent`, `/human`: alimenta la sitemap, e il test sulla build verifica che
  * coincida con le pagine realmente generate.
  */
-export const sitePages = ['/', '/recruiter', '/agent', '/human', '/human/lavori/trimind'] as const;
+export const sitePages = [
+  '/',
+  '/recruiter',
+  '/agent',
+  '/human',
+  '/human/lavori/trimind',
+  '/human/lavori/open-source',
+] as const;

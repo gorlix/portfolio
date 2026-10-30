@@ -11,4 +11,6 @@ export const heavyRoutes = [
   '/en/human/',
   '/human/lavori/trimind/',
   '/en/human/lavori/trimind/',
+  '/human/lavori/open-source/',
+  '/en/human/lavori/open-source/',
 ];

@@ -22,6 +22,12 @@ const targets = [
     scene: 'trimind',
     prefix: 'trimind-poster',
   },
+  {
+    path: '/human/lavori/open-source/',
+    section: 'open-source',
+    scene: 'opensource',
+    prefix: 'opensource-poster',
+  },
 ];
 
 const browser = await chromium.launch();

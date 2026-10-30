@@ -1,0 +1,14 @@
+name: "paca-plugin-gitlab"
+repo: https://github.com/gorlix/paca-plugin-gitlab
+language: Go
+method:
+  todo: "a mano / con AI / vibecoded (non nel CV)"
+status:
+  todo: "active / wip / archived (non nel CV)"
+featured: false
+description: "Plugin Paca (com.gorlix.gitlab) che integra progetti, merge request e branch di GitLab con progetti e task; fork di paca-plugin-github."
+openSource:
+  group: paca
+  description: "Fork di paca-plugin-github portato su GitLab: progetti, merge request e branch collegati ai task di Paca."
+  stars: 1
+  contribution: false

@@ -12,7 +12,9 @@
         "/human/index.html",
         "/en/human/index.html",
         "/human/lavori/trimind/index.html",
-        "/en/human/lavori/trimind/index.html"
+        "/en/human/lavori/trimind/index.html",
+        "/human/lavori/open-source/index.html",
+        "/en/human/lavori/open-source/index.html"
       ],
       "numberOfRuns": 1
     },

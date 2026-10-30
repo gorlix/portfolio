@@ -12,6 +12,7 @@ const pageNotes: Record<string, string> = {
   agent: 'Terminal-style showcase of the machine-readable files',
   human: 'Immersive 3D experience (JavaScript, WebGL)',
   trimind: 'Deep dive on the Trimind engagement, in five 3D moments (JavaScript, WebGL)',
+  opensource: 'Public repositories and open source contributions, as a 3D city (JavaScript, WebGL)',
 };
 
 const pageTitles: Record<string, string> = {
@@ -20,6 +21,7 @@ const pageTitles: Record<string, string> = {
   agent: 'Agent view',
   human: 'Human experience',
   trimind: 'Trimind deep dive',
+  opensource: 'Open source repositories',
 };
 
 const rootFiles = [

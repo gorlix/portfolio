@@ -1,7 +1,6 @@
 name: "claude-multi-view"
 repo: https://github.com/gorlix/claude-multi-view
-language:
-  todo: "Linguaggio principale (non nel CV)"
+language: TypeScript
 method:
   todo: "a mano / con AI / vibecoded (non nel CV)"
 status:
@@ -9,3 +8,8 @@ status:
 featured: true
 rank: 4
 description: "Plugin che monitora e coordina più chat e sub-agent in tmux (stato, limiti di utilizzo, task attivi, notifiche); approccio multi-agente alla gestione di sessioni parallele."
+openSource:
+  group: claude-code
+  description: "Mod di Claude Code per lavorare con più chat e agenti: banda di stato, pannello agenti, limiti di utilizzo."
+  stars: 0
+  contribution: false

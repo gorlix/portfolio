@@ -1,9 +1,13 @@
 name: AuleLiberePoliMi
 repo: https://github.com/gorlix/AuleLiberePoliMi
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived
 featured: false
 description: Project adopted when the original author left it; runs on the homelab.
+openSource:
+  group: community
+  description: "A fork I keep maintaining of the PoliMi free classrooms Telegram bot: inline mode, analytics, keyboard, dependencies."
+  stars: 5
+  contribution: false

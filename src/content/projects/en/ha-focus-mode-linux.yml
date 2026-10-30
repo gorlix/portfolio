@@ -1,10 +1,14 @@
 name: ha-focus-mode-linux
 repo: https://github.com/gorlix/ha-focus-mode-linux
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived
 featured: false
 description: Home Assistant side of the Android Do Not Disturb sync.
 section: domotica
+openSource:
+  group: homelab
+  description: "Home Assistant custom integration to monitor and control the Linux Focus Mode daemon."
+  stars: 1
+  contribution: false

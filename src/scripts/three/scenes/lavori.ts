@@ -242,6 +242,22 @@ export function mount({
         blob(k ? m.flower : p.glow, x + dx, 0.1, BACK + 0.5, 0.13);
       }
     },
+    skyline(x, level) {
+      // Citta in miniatura: anticipa la pagina Open source. Torri a distanze diverse, nessuna
+      // faccia in comune; le finestre sporgono davvero dalla parete.
+      const p = paintOf(level);
+      for (const [dx, h, z, material] of [
+        [-0.75, 1.1, BACK - 0.3, p.muted],
+        [-0.15, 1.9, BACK - 0.05, p.full],
+        [0.5, 1.45, BACK - 0.35, p.muted],
+        [1.0, 0.8, BACK + 0.1, p.full],
+      ] as const) {
+        box(material, x + dx - 0.24, x + dx + 0.24, 0, h, z, 0.42);
+        for (let y = 0.25; y < h - 0.15; y += 0.32) {
+          box(p.glow, x + dx - 0.13, x + dx + 0.13, y, y + 0.13, z + 0.21, 0.03);
+        }
+      }
+    },
     goal(x) {
       // Meta: un igloo basso con la porta scura.
       const dome = new Mesh(
