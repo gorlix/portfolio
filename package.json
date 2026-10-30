@@ -19,6 +19,7 @@
     "format:check": "biome format .",
     "cms:config": "node --import ./scripts/register-ts.mjs scripts/cms-config.ts",
     "cms:assets": "node scripts/copy-cms.mjs",
+    "make:og": "node scripts/make-og.mjs",
     "check:theme": "node scripts/check-theme.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",

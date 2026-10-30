@@ -36,6 +36,10 @@ const ogLocale: Record<Locale, string> = { it: 'it_IT', en: 'en_US' };
 const pageUrl = absoluteUrl(localizedPath(path, locale));
 const otherLocales = locales.filter((l) => l !== locale);
 const ui = await getSingleton('ui', locale);
+const profile = await getSingleton('profile', locale);
+// Immagine Open Graph unica (public/og.png, generata da scripts/make-og.mjs): 1200x630.
+const ogImage = absoluteUrl('/og.png');
+const ogAlt = `${profile.name} — ${profile.role}`;
 ---
 
 <!doctype html>
@@ -59,7 +63,13 @@ const ui = await getSingleton('ui', locale);
           <meta property="og:url" content={pageUrl} />
           <meta property="og:locale" content={ogLocale[locale]} />
           {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
-          <meta name="twitter:card" content="summary" />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={ogAlt} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:image" content={ogImage} />
+          <meta name="twitter:image:alt" content={ogAlt} />
           {alternates(path).map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
         </>
       )
