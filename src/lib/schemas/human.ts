@@ -159,6 +159,10 @@ export const humanSchema = z.strictObject({
   interessi: z.strictObject({
     posterSubject: text,
   }),
+  /** Sezione Beneficenza immersiva (PORT-93): il territorio; le schede sono i topic `beneficenza`. */
+  beneficenza: z.strictObject({
+    posterSubject: text,
+  }),
   /** Pagina di approfondimento Trimind (PORT-82): connettivi provvisori, i fatti stanno nel CV. */
   trimind: z.strictObject({
     titleSuffix: text,
@@ -426,5 +430,6 @@ export const humanTranslatable = [
   'scenes.sport',
   'sport.posterSubject',
   'interessi.posterSubject',
+  'beneficenza.posterSubject',
   'scenes.scrivania',
 ];

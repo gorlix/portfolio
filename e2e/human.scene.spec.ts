@@ -298,7 +298,7 @@ for (const route of ['/human/', '/en/human/']) {
   });
 
   // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
-  // Contatti (le altre sezioni sono diventate immersive una dopo l'altra).
+  // Contatti, l'ultima rimasta.
   const micro = (page: Page) => page.locator('[data-scene="contatti"]');
   /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
   const placeMicro = (page: Page, fraction: number) =>
@@ -433,8 +433,8 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
   });
 
-  // Micro-scene sobrie (PORT-64): Beneficenza e Contatti, stesso contratto di Lavori.
-  for (const name of ['beneficenza', 'contatti']) {
+  // Micro-scena sobria (PORT-64): Contatti, stesso contratto di Lavori.
+  for (const name of ['contatti']) {
     const box = (page: Page) => page.locator(`[data-scene="${name}"]`);
     const place = (page: Page, fraction: number) =>
       box(page).evaluate((el, f) => {
@@ -516,6 +516,37 @@ for (const route of ['/human/', '/en/human/']) {
     await centreCard(page, 'tennis');
     await expect.poll(() => sport(page).getAttribute('data-scene-state')).toBe('static');
     await expect(page.locator('#sport .poster img')).toBeHidden();
+    await context.close();
+  });
+
+  // Beneficenza immersiva (PORT-93): una sola scena, un momento per voce.
+  const beneficenza = (page: Page) => page.locator('[data-scene="beneficenza"]');
+  const centreTopic = (page: Page, slug: string) =>
+    page.locator(`#beneficenza-${slug}`).evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      window.scrollTo(0, box.top + window.scrollY + box.height / 2 - window.innerHeight / 2);
+    });
+
+  test(`${route}: Beneficenza segue le schede, dal quartiere al sito`, async ({ page }) => {
+    await page.goto(route);
+    await centreTopic(page, 'rotaract-abbiategrasso');
+    await expect.poll(() => beneficenza(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(beneficenza(page).locator('canvas')).toBeAttached();
+    const section = page.locator('#beneficenza');
+    for (const slug of ['rotaract-abbiategrasso', 'mdio-website']) {
+      await centreTopic(page, slug);
+      await expect(section).toHaveAttribute('data-phase', 'cards');
+      await expect(section).toHaveAttribute('data-moment', slug);
+    }
+  });
+
+  test(`${route}: Beneficenza con reduced-motion e un fotogramma statico`, async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await centreTopic(page, 'mdio-website');
+    await expect.poll(() => beneficenza(page).getAttribute('data-scene-state')).toBe('static');
+    await expect(page.locator('#beneficenza .poster img')).toBeHidden();
     await context.close();
   });
 

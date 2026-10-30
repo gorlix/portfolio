@@ -1,3 +1,5 @@
+export { cameraAt, eyeOf, norm, type Shot, type Vec } from '../framing';
+
 /*
  * Racconto della montagna di Sport (PORT-88). Logica PURA, senza three: ordine dei momenti,
  * percorsi, cicli d'ambiente (sciatore, palle) e inquadrature. Le animazioni d'ambiente dipendono

@@ -35,6 +35,7 @@ for (const colorScheme of ['dark', 'light'] as const) {
         'domotica',
         'sport',
         'interessi',
+        'beneficenza',
         'trimind',
         'opensource',
       ]) {

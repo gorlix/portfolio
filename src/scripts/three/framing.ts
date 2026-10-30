@@ -31,7 +31,6 @@ export function cardFraming(widthPx: number): Framing {
   return { shift: 0, lift: 0.33 };
 }
 
-/** Un punto o una direzione nello spazio. */
 export type Vec = readonly [number, number, number];
 
 export interface Shot {

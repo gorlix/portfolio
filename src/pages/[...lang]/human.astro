@@ -1,5 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
+import beneficenzaPosterDesktopSrc from '../../assets/human/beneficenza-poster-desktop.png';
+import beneficenzaPosterMobileSrc from '../../assets/human/beneficenza-poster-mobile.png';
 import certificazioniPosterDesktopSrc from '../../assets/human/certificazioni-poster-desktop.png';
 import certificazioniPosterMobileSrc from '../../assets/human/certificazioni-poster-mobile.png';
 import domoticaPosterDesktopSrc from '../../assets/human/domotica-poster-desktop.png';
@@ -35,6 +37,7 @@ import {
   withOpenSource,
   workCourse,
 } from '../../lib/work';
+import { beneficenzaOrder } from '../../scripts/three/beneficenza/territory';
 import { createDomoticaSim, SIM_SEED, sparkPoints } from '../../scripts/three/domotica/sim';
 import { interessiOrder } from '../../scripts/three/interessi/bench';
 import { sportOrder } from '../../scripts/three/sport/course';
@@ -79,6 +82,8 @@ const [
   certificazioniPosterMobile,
   sportPosterDesktop,
   sportPosterMobile,
+  beneficenzaPosterDesktop,
+  beneficenzaPosterMobile,
   interessiPosterDesktop,
   interessiPosterMobile,
 ] = await Promise.all([
@@ -92,6 +97,8 @@ const [
   poster(certificazioniPosterMobileSrc),
   poster(sportPosterDesktopSrc),
   poster(sportPosterMobileSrc),
+  poster(beneficenzaPosterDesktopSrc),
+  poster(beneficenzaPosterMobileSrc),
   poster(interessiPosterDesktopSrc),
   poster(interessiPosterMobileSrc),
 ]);
@@ -153,8 +160,12 @@ const sportTopics = sportOrder.flatMap((slug) => topicsIn('sport').filter((t) =>
 const interessiTopics = interessiOrder.flatMap((slug) =>
   topicsIn('interessi').filter((t) => t.slug === slug),
 );
+/** Voci di Beneficenza nell'ordine del racconto sul territorio (PORT-93): ognuna e un momento. */
+const beneficenzaTopics = beneficenzaOrder.flatMap((slug) =>
+  topicsIn('beneficenza').filter((t) => t.slug === slug),
+);
 
-/** Barra del tempo: una tappa per sezione, Sport e Interessi con i loro sotto-segmenti. */
+/** Barra del tempo: una tappa per sezione, Sport, Interessi e Beneficenza con un sotto-segmento per momento. */
 const timelineItems = sections.map((s) => ({
   id: s.id,
   title: s.title,
@@ -163,6 +174,9 @@ const timelineItems = sections.map((s) => ({
   }),
   ...(s.id === 'interessi' && {
     subs: interessiTopics.map((t) => ({ id: `interessi-${t.slug}`, title: t.data.title })),
+  }),
+  ...(s.id === 'beneficenza' && {
+    subs: beneficenzaTopics.map((t) => ({ id: `beneficenza-${t.slug}`, title: t.data.title })),
   }),
 }));
 
@@ -178,7 +192,8 @@ const immersive = (id: string) =>
   id === 'lavori' ||
   id === 'certificazioni' ||
   id === 'sport' ||
-  id === 'interessi';
+  id === 'interessi' ||
+  id === 'beneficenza';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -333,6 +348,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 />
               </picture>
               <Scene scene="interessi" label={page.scenes.interessi} accent="interessi" />
+            </div>
+          )}
+          {s.id === 'beneficenza' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={beneficenzaPosterMobile.src} />
+                <img
+                  src={beneficenzaPosterDesktop.src}
+                  width={beneficenzaPosterDesktop.options.width}
+                  height={beneficenzaPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="beneficenza" label={page.scenes.beneficenza} accent="beneficenza" />
             </div>
           )}
           {s.id === 'home' ? (
@@ -827,15 +858,6 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             </>
           )}
 
-          {s.id === 'beneficenza' && (
-            <Scene
-              scene="beneficenza"
-              label={page.scenes.beneficenza}
-              accent="beneficenza"
-              data={{ count: topicsIn('beneficenza').length }}
-            />
-          )}
-
           {s.id === 'sport' && (
             <>
               <div class="hero lab" data-moment="overview">
@@ -848,6 +870,33 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <div class="cards">
                 {sportTopics.map(({ slug, data: t }) => (
                   <article class="card" id={`sport-${slug}`} data-moment={slug}>
+                    <h3>{t.title}</h3>
+                    {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
+                    <p>{t.text}</p>
+                    {t.links.length > 0 && (
+                      <ul class="plain inline">
+                        {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
+                      </ul>
+                    )}
+                  </article>
+                ))}
+              </div>
+              <div class="exit" data-moment="exit" aria-hidden="true"></div>
+            </>
+          )}
+
+          {s.id === 'beneficenza' && (
+            <>
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
+                <p class="poster-note" role="status">
+                  {posterNotice(page.beneficenza.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+                </p>
+              </div>
+
+              <div class="cards">
+                {beneficenzaTopics.map(({ slug, data: t }) => (
+                  <article class="card" id={`beneficenza-${slug}`} data-moment={slug}>
                     <h3>{t.title}</h3>
                     {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
                     <p>{t.text}</p>
@@ -889,20 +938,6 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <div class="exit" data-moment="exit" aria-hidden="true"></div>
             </>
           )}
-
-          {s.id === 'beneficenza' &&
-            topicsIn(s.id).map(({ slug, data: t }) => (
-              <article class="item" id={`${s.id}-${slug}`}>
-                <h3>{t.title}</h3>
-                {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
-                <p>{t.text}</p>
-                {t.links.length > 0 && (
-                  <ul class="plain inline">
-                    {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
-                  </ul>
-                )}
-              </article>
-            ))}
 
           {s.id === 'contatti' && (
             <>
@@ -991,7 +1026,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   section[data-section="domotica"] > h2,
   section[data-section="certificazioni"] > h2,
   section[data-section="sport"] > h2,
-  section[data-section="interessi"] > h2 {
+  section[data-section="interessi"] > h2,
+  section[data-section="beneficenza"] > h2 {
     display: inline-block;
     padding: 0.25rem 2rem 0.25rem 0.5rem;
     background: linear-gradient(to right, color-mix(in srgb, var(--accent) 24%, transparent), transparent);

@@ -16,10 +16,12 @@ const current = (page: import('@playwright/test').Page) =>
 
 for (const route of ['/human/', '/en/human/']) {
   test.describe(`${route} barra del tempo`, () => {
-    test('un punto per sezione, sotto-segmenti per Sport e Interessi', async ({ page }) => {
+    test('un punto per sezione, sotto-segmenti per Sport, Interessi e Beneficenza', async ({
+      page,
+    }) => {
       await page.goto(route);
       await expect(page.locator('nav[data-timeline] > ul > li')).toHaveCount(sectionIds.length);
-      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(10);
+      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(12);
       for (const a of await page.locator('nav[data-timeline] a').all()) {
         const id = (await a.getAttribute('href'))?.slice(1);
         await expect(page.locator(`#${id}`)).toBeAttached();
@@ -72,6 +74,8 @@ for (const route of ['/human/', '/en/human/']) {
         'interessi-obsidian',
         'interessi-rust',
         'interessi-food',
+        'beneficenza-rotaract-abbiategrasso',
+        'beneficenza-mdio-website',
       ]) {
         await page.evaluate((id) => {
           const el = document.getElementById(id) as HTMLElement;
