@@ -24,7 +24,7 @@ export const WALK_Z = 3.1;
 /** Il pinguino si ferma un po' prima dell'oggetto: lo guarda senza coprirlo. */
 const STOP_OFFSET = 3.6;
 /** Partenza e arrivo oltre il primo e l'ultimo oggetto. */
-const START_OFFSET = 3;
+const START_OFFSET = 5;
 const FINISH_OFFSET = 7.5;
 
 /** Centro dell'oggetto numero `index` lungo il banco. */
