@@ -8,6 +8,12 @@ skip: skip
 hints:
   keys: "Use the arrow keys and Enter, or press 1, 2 or 3."
   lang: "Type “lang” and press Enter to switch language."
+tmux:
+  session: portfolio
+  mainPane: whoami.sh
+  infoPane: info
+  infoRole: role
+  infoLocation: location
 question: So, who are you?
 choices:
   - { id: human, label: Human, path: /human }
