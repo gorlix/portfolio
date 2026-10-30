@@ -5,6 +5,26 @@ import { expect, type Page, test } from '@playwright/test';
 
 const section = (page: Page) => page.locator('#open-source');
 
+test.describe('telefono reale', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  for (const path of ['/human/lavori/open-source/', '/en/human/lavori/open-source/']) {
+    // Il titolo rimpicciolito (fase "cards") non deve allargare la pagina: a 410px il browser
+    // scorre di lato col dito.
+    test(`il titolo ridotto non allarga la pagina (${path})`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForTimeout(1000);
+      for (const y of [200, 500, 1500]) {
+        await page.evaluate((top) => window.scrollTo(0, top), y);
+        await page.waitForTimeout(300);
+        expect(await section(page).getAttribute('data-phase')).toBe(y > 400 ? 'cards' : 'hero');
+        const width = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(width, `scrollWidth a y=${y}`).toBe(390);
+      }
+    });
+  }
+});
+
 /** Porta il momento al centro del viewport con lo scroll della pagina. */
 const centre = (page: Page, moment: string) =>
   page.evaluate((name) => {

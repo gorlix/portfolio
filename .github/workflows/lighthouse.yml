@@ -1,9 +1,11 @@
 name: Lighthouse
 
-# Gira su ogni PR verso main (e a mano). Le soglie in lighthouserc.json decidono cosa
+# Gira su ogni PR verso main, su ogni push su main (e a mano). Le soglie in lighthouserc.json decidono cosa
 # blocca (error) e cosa avvisa soltanto (warn); spec §3.5.
 on:
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
   workflow_dispatch:
 

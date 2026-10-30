@@ -16,10 +16,10 @@ const current = (page: import('@playwright/test').Page) =>
 
 for (const route of ['/human/', '/en/human/']) {
   test.describe(`${route} barra del tempo`, () => {
-    test('un punto per sezione, Sport con quattro sotto-segmenti', async ({ page }) => {
+    test('un punto per sezione, sotto-segmenti per Sport e Beneficenza', async ({ page }) => {
       await page.goto(route);
       await expect(page.locator('nav[data-timeline] > ul > li')).toHaveCount(sectionIds.length);
-      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(4);
+      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(6);
       for (const a of await page.locator('nav[data-timeline] a').all()) {
         const id = (await a.getAttribute('href'))?.slice(1);
         await expect(page.locator(`#${id}`)).toBeAttached();
@@ -59,9 +59,16 @@ for (const route of ['/human/', '/en/human/']) {
       await expect(page).toHaveURL(/#lavori$/);
     });
 
-    test('i sotto-segmenti di Sport seguono lo scroll', async ({ page }) => {
+    test('i sotto-segmenti di Sport e Beneficenza seguono lo scroll', async ({ page }) => {
       await page.goto(route);
-      for (const sub of ['sport-ski', 'sport-hiking', 'sport-tennis', 'sport-volleyball']) {
+      for (const sub of [
+        'sport-ski',
+        'sport-hiking',
+        'sport-tennis',
+        'sport-volleyball',
+        'beneficenza-rotaract-abbiategrasso',
+        'beneficenza-mdio-website',
+      ]) {
         await page.evaluate((id) => {
           const el = document.getElementById(id) as HTMLElement;
           window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - innerHeight * 0.4);
