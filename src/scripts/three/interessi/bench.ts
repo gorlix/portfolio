@@ -24,7 +24,7 @@ export const WALK_Z = 3.1;
 /** Il pinguino si ferma un po' prima dell'oggetto: lo guarda senza coprirlo. */
 const STOP_OFFSET = 3.6;
 /** Partenza e arrivo oltre il primo e l'ultimo oggetto. */
-const START_OFFSET = 6;
+const START_OFFSET = 3;
 const FINISH_OFFSET = 7.5;
 
 /** Centro dell'oggetto numero `index` lungo il banco. */
@@ -68,7 +68,7 @@ export function shotsFor(portrait: boolean): Record<string, Shot> {
   // Schermo stretto: strette e dall'alto, il piano del banco riempie anche il fondo. Il punto
   // guardato sta dietro l'oggetto: sotto il titolo e sopra la scheda, mai coperto.
   if (portrait) {
-    table.overview = { target: [-30, 6.4, 2], from: [-1, 0.55, 0.22], spanH: 40, spanW: 15 };
+    table.overview = { target: [-30, 8.2, 2], from: [-1, 0.55, 0.22], spanH: 40, spanW: 15 };
     interessiOrder.forEach((slug, i) => {
       const x = stationX(i) + (slug === 'food' ? 0.5 : -1);
       table[slug] = { target: [x, 1, -2.8], from: [-0.12, 1, 0.6], spanH: 12, spanW: 17 };
