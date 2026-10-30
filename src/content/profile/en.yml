@@ -14,7 +14,7 @@ languages:
     level: "native"
   - name: "English"
     level: "fluent"
-cv: /cv/alessandro-gorla-it.pdf
+cv: /cv/alessandro-gorla-en.pdf
 photo:
   src: /src/assets/profile.jpg
   alt: Portrait of Alessandro Gorla, smiling, wearing round glasses
