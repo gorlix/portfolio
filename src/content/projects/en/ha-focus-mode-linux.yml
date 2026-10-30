@@ -1,7 +1,6 @@
 name: ha-focus-mode-linux
 repo: https://github.com/gorlix/ha-focus-mode-linux
-language:
-  todo: Linguaggio principale
+language: Python
 method: ai-copilot
 status:
   todo: active / wip / archived

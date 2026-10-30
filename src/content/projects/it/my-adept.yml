@@ -1,7 +1,6 @@
 name: my-adept
 repo: https://github.com/gorlix/my-adept
-language:
-  todo: Linguaggio principale
+language: C
 method: by-hand
 status:
   todo: active / wip / archived

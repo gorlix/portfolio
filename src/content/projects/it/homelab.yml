@@ -1,7 +1,6 @@
 name: homelab
 repo: https://github.com/gorlix/homelab
-language:
-  todo: Linguaggio principale
+language: HCL
 method:
   todo: a mano / con AI / vibecoded
 status:

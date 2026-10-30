@@ -14,11 +14,10 @@ import AutomationSteps from '../../components/AutomationSteps.astro';
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
 import Timeline from '../../components/Timeline.astro';
-import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { BEACON_SRC, beaconConfig } from '../../lib/analytics';
 import { getEntries, getSingleton } from '../../lib/data';
-import { domoticaModel } from '../../lib/domotica';
+import { domoticaModel, hasPublicSteps } from '../../lib/domotica';
 import { formatDate } from '../../lib/format';
 import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
@@ -163,7 +162,10 @@ const nodeName = (id: string) => infra.nodes.find((n) => n.id === id)?.name ?? i
 const adrById = (id: string) => homelab.adrs.find((a) => a.id === id);
 
 const D = page.domotica;
-const domotica = domoticaModel(D.rooms, automations);
+const domotica = domoticaModel(
+  D.rooms,
+  automations.filter(({ data }) => hasPublicSteps(data)),
+);
 const automationBySlug = (slug: string) => automations.find((e) => e.slug === slug)?.data;
 const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
 const domoticaRooms = domotica.rooms.filter((r) => r.kind === 'room');
@@ -308,7 +310,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <div class="hero home" data-moment="hero">
                 <div class="glass">
                   <div class="who">
-                    <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
+                    <Portrait photo={profile.photo} />
                     <p class="greeting">{page.home.greeting}</p>
                   </div>
                   <nav aria-label={page.home.badgesLabel}>
@@ -398,43 +400,30 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   const company = isTodo(e.company) ? null : e.company;
                   return (
                     <article class="card job" data-moment={slug} data-kind={e.kind}>
-                      <h3>{isTodo(e.role) ? <Todo label={page.todoLabel} hint={e.role.todo} /> : e.role}</h3>
+                      <h3>{isTodo(e.role) ? '' : e.role}</h3>
                       <p class="org">
-                        <strong>{company ?? <Todo label={page.todoLabel} hint={isTodo(e.company) ? e.company.todo : ''} />}</strong>
+                        {company && <strong>{company}</strong>}
                         {volunteer && <span class="chip">{W.volunteer}</span>}
                       </p>
-                      <p class="meta">
-                        {when ?? (
-                          <Todo
-                            label={page.todoLabel}
-                            hint={isTodo(e.start) ? e.start.todo : isTodo(e.end) ? e.end.todo : ''}
-                          />
-                        )}
-                      </p>
+                      {when && <p class="meta">{when}</p>}
                       {/* Il volontariato e gia marcato: un riassunto che dice solo "Volontariato" non si ripete. */}
                       {e.summary && e.summary.toLocaleLowerCase(locale) !== W.volunteer.toLocaleLowerCase(locale) && (
                         <p class="summary">{e.summary}</p>
                       )}
-                      <h4>{W.highlights}</h4>
-                      {isTodo(e.results) ? (
-                        <p><Todo label={page.todoLabel} hint={e.results.todo} /></p>
-                      ) : (
-                        <ul>
-                          {e.results.slice(0, highlights(e.detail !== undefined)).map(splitResult).map((r) => (
-                            <li>{r.label && <strong>{r.label}: </strong>}{r.text}</li>
-                          ))}
-                        </ul>
+                      {!isTodo(e.results) && (
+                        <>
+                          <h4>{W.highlights}</h4>
+                          <ul>
+                            {e.results.slice(0, highlights(e.detail !== undefined)).map(splitResult).map((r) => (
+                              <li>{r.label && <strong>{r.label}: </strong>}{r.text}</li>
+                            ))}
+                          </ul>
+                        </>
                       )}
                       {!isTodo(e.stack) && e.stack.length > 0 && (
                         <>
                           <h4>{L.stack}</h4>
                           <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
-                        </>
-                      )}
-                      {isTodo(e.stack) && (
-                        <>
-                          <h4>{L.stack}</h4>
-                          <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
                         </>
                       )}
                       {e.detail && (
@@ -613,7 +602,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 {projectsIn(s.id).map(({ data: p }) => (
                   <div class="item">
                     <h4>{p.name}</h4>
-                    <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+                    {!isTodo(p.description) && <p>{p.description}</p>}
                     <p class="meta"><a href={p.repo}>{L.repository}</a></p>
                   </div>
                 ))}
@@ -652,7 +641,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                           r.automations.map((slug) => automationBySlug(slug)).map((a) => a && (
                             <article>
                               <h4>{a.name}</h4>
-                              <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
+                              <AutomationSteps automation={a} labels={D} />
                             </article>
                           ))
                         )}
@@ -693,7 +682,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   return a && (
                     <article class="card" data-moment={slug} data-automation={slug}>
                       <h3>{a.name} <span class="meta">· {roomName(a.room)}</span></h3>
-                      <AutomationSteps automation={a} labels={D} todoLabel={page.todoLabel} />
+                      <AutomationSteps automation={a} labels={D} />
                       {a.repo && <p class="meta"><a href={a.repo}>{L.repository}</a></p>}
                     </article>
                   );
@@ -742,11 +731,10 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   {projectsIn(s.id).map(({ data: p }) => (
                     <div class="item">
                       <h4>{p.name}</h4>
-                      <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
+                      {!isTodo(p.description) && <p>{p.description}</p>}
                       <p class="meta"><a href={p.repo}>{L.repository}</a></p>
                     </div>
                   ))}
-                  <p><Todo label={page.todoLabel} hint={D.automationsTodo} /></p>
                 </article>
               </div>
             </>
@@ -766,17 +754,14 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   const inProgress = c.status === 'in-progress';
                   return (
                     <article class="card job cert" data-moment={slug} data-status={c.status}>
-                      <h3>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</h3>
+                      <h3>{isTodo(c.name) ? '' : c.name}</h3>
                       <p class="org">
-                        <strong>
-                          {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
-                        </strong>
+                        {!isTodo(c.issuer) && <strong>{L.issuer}: {c.issuer}</strong>}
                         <span class="chip">{inProgress ? L.ongoing : C.earned}</span>
                       </p>
-                      <p class="meta">
-                        {inProgress && `${C.expected}: `}
-                        {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
-                      </p>
+                      {!isTodo(c.date) && (
+                        <p class="meta">{inProgress && `${C.expected}: `}{formatDate(c.date, locale)}</p>
+                      )}
                       {!isTodo(c.verifyUrl) && <p><a href={c.verifyUrl}>{L.verify}</a></p>}
                     </article>
                   );
@@ -787,15 +772,13 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                     <ul class="plain small">
                       {supplementaryCerts.map(({ data: c }) => (
                         <li>
-                          <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
-                          <span class="cert-meta">
-                            <span class="meta">
-                              {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
+                          <strong>{isTodo(c.name) ? '' : c.name}</strong>
+                          {(!isTodo(c.issuer) || !isTodo(c.date)) && (
+                            <span class="cert-meta">
+                              {!isTodo(c.issuer) && <span class="meta">{L.issuer}: {c.issuer}</span>}
+                              {!isTodo(c.date) && <span class="meta">{formatDate(c.date, locale)}</span>}
                             </span>
-                            <span class="meta">
-                              {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
-                            </span>
-                          </span>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -847,7 +830,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <article class="item" id={`${s.id}-${slug}`}>
                 <h3>{t.title}</h3>
                 {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
-                <p>{isTodo(t.text) ? <Todo label={page.todoLabel} hint={t.text.todo} /> : t.text}</p>
+                {!isTodo(t.text) && <p>{t.text}</p>}
                 {t.links.length > 0 && (
                   <ul class="plain inline">
                     {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
@@ -875,16 +858,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   </ul>
                 </dd>
               </div>
-              <div>
-                <dt>{L.cv}</dt>
-                <dd>
-                  {isTodo(profile.cv) ? (
-                    <Todo label={page.todoLabel} hint={profile.cv.todo} />
-                  ) : (
-                    <a class="button" href={profile.cv} download>{L.cv}</a>
-                  )}
-                </dd>
-              </div>
+              {!isTodo(profile.cv) && (
+                <div>
+                  <dt>{L.cv}</dt>
+                  <dd><a class="button" href={profile.cv} download>{L.cv}</a></dd>
+                </div>
+              )}
             </dl>
             <p class="farewell">
               <code>{page.farewell.command}</code>

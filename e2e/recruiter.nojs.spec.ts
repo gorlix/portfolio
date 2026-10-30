@@ -37,9 +37,9 @@ for (const [route, lang] of [
       const projects = page.locator('#progetti article');
       await expect(projects).toHaveCount(5);
       await expect(projects.first().getByRole('heading', { level: 3 })).toHaveText('homelab');
-      // Il metodo dei progetti del CV non e dichiarato: segnaposto finche Alessandro non lo fornisce.
-      await expect(page.locator('#progetti article', { hasText: 'Paca' })).toContainText(
-        lang === 'en' ? 'Method: TODO(Alessandro)' : 'Metodo: TODO(Alessandro)',
+      // Il metodo dei progetti non e ancora dichiarato: la riga non compare finche Alessandro non lo fornisce.
+      await expect(page.locator('#progetti article', { hasText: 'Paca' })).not.toContainText(
+        lang === 'en' ? 'Method' : 'Metodo',
       );
     });
 
@@ -58,9 +58,12 @@ for (const [route, lang] of [
       ).toBeVisible();
     });
 
-    test('i dati mancanti sono segnaposto visibili', async ({ page }) => {
+    test('i dati mancanti non compaiono: nessun segnaposto e nessuna etichetta vuota', async ({
+      page,
+    }) => {
       await page.goto(route);
-      await expect(page.getByText('TODO(Alessandro)').first()).toBeVisible();
+      await expect(page.getByText(/TODO/)).toHaveCount(0);
+      await expect(page.locator('#certificazioni .meta', { hasText: /: $/ })).toHaveCount(0);
     });
   });
 }

@@ -1,5 +1,4 @@
 section: beneficenza
 links: []
 title: Website of the first Italian multi-district (MDIO-website)
-text:
-  todo: First-person text (Alessandro copy)
+text: "As IT Delegate of District 2050 I look after the website of the first Italian multi-district: automatic build and deploy with GitHub Actions, hosting and DNS handled on my own. One joke only: if something breaks, it's usually the DNS."
