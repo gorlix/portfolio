@@ -75,9 +75,7 @@ scenes:
   trimind: "The low-poly map of Trimind: a closed server with its containers and a single tunnel to the cloud, expiring backups, the pipeline, monitoring panels and tests turning green"
   opensource: "A low-poly city with one district for each group of repositories and a penguin walking through it, taller where there are more stars"
   certificazioni: "A low-poly notice board with hexagonal slots, two hexagons half full of liquid and a row of small badges, with a penguin reading in front of it"
-  sci: "A low-poly mountain with a line that carves down in turns as you scroll"
-  tennis: "A ball that hits the line of a clay court, kicks up the clay and flies towards you"
-  pallavolo: "Two low-poly characters passing the ball with a forearm pass"
+  sport: "A big snowy low-poly mountain inspired by Mont Blanc: a ski run in the middle with a penguin carving down, a trail on the left with two penguins climbing, a tennis court and a volleyball court on the right"
 farewell:
   command: "$ logout"
   message: "Thanks for stopping by. If you want another lap, the door is right here:"
@@ -215,6 +213,8 @@ certifications:
   earned: "earned"
   expected: "Expected date"
   posterSubject: "of the board"
+sport:
+  posterSubject: "of the mountain"
 trimind:
   titleSuffix: "Trimind, in depth"
   metaDescription: "My work for Trimind in five moments: infrastructure, backups, CI/CD, observability and multi-provider, quality."

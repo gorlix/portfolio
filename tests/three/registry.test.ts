@@ -21,9 +21,7 @@ describe('registro delle scene', () => {
       'beneficenza',
       'contatti',
       'interessi',
-      'sci',
-      'tennis',
-      'pallavolo',
+      'sport',
     ]);
   });
 
@@ -42,10 +40,11 @@ describe('registro delle scene', () => {
 });
 
 describe('tipi di scena', () => {
-  it('le micro-scene sono registrate, Homelab, Domotica, Lavori e Trimind immersive', () => {
+  it('le micro-scene sono registrate, Homelab, Domotica, Lavori, Trimind e Sport immersive', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('immersive');
     expect(sceneKind('trimind')).toBe('immersive');
+    expect(sceneKind('sport')).toBe('immersive');
     expect(sceneKind('opensource')).toBe('immersive');
     expect(sceneKind('certificazioni')).toBe('immersive');
     expect(sceneKind('interessi')).toBe('micro');

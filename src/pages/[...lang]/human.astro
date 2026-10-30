@@ -8,6 +8,8 @@ import lavoriPosterDesktopSrc from '../../assets/human/lavori-poster-desktop.png
 import lavoriPosterMobileSrc from '../../assets/human/lavori-poster-mobile.png';
 import posterDesktopSrc from '../../assets/human/poster-desktop.png';
 import posterMobileSrc from '../../assets/human/poster-mobile.png';
+import sportPosterDesktopSrc from '../../assets/human/sport-poster-desktop.png';
+import sportPosterMobileSrc from '../../assets/human/sport-poster-mobile.png';
 import AutomationSteps from '../../components/AutomationSteps.astro';
 import Portrait from '../../components/Portrait.astro';
 import Scene from '../../components/Scene.astro';
@@ -32,6 +34,7 @@ import {
   workCourse,
 } from '../../lib/work';
 import { createDomoticaSim, SIM_SEED, sparkPoints } from '../../scripts/three/domotica/sim';
+import { sportOrder } from '../../scripts/three/sport/course';
 
 export const getStaticPaths = localeStaticPaths;
 
@@ -71,6 +74,8 @@ const [
   domoticaPosterMobile,
   certificazioniPosterDesktop,
   certificazioniPosterMobile,
+  sportPosterDesktop,
+  sportPosterMobile,
 ] = await Promise.all([
   poster(posterDesktopSrc),
   poster(posterMobileSrc),
@@ -80,6 +85,8 @@ const [
   poster(domoticaPosterMobileSrc),
   poster(certificazioniPosterDesktopSrc),
   poster(certificazioniPosterMobileSrc),
+  poster(sportPosterDesktopSrc),
+  poster(sportPosterMobileSrc),
 ]);
 const posterReasons = ['webgl', 'savedata', 'error', 'nojs'] as const;
 /** Avviso del poster con il soggetto della sezione ("della scrivania", "della casa"). */
@@ -132,20 +139,16 @@ const projectsIn = (section: string) =>
   projects
     .filter((p) => p.data.section === section)
     .sort((a, b) => (a.data.rank ?? 99) - (b.data.rank ?? 99) || a.slug.localeCompare(b.slug));
-/** Micro-scena di ogni attivita sportiva (slug del topic -> scena del registro). */
-const sportScenes: Record<string, 'sci' | 'tennis' | 'pallavolo'> = {
-  ski: 'sci',
-  tennis: 'tennis',
-  volleyball: 'pallavolo',
-};
 const topicsIn = (section: string) => topics.filter((t) => t.data.section === section);
+/** Attivita sportive nell'ordine del racconto sulla montagna (PORT-88): ognuna e un momento. */
+const sportTopics = sportOrder.flatMap((slug) => topicsIn('sport').filter((t) => t.slug === slug));
 
 /** Barra del tempo: una tappa per sezione, Sport con un sotto-segmento per ogni attivita. */
 const timelineItems = sections.map((s) => ({
   id: s.id,
   title: s.title,
   ...(s.id === 'sport' && {
-    subs: topicsIn('sport').map((t) => ({ id: `sport-${t.slug}`, title: t.data.title })),
+    subs: sportTopics.map((t) => ({ id: `sport-${t.slug}`, title: t.data.title })),
   }),
 }));
 
@@ -159,7 +162,8 @@ const immersive = (id: string) =>
   id === 'home' ||
   id === 'domotica' ||
   id === 'lavori' ||
-  id === 'certificazioni';
+  id === 'certificazioni' ||
+  id === 'sport';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -285,6 +289,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 />
               </picture>
               <Scene scene="certificazioni" label={page.scenes.certificazioni} accent="certificazioni" data={certBoard} />
+            </div>
+          )}
+          {s.id === 'sport' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={sportPosterMobile.src} />
+                <img
+                  src={sportPosterDesktop.src}
+                  width={sportPosterDesktop.options.width}
+                  height={sportPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="sport" label={page.scenes.sport} accent="sport" />
             </div>
           )}
           {s.id === 'home' ? (
@@ -800,16 +820,36 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
             />
           )}
 
-          {(s.id === 'sport' || s.id === 'interessi' || s.id === 'beneficenza') &&
+          {s.id === 'sport' && (
+            <>
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
+                <p class="poster-note" role="status">
+                  {posterNotice(page.sport.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+                </p>
+              </div>
+
+              <div class="cards">
+                {sportTopics.map(({ slug, data: t }) => (
+                  <article class="card" id={`sport-${slug}`} data-moment={slug}>
+                    <h3>{t.title}</h3>
+                    {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
+                    {!isTodo(t.text) && <p>{t.text}</p>}
+                    {t.links.length > 0 && (
+                      <ul class="plain inline">
+                        {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
+                      </ul>
+                    )}
+                  </article>
+                ))}
+              </div>
+              <div class="exit" data-moment="exit" aria-hidden="true"></div>
+            </>
+          )}
+
+          {(s.id === 'interessi' || s.id === 'beneficenza') &&
             topicsIn(s.id).map(({ slug, data: t }) => (
               <article class="item" id={`${s.id}-${slug}`}>
-                {s.id === 'sport' && sportScenes[slug] && (
-                  <Scene
-                    scene={sportScenes[slug]}
-                    label={page.scenes[sportScenes[slug]]}
-                    accent="sport"
-                  />
-                )}
                 <h3>{t.title}</h3>
                 {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
                 {!isTodo(t.text) && <p>{t.text}</p>}
@@ -908,7 +948,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   section[data-section="lavori"] > h2,
   section[data-section="homelab"] > h2,
   section[data-section="domotica"] > h2,
-  section[data-section="certificazioni"] > h2 {
+  section[data-section="certificazioni"] > h2,
+  section[data-section="sport"] > h2 {
     display: inline-block;
     padding: 0.25rem 2rem 0.25rem 0.5rem;
     background: linear-gradient(to right, color-mix(in srgb, var(--accent) 24%, transparent), transparent);

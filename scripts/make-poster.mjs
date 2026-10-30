@@ -16,6 +16,7 @@ const targets = [
   { path: '/human/', section: 'home', scene: 'scrivania', prefix: 'poster' },
   { path: '/human/', section: 'lavori', scene: 'lavori', prefix: 'lavori-poster' },
   { path: '/human/', section: 'domotica', scene: 'domotica', prefix: 'domotica-poster' },
+  { path: '/human/', section: 'sport', scene: 'sport', prefix: 'sport-poster' },
   {
     path: '/human/',
     section: 'certificazioni',

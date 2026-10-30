@@ -16,9 +16,7 @@ export const sceneLoaders = {
   beneficenza: () => import('./scenes/beneficenza'),
   contatti: () => import('./scenes/contatti'),
   interessi: () => import('./scenes/interessi'),
-  sci: () => import('./scenes/sci'),
-  tennis: () => import('./scenes/tennis'),
-  pallavolo: () => import('./scenes/pallavolo'),
+  sport: () => import('./scenes/sport'),
 } satisfies Record<string, () => Promise<SceneModule>>;
 
 export type SceneName = keyof typeof sceneLoaders;

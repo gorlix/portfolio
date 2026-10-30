@@ -25,7 +25,7 @@ export const chunkBudgets: ChunkBudget[] = [
   {
     name: 'scena',
     pattern:
-      /^(homelab|domotica|lavori|trimind|opensource|certificazioni|scrivania|beneficenza|contatti|interessi|sci|tennis|pallavolo|placeholder)\./,
+      /^(homelab|domotica|lavori|trimind|opensource|certificazioni|scrivania|beneficenza|contatti|interessi|sport|placeholder)\./,
     maxGzip: 16 * KB,
   },
   // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
