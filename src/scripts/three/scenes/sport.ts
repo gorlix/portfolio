@@ -144,7 +144,7 @@ export function mount({
         roughness: 0.9,
       }),
     );
-  const rgb = (color: Color): Rgb => [color.r, color.g, color.b];
+  const channels = (color: Color): Rgb => [color.r, color.g, color.b];
   const soft = (color: Color, amount: number) => surface.clone().lerp(color, amount);
   const clay = tint(['--ctp-peach', '--text']).lerp(tint(['--ctp-red', '--text']), 0.45);
 
