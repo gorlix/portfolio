@@ -52,7 +52,6 @@ intros:
   interessi: Il lato meno ordinato di me, che poi è quello più divertente.
   beneficenza: Una parte di tempo che dedico agli altri, senza troppe battute.
   contatti: Se sei arrivato fin qui, scrivimi. Rispondo, giuro.
-todoLabel: "TODO(Alessandro)"
 labels:
   ongoing: in corso
   results: Risultati
@@ -116,7 +115,6 @@ homelab:
   projects: "Progetti"
 domotica:
   projects: Progetti pubblici
-  automationsTodo: Elenco delle automazioni da mostrare (anche grezzo)
   trigger: Trigger
   conditions: Condizioni
   actions: Azioni

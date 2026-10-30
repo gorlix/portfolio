@@ -1,7 +1,6 @@
 ---
 import type { Automation } from '../lib/schemas/automations';
 import { isTodo } from '../lib/schemas/common';
-import Todo from './Todo.astro';
 
 /*
  * Trigger -> condizioni -> azioni di un'automazione (spec §12.2). Usato sia nell'elenco testuale
@@ -10,44 +9,36 @@ import Todo from './Todo.astro';
 interface Props {
   automation: Automation;
   labels: { trigger: string; conditions: string; actions: string };
-  todoLabel: string;
 }
 
-const { automation: a, labels, todoLabel } = Astro.props;
+const { automation: a, labels } = Astro.props;
 ---
 
 <dl class="steps">
-  <div>
-    <dt>{labels.trigger}</dt>
-    <dd>{isTodo(a.trigger) ? <Todo label={todoLabel} hint={a.trigger.todo} /> : a.trigger}</dd>
-  </div>
   {
-    isTodo(a.conditions) ? (
+    !isTodo(a.trigger) && (
       <div>
-        <dt>{labels.conditions}</dt>
-        <dd><Todo label={todoLabel} hint={a.conditions.todo} /></dd>
+        <dt>{labels.trigger}</dt>
+        <dd>{a.trigger}</dd>
       </div>
-    ) : (
-      a.conditions.length > 0 && (
-        <div>
-          <dt>{labels.conditions}</dt>
-          <dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd>
-        </div>
-      )
     )
   }
-  <div>
-    <dt>{labels.actions}</dt>
-    <dd>
-      {
-        isTodo(a.actions) ? (
-          <Todo label={todoLabel} hint={a.actions.todo} />
-        ) : (
-          <ul>{a.actions.map((x) => <li>{x}</li>)}</ul>
-        )
-      }
-    </dd>
-  </div>
+  {
+    !isTodo(a.conditions) && a.conditions.length > 0 && (
+      <div>
+        <dt>{labels.conditions}</dt>
+        <dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd>
+      </div>
+    )
+  }
+  {
+    !isTodo(a.actions) && (
+      <div>
+        <dt>{labels.actions}</dt>
+        <dd><ul>{a.actions.map((x) => <li>{x}</li>)}</ul></dd>
+      </div>
+    )
+  }
 </dl>
 
 <style>

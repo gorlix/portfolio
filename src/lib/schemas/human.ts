@@ -68,8 +68,6 @@ export const humanSchema = z.strictObject({
   }),
   /** Frase d'apertura di ogni sezione, in prima persona. */
   intros: sectionTexts,
-  /** Etichetta del segnaposto per i dati non ancora forniti. */
-  todoLabel: text,
   labels: z.strictObject({
     ongoing: text,
     results: text,
@@ -197,8 +195,6 @@ export const humanSchema = z.strictObject({
   }),
   domotica: z.strictObject({
     projects: text,
-    /** Mostrato come segnaposto finche non ci sono automazioni pubblicate. */
-    automationsTodo: text,
     trigger: text,
     conditions: text,
     actions: text,
@@ -328,7 +324,6 @@ export const humanTranslatable = [
   'homelab.failoverTitle',
   'homelab.projects',
   'domotica.projects',
-  'domotica.automationsTodo',
   'domotica.trigger',
   'domotica.conditions',
   'domotica.actions',

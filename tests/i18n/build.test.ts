@@ -476,3 +476,15 @@ describe('criteri di accettazione minimi §16 (PORT-73)', () => {
     expect(ids('/en/human/')).toEqual(ids('/human/'));
   });
 });
+
+describe('segnaposto dei dati mancanti', () => {
+  it('non compaiono mai nel sito pubblicato (pagine e file per macchine)', () => {
+    const files = walk(outDir).filter((f) => /\.(html|txt|md|json)$/.test(f) && !isAdmin(f));
+    expect(files.length).toBeGreaterThan(0);
+    for (const f of files) {
+      expect(readFileSync(f, 'utf8'), relative(outDir, f)).not.toMatch(
+        /TODO\(Alessandro\)|\(non nel CV\)|\(not in CV\)/,
+      );
+    }
+  });
+});

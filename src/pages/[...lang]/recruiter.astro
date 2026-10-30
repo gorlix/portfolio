@@ -1,6 +1,5 @@
 ---
 import Portrait from '../../components/Portrait.astro';
-import Todo from '../../components/Todo.astro';
 import Base from '../../layouts/Base.astro';
 import { getEntries, getSingleton } from '../../lib/data';
 import { formatDate } from '../../lib/format';
@@ -54,6 +53,15 @@ const period = (start: unknown, end: unknown, paused = false) => {
   return start === undefined ? to : `${formatDate(start as string, locale)} – ${to}`;
 };
 
+const certMeta = (c: (typeof certifications)[number]['data']) =>
+  [
+    c.status === 'in-progress' ? L.ongoing : null,
+    isTodo(c.issuer) ? null : `${L.issuer}: ${c.issuer}`,
+    c.status === 'in-progress' || isTodo(c.date) ? null : formatDate(c.date, locale),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
 const profiles = [
   { name: 'GitHub', url: profile.links.github },
   { name: 'LinkedIn', url: profile.links.linkedin },
@@ -83,57 +91,39 @@ const jsonLd = await loadJsonLd({
         {page.sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
         <li><a href={here('/human')}>{page.links.human}</a></li>
         <li><a href={here('/agent')}>{page.links.agent}</a></li>
-        <li>
-          {
-            isTodo(profile.cv) ? (
-              <Todo label={page.todoLabel} hint={L.cv} />
-            ) : (
-              <a href={profile.cv} download>{L.cv}</a>
-            )
-          }
-        </li>
+        {!isTodo(profile.cv) && <li><a href={profile.cv} download>{L.cv}</a></li>}
       </ul>
     </nav>
   </Fragment>
 
   <article class="page">
     <section id="profilo" aria-labelledby="h-profilo" class="opening">
-      <Portrait photo={profile.photo} todoLabel={page.todoLabel} />
+      <Portrait photo={profile.photo} />
       <div class="intro">
         <h1 id="h-profilo">{profile.name}</h1>
-        <p class="role">
-          {isTodo(profile.role) ? <Todo label={page.todoLabel} hint={profile.role.todo} /> : profile.role}
-        </p>
-        <p class="tagline">
-          {isTodo(profile.tagline) ? <Todo label={page.todoLabel} hint={profile.tagline.todo} /> : profile.tagline}
-        </p>
+        {!isTodo(profile.role) && <p class="role">{profile.role}</p>}
+        {!isTodo(profile.tagline) && <p class="tagline">{profile.tagline}</p>}
         <dl class="facts">
           <div>
             <dt>{L.location}</dt>
             <dd>{profile.location}</dd>
           </div>
-          <div>
-            <dt>{L.availability}</dt>
-            <dd>
-              {
-                isTodo(profile.availability) ? (
-                  <Todo label={page.todoLabel} hint={profile.availability.todo} />
-                ) : (
-                  profile.availability
-                )
-              }
-            </dd>
-          </div>
-        </dl>
-        <p class="cta">
           {
-            isTodo(profile.cv) ? (
-              <Todo label={page.todoLabel} hint={`${L.cv}: ${profile.cv.todo}`} />
-            ) : (
-              <a class="button" href={profile.cv} download>{L.cv}</a>
+            !isTodo(profile.availability) && (
+              <div>
+                <dt>{L.availability}</dt>
+                <dd>{profile.availability}</dd>
+              </div>
             )
           }
-        </p>
+        </dl>
+        {
+          !isTodo(profile.cv) && (
+            <p class="cta">
+              <a class="button" href={profile.cv} download>{L.cv}</a>
+            </p>
+          )
+        }
       </div>
     </section>
 
@@ -160,43 +150,30 @@ const jsonLd = await loadJsonLd({
           const when = period(e.start, e.end);
           return (
             <article class="item">
-              <h3>
-                {isTodo(e.role) ? <Todo label={page.todoLabel} hint={e.role.todo} /> : e.role}
-                {' · '}
-                {isTodo(e.company) ? <Todo label={page.todoLabel} hint={e.company.todo} /> : e.company}
-              </h3>
-              <p class="meta">
-                {e.summary && <>{e.summary}<br /></>}
-                {
-                  when ?? (
-                    <Todo
-                      label={page.todoLabel}
-                      hint={isTodo(e.start) ? e.start.todo : isTodo(e.end) ? e.end.todo : ''}
-                    />
-                  )
-                }
-              </p>
-              <h4>{L.results}</h4>
+              <h3>{[isTodo(e.role) ? '' : e.role, isTodo(e.company) ? '' : e.company].filter(Boolean).join(' · ')}</h3>
               {
-                isTodo(e.results) ? (
-                  <p><Todo label={page.todoLabel} hint={e.results.todo} /></p>
-                ) : (
-                  <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
+                (e.summary || when) && (
+                  <p class="meta">
+                    {e.summary}
+                    {e.summary && when && <br />}
+                    {when}
+                  </p>
                 )
               }
               {
-                isTodo(e.stack) ? (
+                !isTodo(e.results) && (
+                  <>
+                    <h4>{L.results}</h4>
+                    <ul>{e.results.map((r) => <li>{r}</li>)}</ul>
+                  </>
+                )
+              }
+              {
+                !isTodo(e.stack) && e.stack.length > 0 && (
                   <>
                     <h4>{L.stack}</h4>
-                    <p><Todo label={page.todoLabel} hint={e.stack.todo} /></p>
+                    <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
                   </>
-                ) : (
-                  e.stack.length > 0 && (
-                    <>
-                      <h4>{L.stack}</h4>
-                      <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
-                    </>
-                  )
                 )
               }
             </article>
@@ -212,20 +189,8 @@ const jsonLd = await loadJsonLd({
         {
           technicalCerts.map(({ data: c }) => (
             <li>
-              <strong>{isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}</strong>
-              <span class="meta">
-                {
-                  c.status === 'in-progress' ? (
-                    <>{L.ongoing}{!isTodo(c.issuer) && ` · ${L.issuer}: ${c.issuer}`}</>
-                  ) : (
-                    <>
-                      {L.issuer}: {isTodo(c.issuer) ? <Todo label={page.todoLabel} hint={c.issuer.todo} /> : c.issuer}
-                      {' · '}
-                      {isTodo(c.date) ? <Todo label={page.todoLabel} hint={c.date.todo} /> : formatDate(c.date, locale)}
-                    </>
-                  )
-                }
-              </span>
+              <strong>{isTodo(c.name) ? '' : c.name}</strong>
+              {certMeta(c) && <span class="meta">{certMeta(c)}</span>}
               {!isTodo(c.verifyUrl) && <a href={c.verifyUrl}>{L.verify}</a>}
             </li>
           ))
@@ -238,7 +203,7 @@ const jsonLd = await loadJsonLd({
             <ul class="plain small">
               {supplementaryCerts.map(({ data: c }) => (
                 <li>
-                  {isTodo(c.name) ? <Todo label={page.todoLabel} hint={c.name.todo} /> : c.name}
+                  {isTodo(c.name) ? '' : c.name}
                   {!isTodo(c.issuer) && <span class="meta"> · {c.issuer}</span>}
                 </li>
               ))}
@@ -255,15 +220,23 @@ const jsonLd = await loadJsonLd({
         featuredProjects.map(({ data: p }) => (
           <article class="item">
             <h3>{p.name}</h3>
-            <p>{isTodo(p.description) ? <Todo label={page.todoLabel} hint={p.description.todo} /> : p.description}</p>
-            <p class="meta">
-              {L.language}: {isTodo(p.language) ? <Todo label={page.todoLabel} hint={p.language.todo} /> : p.language}
-              {p.repo && <>{' · '}<a href={p.repo}>{L.repository}</a></>}
-            </p>
-            <p class="meta">
-              {page.projects.methodLabel}:{' '}
-              {isTodo(p.method) ? <Todo label={page.todoLabel} hint={p.method.todo} /> : page.projects.methods[p.method]}
-            </p>
+            {!isTodo(p.description) && <p>{p.description}</p>}
+            {
+              (!isTodo(p.language) || p.repo) && (
+                <p class="meta">
+                  {!isTodo(p.language) && `${L.language}: ${p.language}`}
+                  {!isTodo(p.language) && p.repo && ' · '}
+                  {p.repo && <a href={p.repo}>{L.repository}</a>}
+                </p>
+              )
+            }
+            {
+              !isTodo(p.method) && (
+                <p class="meta">
+                  {page.projects.methodLabel}: {page.projects.methods[p.method]}
+                </p>
+              )
+            }
           </article>
         ))
       }
@@ -276,19 +249,8 @@ const jsonLd = await loadJsonLd({
           const when = period(ed.start, ed.end, ed.paused);
           return (
             <article class="item">
-              <h3>{isTodo(ed.degree) ? <Todo label={page.todoLabel} hint={ed.degree.todo} /> : ed.degree}</h3>
-              <p class="meta">
-                {isTodo(ed.institution) ? <Todo label={page.todoLabel} hint={ed.institution.todo} /> : ed.institution}
-                {' · '}
-                {
-                  when ?? (
-                    <Todo
-                      label={page.todoLabel}
-                      hint={isTodo(ed.start) ? ed.start.todo : isTodo(ed.end) ? ed.end.todo : ''}
-                    />
-                  )
-                }
-              </p>
+              <h3>{isTodo(ed.degree) ? '' : ed.degree}</h3>
+              <p class="meta">{[isTodo(ed.institution) ? '' : ed.institution, when].filter(Boolean).join(' · ')}</p>
             </article>
           );
         })
