@@ -35,18 +35,32 @@ const ui = await getSingleton('ui', locale);
 <style>
   ul {
     display: flex;
-    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    border: 1px solid var(--border);
     font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  li + li {
+    border-left: 1px solid var(--border);
   }
   a {
-    color: var(--link);
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.625rem;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--text);
     text-decoration: underline;
   }
   a[aria-current] {
-    color: var(--text);
+    background: var(--text);
+    color: var(--bg);
     font-weight: 700;
+    text-decoration: none;
   }
 </style>

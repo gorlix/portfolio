@@ -266,6 +266,25 @@ collections:
           - name: question
             i18n: true
             widget: string
+          - name: tmux
+            i18n: true
+            widget: object
+            fields:
+              - name: session
+                i18n: duplicate
+                widget: string
+              - name: mainPane
+                i18n: true
+                widget: string
+              - name: infoPane
+                i18n: duplicate
+                widget: string
+              - name: infoRole
+                i18n: true
+                widget: string
+              - name: infoLocation
+                i18n: true
+                widget: string
           - name: choices
             i18n: true
             widget: list
