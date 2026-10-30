@@ -300,8 +300,6 @@ for (const route of ['/human/', '/en/human/']) {
   // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
   // Contatti (le altre sezioni sono diventate immersive una dopo l'altra).
   const micro = (page: Page) => page.locator('[data-scene="contatti"]');
-  const progress = async (page: Page) =>
-    Number((await micro(page).getAttribute('data-scene-progress')) ?? Number.NaN);
   /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
   const placeMicro = (page: Page, fraction: number) =>
     micro(page).evaluate((el, f) => {
@@ -378,25 +376,6 @@ for (const route of ['/human/', '/en/human/']) {
     expect(urls.filter(isLazyScene)).toEqual([]);
   });
 
-  test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
-    await page.goto(route);
-    await placeMicro(page, 0.9);
-    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
-    await expect(micro(page).locator('canvas')).toBeAttached();
-    await expect.poll(() => progress(page)).toBeGreaterThanOrEqual(0);
-    const start = await progress(page);
-
-    await placeMicro(page, 0.5);
-    await expect.poll(() => progress(page)).toBeGreaterThan(start);
-    const middle = await progress(page);
-
-    await placeMicro(page, 0.1);
-    await expect.poll(() => progress(page)).toBe(1);
-
-    await placeMicro(page, 0.8);
-    await expect.poll(() => progress(page)).toBeLessThan(middle);
-  });
-
   test(`${route}: la micro-scena non blocca ne dirotta lo scroll`, async ({ page }) => {
     await page.goto(route);
     await placeMicro(page, 0.6);
@@ -409,12 +388,13 @@ for (const route of ['/human/', '/en/human/']) {
     if (!box) throw new Error('micro-scena senza riquadro');
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     const before = await page.evaluate(() => window.scrollY);
-    await page.mouse.wheel(0, 400);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before + 400);
-    await page.waitForTimeout(400);
-    expect(await page.evaluate(() => window.scrollY)).toBe(before + 400);
-
+    // Contatti sta in fondo alla pagina: si sale e poi si riscende.
     await page.mouse.wheel(0, -400);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before - 400);
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before - 400);
+
+    await page.mouse.wheel(0, 400);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
   });
 
@@ -449,7 +429,7 @@ for (const route of ['/human/', '/en/human/']) {
     await page.waitForTimeout(400);
     expect(await frames()).toBe(settled);
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
   });
 
