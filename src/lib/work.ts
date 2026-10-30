@@ -1,4 +1,3 @@
-import { isTodo, type Todo } from './schemas/common';
 import type { DetailPage, Scenery } from './schemas/experiences';
 import type { OpenSourceGroup } from './schemas/projects';
 
@@ -10,8 +9,8 @@ import type { OpenSourceGroup } from './schemas/projects';
 
 export interface LevelInput {
   slug: string;
-  start: string | Todo;
-  end: string | null | Todo;
+  start?: string | undefined;
+  end?: string | null | undefined;
   kind: 'work' | 'volunteer';
   detail?: DetailPage | undefined;
   scenery?: Scenery[] | undefined;
@@ -48,8 +47,10 @@ export const defaultScenery = (kind: LevelInput['kind']): Scenery[] =>
  * Ordine cronologico, dalla piu vecchia. Senza data d'inizio nota l'esperienza va per prima;
  * a parita, l'ordine e quello dello slug.
  */
-export function chronological<T extends { slug: string; start: string | Todo }>(items: T[]): T[] {
-  const start = (e: T) => (isTodo(e.start) ? '' : e.start);
+export function chronological<T extends { slug: string; start?: string | undefined }>(
+  items: T[],
+): T[] {
+  const start = (e: T) => e.start ?? '';
   return [...items].sort(
     (a, b) => start(a).localeCompare(start(b)) || a.slug.localeCompare(b.slug),
   );
@@ -90,7 +91,7 @@ export const withOpenSource = ({ levels }: WorkCourse): WorkCourse => ({
 export interface OpenSourceProject {
   name: string;
   repo?: string | undefined;
-  language: string | Todo;
+  language?: string | undefined;
   openSource?:
     | { group: OpenSourceGroup; description: string; stars: number; contribution: boolean }
     | undefined;
@@ -109,8 +110,7 @@ export function groupRepos<G extends { id: OpenSourceGroup }>(
   const repos = projects.flatMap((p) => {
     if (!p.openSource) return [];
     const { repo, language } = p;
-    if (!repo || isTodo(language))
-      throw new Error(`open source: ${p.name} senza repo o linguaggio`);
+    if (!repo || !language) throw new Error(`open source: ${p.name} senza repo o linguaggio`);
     const { group, description, contribution, stars } = p.openSource;
     if (!groups.some((g) => g.id === group))
       throw new Error(`open source: gruppo ${group} assente`);

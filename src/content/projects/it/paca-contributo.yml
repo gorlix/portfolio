@@ -1,10 +1,8 @@
 name: "Paca"
 repo: https://github.com/Paca-AI/paca/pull/454
 language: Go
-method:
-  todo: "a mano / con AI / vibecoded (non nel CV)"
-status:
-  todo: "active / wip / archived (non nel CV)"
+method: ai-copilot
+status: archived
 featured: true
 rank: 2
 description: "Contributo a Paca (GitHub Actions): pull request accettata e rilasciata nella v0.15.0 del progetto open source di project management con agenti AI (1,8k stelle su GitHub), con smoke test in CI; plugin di integrazione con GitLab pubblicato a corredo."

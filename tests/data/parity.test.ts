@@ -25,9 +25,4 @@ describe('diffLocales', () => {
   it('segnala array di lunghezza diversa', () => {
     expect(diffLocales({ items: ['a', 'b'] }, { items: ['a'] }, tr)[0]).toContain('items');
   });
-
-  it('richiede il segnaposto todo da entrambe le parti', () => {
-    expect(diffLocales({ title: { todo: 'x' } }, { title: { todo: 'y' } }, tr)).toEqual([]);
-    expect(diffLocales({ title: { todo: 'x' } }, { title: 'b' }, tr)[0]).toContain('todo');
-  });
 });

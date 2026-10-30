@@ -1,6 +1,6 @@
 import { getEntries, getSingleton } from '../data';
 import { absoluteUrl, localizedPath } from '../i18n';
-import { isTodo, type Locale, locales, type Todo } from '../schemas/common';
+import { type Locale, locales } from '../schemas/common';
 
 /** Un valore in entrambe le lingue, sempre da una sola fonte dati. */
 export type Bilingual<T = string> = Record<Locale, T>;
@@ -41,11 +41,9 @@ export interface MachineModel {
   }[];
 }
 
-const known = <T>(value: T | Todo): T | undefined => (isTodo(value) ? undefined : value);
-
-/** Valore bilingue solo se noto in entrambe le lingue (la parita dei todo e verificata dai dati). */
-function bilingual<T>(pick: (locale: Locale) => T | Todo): Bilingual<T> | undefined {
-  const [it, en] = locales.map((l) => known(pick(l)));
+/** Valore bilingue solo se noto in entrambe le lingue (la parita e verificata dai dati). */
+function bilingual<T>(pick: (locale: Locale) => T | undefined): Bilingual<T> | undefined {
+  const [it, en] = locales.map((l) => pick(l));
   return it !== undefined && en !== undefined ? ({ it, en } as Bilingual<T>) : undefined;
 }
 
@@ -70,7 +68,7 @@ export async function loadMachineModel(): Promise<MachineModel> {
     getEntries('certifications', 'en'),
   ]);
   const profile: Bilingual<typeof pIt> = { it: pIt, en: pEn };
-  const of = <T>(pick: (p: typeof pIt) => T | Todo) => bilingual((l) => pick(profile[l]));
+  const of = <T>(pick: (p: typeof pIt) => T | undefined) => bilingual((l) => pick(profile[l]));
 
   return {
     name: pEn.name,
@@ -83,7 +81,7 @@ export async function loadMachineModel(): Promise<MachineModel> {
       github: pEn.links.github,
       linkedin: pEn.links.linkedin,
       x: pEn.links.x,
-      devto: known(pEn.links.devto),
+      devto: pEn.links.devto,
     },
     pages: pageDefs.map(([id, path]) => ({
       id,
@@ -98,14 +96,13 @@ export async function loadMachineModel(): Promise<MachineModel> {
       kind: s.data.kind,
     })),
     certifications: certsEn.flatMap(({ data: c }) => {
-      const name = known(c.name);
-      if (!name) return [];
+      const { name } = c;
       return [
         {
           name,
-          issuer: known(c.issuer),
-          date: known(c.date),
-          verifyUrl: known(c.verifyUrl),
+          issuer: c.issuer,
+          date: c.date,
+          verifyUrl: c.verifyUrl,
           status: c.status,
         },
       ];
@@ -115,9 +112,9 @@ export async function loadMachineModel(): Promise<MachineModel> {
       name: p.data.name,
       repo: p.data.repo,
       description: bilingual((l) => (l === 'it' ? projIt[i] : p)?.data.description as string),
-      language: known(p.data.language),
-      method: known(p.data.method),
-      status: known(p.data.status),
+      language: p.data.language,
+      method: p.data.method,
+      status: p.data.status,
       featured: p.data.featured,
     })),
   };

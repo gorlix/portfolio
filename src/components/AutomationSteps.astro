@@ -1,6 +1,5 @@
 ---
 import type { Automation } from '../lib/schemas/automations';
-import { isTodo } from '../lib/schemas/common';
 
 /*
  * Trigger -> condizioni -> azioni di un'automazione (spec §12.2). Usato sia nell'elenco testuale
@@ -16,7 +15,7 @@ const { automation: a, labels } = Astro.props;
 
 <dl class="steps">
   {
-    !isTodo(a.trigger) && (
+    a.trigger && (
       <div>
         <dt>{labels.trigger}</dt>
         <dd>{a.trigger}</dd>
@@ -24,7 +23,7 @@ const { automation: a, labels } = Astro.props;
     )
   }
   {
-    !isTodo(a.conditions) && a.conditions.length > 0 && (
+    a.conditions.length > 0 && (
       <div>
         <dt>{labels.conditions}</dt>
         <dd><ul>{a.conditions.map((c) => <li>{c}</li>)}</ul></dd>
@@ -32,7 +31,7 @@ const { automation: a, labels } = Astro.props;
     )
   }
   {
-    !isTodo(a.actions) && (
+    a.actions && (
       <div>
         <dt>{labels.actions}</dt>
         <dd><ul>{a.actions.map((x) => <li>{x}</li>)}</ul></dd>

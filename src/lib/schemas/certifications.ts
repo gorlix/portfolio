@@ -1,12 +1,14 @@
 import { z } from 'astro/zod';
-import { isoDate, orTodo, text, url } from './common';
+import { isoDate, text, url } from './common';
 
 export const certificationSchema = z.strictObject({
-  name: orTodo(text),
-  issuer: orTodo(text),
-  date: orTodo(isoDate),
-  verifyUrl: orTodo(url),
-  kind: orTodo(z.enum(['technical', 'supplementary'])),
+  name: text,
+  issuer: text.optional(),
+  date: isoDate.optional(),
+  verifyUrl: url.optional(),
+  /** Codice della credenziale, quando non c'e un link pubblico per verificarla. */
+  credentialId: text.optional(),
+  kind: z.enum(['technical', 'supplementary']),
   /** `in-progress` = percorso di studio avviato, non ancora conseguita. */
   status: z.enum(['earned', 'in-progress']),
   /** Ordine nella bacheca di /human (piu basso = prima); senza, in fondo. */

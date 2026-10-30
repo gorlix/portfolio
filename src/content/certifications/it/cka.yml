@@ -1,10 +1,5 @@
 name: "CKA (Certified Kubernetes Administrator)"
-issuer:
-  todo: "Ente (non nel CV)"
-date:
-  todo: "Data (non nel CV)"
-verifyUrl:
-  todo: "Link di verifica (non nel CV)"
+issuer: "CNCF / The Linux Foundation"
 kind: technical
 status: in-progress
 rank: 2

@@ -4,7 +4,7 @@ language: Java
 method: vibecoded
 status: wip
 featured: false
-description: Ruota attorno al Supernote Manta.
+description: "Plugin di automazione per Supernote: trasforma zone delle note scritte a mano in azioni digitali. Alpha, ancora in sviluppo."
 openSource:
   group: supernote
   description: "Plugin di automazione per i dispositivi Supernote, scritto in Java."

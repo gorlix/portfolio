@@ -100,9 +100,9 @@ describe('schemi: casi negativi', () => {
     expect(profileSchema.safeParse({ ...base, extra: 1 }).success).toBe(false);
   });
 
-  it('accetta un dato mancante solo se dichiarato todo', () => {
-    expect(profileSchema.safeParse({ ...base, role: { todo: 'ruolo' } }).success).toBe(true);
+  it('rifiuta un campo obbligatorio vuoto o assente', () => {
     expect(profileSchema.safeParse({ ...base, role: '' }).success).toBe(false);
+    expect(profileSchema.safeParse({ ...base, role: undefined }).success).toBe(false);
   });
 
   it('rifiuta un metodo di progetto non valido', () => {

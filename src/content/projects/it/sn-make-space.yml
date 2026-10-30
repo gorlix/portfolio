@@ -2,10 +2,9 @@ name: sn_make_space
 repo: https://github.com/gorlix/sn_make_space
 language: PowerShell
 method: vibecoded
-status:
-  todo: active / wip / archived
+status: active
 featured: false
-description: Ruota attorno al Supernote Manta.
+description: 'Plugin Supernote che aggiunge spazio bianco dove serve: tocchi una riga e il resto della pagina scorre su o giù. Come "Inserisci spazio" di OneNote, ma sul Supernote.'
 openSource:
   group: supernote
   description: "Inserisce spazio bianco in una pagina Supernote: tocchi una riga e tutto quello sotto scorre."
