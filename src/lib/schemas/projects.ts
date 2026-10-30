@@ -1,5 +1,5 @@
 import { z } from 'astro/zod';
-import { orTodo, sectionId, text, url } from './common';
+import { sectionId, text, url } from './common';
 
 export const projectMethods = ['by-hand', 'ai-copilot', 'vibecoded'] as const;
 
@@ -20,12 +20,12 @@ export type OpenSourceGroup = (typeof openSourceGroups)[number];
 
 export const projectSchema = z.strictObject({
   name: text,
-  description: orTodo(text),
+  description: text,
   /** Assente se il progetto non ha un repository pubblico. */
   repo: url.optional(),
-  language: orTodo(text),
-  method: orTodo(z.enum(projectMethods)),
-  status: orTodo(z.enum(['active', 'wip', 'archived'])),
+  language: text.optional(),
+  method: z.enum(projectMethods).optional(),
+  status: z.enum(['active', 'wip', 'archived']),
   featured: z.boolean(),
   /** Ordine tra i progetti in evidenza (1 = primo); assente = in coda. */
   rank: z.number().int().positive().optional(),

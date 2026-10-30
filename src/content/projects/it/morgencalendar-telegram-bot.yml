@@ -2,8 +2,7 @@ name: MorgenCalendar-Telegram-Bot
 repo: https://github.com/gorlix/MorgenCalendar-Telegram-Bot
 language: Python
 method: ai-copilot
-status:
-  todo: active / wip / archived
+status: archived
 featured: false
 description: "Bot Telegram per chi usa Morgen Calendar: crea un evento in linguaggio naturale con un solo comando, mostra l'agenda di oggi e di domani e invia un riepilogo giornaliero all'ora scelta. Si possono usare più calendari."
 openSource:

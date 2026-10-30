@@ -17,12 +17,12 @@ import Timeline from '../../components/Timeline.astro';
 import Base from '../../layouts/Base.astro';
 import { BEACON_SRC, beaconConfig } from '../../lib/analytics';
 import { getEntries, getSingleton } from '../../lib/data';
-import { domoticaModel, hasPublicSteps } from '../../lib/domotica';
+import { domoticaModel } from '../../lib/domotica';
 import { formatDate } from '../../lib/format';
 import { homelabModel } from '../../lib/homelab';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
-import { isTodo, type Locale } from '../../lib/schemas/common';
+import type { Locale } from '../../lib/schemas/common';
 import {
   chronological,
   detailPath,
@@ -152,9 +152,9 @@ const timelineItems = sections.map((s) => ({
   }),
 }));
 
-const period = (start: unknown, end: unknown) => {
-  if (isTodo(start) || isTodo(end)) return null;
-  return `${formatDate(start as string, locale)} – ${end === null ? L.ongoing : formatDate(end as string, locale)}`;
+const period = (start: string | undefined, end: string | null | undefined) => {
+  if (start === undefined || end === undefined) return null;
+  return `${formatDate(start, locale)} – ${end === null ? L.ongoing : formatDate(end, locale)}`;
 };
 /** Sezioni col layout immersivo (spec §7.3, PORT-76): per ora solo il pilota Homelab. */
 const immersive = (id: string) =>
@@ -171,10 +171,7 @@ const nodeName = (id: string) => infra.nodes.find((n) => n.id === id)?.name ?? i
 const adrById = (id: string) => homelab.adrs.find((a) => a.id === id);
 
 const D = page.domotica;
-const domotica = domoticaModel(
-  D.rooms,
-  automations.filter(({ data }) => hasPublicSteps(data)),
-);
+const domotica = domoticaModel(D.rooms, automations);
 const automationBySlug = (slug: string) => automations.find((e) => e.slug === slug)?.data;
 const roomName = (id: string) => D.rooms.find((r) => r.id === id)?.name ?? id;
 const domoticaRooms = domotica.rooms.filter((r) => r.kind === 'room');
@@ -190,7 +187,7 @@ const num = (value: number, digits = 0) =>
   }).format(value);
 
 /** Canali mostrati in Contatti (email, GitHub, LinkedIn, X, piu dev.to e CV se presenti). */
-const contactChannels = 4 + [profile.links.devto, profile.cv].filter((v) => !isTodo(v)).length;
+const contactChannels = 6;
 
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const beacon = beaconConfig(import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN);
@@ -406,12 +403,11 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 {newestFirst.map(({ slug, data: e }) => {
                   const when = period(e.start, e.end);
                   const volunteer = e.kind === 'volunteer';
-                  const company = isTodo(e.company) ? null : e.company;
-                  return (
+                                    return (
                     <article class="card job" data-moment={slug} data-kind={e.kind}>
-                      <h3>{isTodo(e.role) ? '' : e.role}</h3>
+                      <h3>{e.role}</h3>
                       <p class="org">
-                        {company && <strong>{company}</strong>}
+                        <strong>{e.company}</strong>
                         {volunteer && <span class="chip">{W.volunteer}</span>}
                       </p>
                       {when && <p class="meta">{when}</p>}
@@ -419,17 +415,13 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                       {e.summary && e.summary.toLocaleLowerCase(locale) !== W.volunteer.toLocaleLowerCase(locale) && (
                         <p class="summary">{e.summary}</p>
                       )}
-                      {!isTodo(e.results) && (
-                        <>
-                          <h4>{W.highlights}</h4>
-                          <ul>
-                            {e.results.slice(0, highlights(e.detail !== undefined)).map(splitResult).map((r) => (
-                              <li>{r.label && <strong>{r.label}: </strong>}{r.text}</li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
-                      {!isTodo(e.stack) && e.stack.length > 0 && (
+                      <h4>{W.highlights}</h4>
+                      <ul>
+                        {e.results.slice(0, highlights(e.detail !== undefined)).map(splitResult).map((r) => (
+                          <li>{r.label && <strong>{r.label}: </strong>}{r.text}</li>
+                        ))}
+                      </ul>
+                      {e.stack.length > 0 && (
                         <>
                           <h4>{L.stack}</h4>
                           <ul class="tags">{e.stack.map((t) => <li>{t}</li>)}</ul>
@@ -440,7 +432,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                           <a
                             class="button"
                             href={here(detailPath(e.detail))}
-                            aria-label={W.deeperLabel.replace('{company}', company ?? '')}
+                            aria-label={W.deeperLabel.replace('{company}', e.company)}
                           >
                             {W.deeper} <span aria-hidden="true">→</span>
                           </a>
@@ -624,7 +616,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 {projectsIn(s.id).map(({ data: p }) => (
                   <div class="item">
                     <h4>{p.name}</h4>
-                    {!isTodo(p.description) && <p>{p.description}</p>}
+                    <p>{p.description}</p>
                     <p class="meta"><a href={p.repo}>{L.repository}</a></p>
                   </div>
                 ))}
@@ -753,7 +745,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   {projectsIn(s.id).map(({ data: p }) => (
                     <div class="item">
                       <h4>{p.name}</h4>
-                      {!isTodo(p.description) && <p>{p.description}</p>}
+                      <p>{p.description}</p>
                       <p class="meta"><a href={p.repo}>{L.repository}</a></p>
                     </div>
                   ))}
@@ -776,15 +768,16 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   const inProgress = c.status === 'in-progress';
                   return (
                     <article class="card job cert" data-moment={slug} data-status={c.status}>
-                      <h3>{isTodo(c.name) ? '' : c.name}</h3>
+                      <h3>{c.name}</h3>
                       <p class="org">
-                        {!isTodo(c.issuer) && <strong>{L.issuer}: {c.issuer}</strong>}
+                        {c.issuer !== undefined && <strong>{L.issuer}: {c.issuer}</strong>}
                         <span class="chip">{inProgress ? L.ongoing : C.earned}</span>
                       </p>
-                      {!isTodo(c.date) && (
+                      {c.date !== undefined && (
                         <p class="meta">{inProgress && `${C.expected}: `}{formatDate(c.date, locale)}</p>
                       )}
-                      {!isTodo(c.verifyUrl) && <p><a href={c.verifyUrl}>{L.verify}</a></p>}
+                      {c.verifyUrl !== undefined && <p><a href={c.verifyUrl}>{L.verify}</a></p>}
+                      {c.credentialId !== undefined && <p class="meta">{L.credentialId}: {c.credentialId}</p>}
                     </article>
                   );
                 })}
@@ -794,11 +787,12 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                     <ul class="plain small">
                       {supplementaryCerts.map(({ data: c }) => (
                         <li>
-                          <strong>{isTodo(c.name) ? '' : c.name}</strong>
-                          {(!isTodo(c.issuer) || !isTodo(c.date)) && (
+                          <strong>{c.name}</strong>
+                          {(c.issuer !== undefined || c.date !== undefined || c.credentialId !== undefined) && (
                             <span class="cert-meta">
-                              {!isTodo(c.issuer) && <span class="meta">{L.issuer}: {c.issuer}</span>}
-                              {!isTodo(c.date) && <span class="meta">{formatDate(c.date, locale)}</span>}
+                              {c.issuer !== undefined && <span class="meta">{L.issuer}: {c.issuer}</span>}
+                              {c.date !== undefined && <span class="meta">{formatDate(c.date, locale)}</span>}
+                              {c.credentialId !== undefined && <span class="meta">{L.credentialId}: {c.credentialId}</span>}
                             </span>
                           )}
                         </li>
@@ -834,7 +828,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   <article class="card" id={`sport-${slug}`} data-moment={slug}>
                     <h3>{t.title}</h3>
                     {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
-                    {!isTodo(t.text) && <p>{t.text}</p>}
+                    <p>{t.text}</p>
                     {t.links.length > 0 && (
                       <ul class="plain inline">
                         {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
@@ -852,7 +846,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
               <article class="item" id={`${s.id}-${slug}`}>
                 <h3>{t.title}</h3>
                 {t.tagline && <p class="tagline"><em>{t.tagline}</em></p>}
-                {!isTodo(t.text) && <p>{t.text}</p>}
+                <p>{t.text}</p>
                 {t.links.length > 0 && (
                   <ul class="plain inline">
                     {t.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}
@@ -875,17 +869,15 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                   <ul class="plain inline">
                     <li><a href={profile.links.github}>GitHub</a></li>
                     <li><a href={profile.links.linkedin}>LinkedIn</a></li>
-                    {!isTodo(profile.links.devto) && <li><a href={profile.links.devto}>dev.to</a></li>}
+                    <li><a href={profile.links.devto}>dev.to</a></li>
                     <li><a href={profile.links.x}>X</a></li>
                   </ul>
                 </dd>
               </div>
-              {!isTodo(profile.cv) && (
-                <div>
-                  <dt>{L.cv}</dt>
-                  <dd><a class="button" href={profile.cv} download>{L.cv}</a></dd>
-                </div>
-              )}
+              <div>
+                <dt>{L.cv}</dt>
+                <dd><a class="button" href={profile.cv} download>{L.cv}</a></dd>
+              </div>
             </dl>
             <p class="farewell">
               <code>{page.farewell.command}</code>

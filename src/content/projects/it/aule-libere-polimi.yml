@@ -2,10 +2,9 @@ name: AuleLiberePoliMi
 repo: https://github.com/gorlix/AuleLiberePoliMi
 language: Python
 method: ai-copilot
-status:
-  todo: active / wip / archived
+status: active
 featured: false
-description: Progetto adottato quando l'autore originale l'ha lasciato; gira sull'homelab.
+description: "Bot Telegram che cerca le aule libere del Politecnico di Milano per campus, giorno e fascia oraria, con le prese di corrente. L'ho adottato quando l'autore ha smesso di mantenerlo; ora gira sul mio homelab."
 openSource:
   group: community
   description: "Fork che porto avanti del bot Telegram per le aule libere del PoliMi: modalità inline, analytics, tastiera, dipendenze."

@@ -33,22 +33,16 @@ collections:
             widget: string
           - name: role
             i18n: true
-            required: false
             widget: string
-            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
           - name: location
             i18n: true
             widget: string
           - name: availability
             i18n: true
-            required: false
             widget: string
-            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
           - name: tagline
             i18n: true
-            required: false
             widget: text
-            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
           - name: languages
             i18n: true
             widget: list
@@ -78,22 +72,17 @@ collections:
                 type: url
               - name: devto
                 i18n: duplicate
-                required: false
                 widget: string
                 type: url
-                hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
               - name: x
                 i18n: duplicate
                 widget: string
                 type: url
           - name: cv
             i18n: true
-            required: false
             widget: string
-            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
           - name: photo
             i18n: true
-            required: false
             widget: object
             fields:
               - name: src
@@ -102,7 +91,6 @@ collections:
               - name: alt
                 i18n: true
                 widget: string
-            hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: agent
         label: Agent
         file: src/content/agent/{{locale}}.yml
@@ -407,6 +395,9 @@ collections:
               - name: verify
                 i18n: true
                 widget: string
+              - name: credentialId
+                i18n: true
+                widget: string
               - name: technicalCertifications
                 i18n: true
                 widget: string
@@ -571,6 +562,9 @@ collections:
                 i18n: true
                 widget: string
               - name: verify
+                i18n: true
+                widget: string
+              - name: credentialId
                 i18n: true
                 widget: string
               - name: supplementaryCertifications
@@ -1369,14 +1363,10 @@ collections:
     fields:
       - name: company
         i18n: duplicate
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: role
         i18n: true
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: summary
         i18n: true
         required: false
@@ -1388,7 +1378,7 @@ collections:
         pattern:
           - ^\d{4}(-\d{2}(-\d{2})?)?$
           - Formato non valido
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+        hint: Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).
       - name: end
         i18n: duplicate
         required: false
@@ -1396,26 +1386,22 @@ collections:
         pattern:
           - ^\d{4}(-\d{2}(-\d{2})?)?$
           - Formato non valido
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+        hint: Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).
       - name: results
         i18n: true
-        required: false
         widget: list
         min: 1
         field:
           name: item
           i18n: true
           widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: stack
         i18n: duplicate
-        required: false
         widget: list
         field:
           name: item
           i18n: duplicate
           widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: kind
         i18n: duplicate
         required: false
@@ -1467,14 +1453,11 @@ collections:
     fields:
       - name: name
         i18n: true
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: issuer
         i18n: duplicate
         required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: date
         i18n: duplicate
         required: false
@@ -1482,21 +1465,22 @@ collections:
         pattern:
           - ^\d{4}(-\d{2}(-\d{2})?)?$
           - Formato non valido
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+        hint: Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).
       - name: verifyUrl
         i18n: duplicate
         required: false
         widget: string
         type: url
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
-      - name: kind
+      - name: credentialId
         i18n: duplicate
         required: false
+        widget: string
+      - name: kind
+        i18n: duplicate
         widget: select
         options:
           - technical
           - supplementary
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: status
         i18n: duplicate
         widget: select
@@ -1527,14 +1511,10 @@ collections:
     fields:
       - name: institution
         i18n: duplicate
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: degree
         i18n: true
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: start
         i18n: duplicate
         required: false
@@ -1542,7 +1522,7 @@ collections:
         pattern:
           - ^\d{4}(-\d{2}(-\d{2})?)?$
           - Formato non valido
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+        hint: Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).
       - name: end
         i18n: duplicate
         required: false
@@ -1550,7 +1530,7 @@ collections:
         pattern:
           - ^\d{4}(-\d{2}(-\d{2})?)?$
           - Formato non valido
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito. Anno (2024), anno-mese (2024-05) o data completa (2024-05-17)."
+        hint: Anno (2024), anno-mese (2024-05) o data completa (2024-05-17).
       - name: paused
         i18n: duplicate
         required: false
@@ -1569,9 +1549,7 @@ collections:
         widget: string
       - name: description
         i18n: true
-        required: false
         widget: text
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: repo
         i18n: duplicate
         required: false
@@ -1581,7 +1559,6 @@ collections:
         i18n: duplicate
         required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: method
         i18n: duplicate
         required: false
@@ -1590,16 +1567,13 @@ collections:
           - by-hand
           - ai-copilot
           - vibecoded
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: status
         i18n: duplicate
-        required: false
         widget: select
         options:
           - active
           - wip
           - archived
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: featured
         i18n: duplicate
         widget: boolean
@@ -1680,28 +1654,22 @@ collections:
         max: 9007199254740991
       - name: trigger
         i18n: true
-        required: false
         widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: conditions
         i18n: true
-        required: false
         widget: list
         field:
           name: item
           i18n: true
           widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: actions
         i18n: true
-        required: false
         widget: list
         min: 1
         field:
           name: item
           i18n: true
           widget: string
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: repo
         i18n: duplicate
         required: false
@@ -1732,9 +1700,7 @@ collections:
         widget: text
       - name: text
         i18n: true
-        required: false
         widget: text
-        hint: "Dato ancora da fornire: nel file e un segnaposto `todo`. Compilando il campo il segnaposto viene sostituito."
       - name: links
         i18n: true
         widget: list
