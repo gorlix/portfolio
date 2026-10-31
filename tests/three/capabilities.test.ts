@@ -40,13 +40,13 @@ describe('decideTier', () => {
     expect(decideTier({ ...weak, webgl: false, majorPerformanceCaveat: true })).toBe('text');
   });
 
-  it('micro-scena con reduced-motion: fotogramma statico finale, non testo', () => {
-    expect(decideTier({ ...capable, reducedMotion: true }, 'micro')).toBe('reduced');
+  it('scena immersiva con reduced-motion: fotogramma statico finale, non testo', () => {
+    expect(decideTier({ ...capable, reducedMotion: true }, 'immersive')).toBe('reduced');
     expect(decideTier({ ...capable, reducedMotion: true }, 'interactive')).toBe('text');
-    // Senza WebGL o con risparmio dati anche la micro-scena lascia solo il testo.
-    expect(decideTier({ ...capable, reducedMotion: true, webgl: false }, 'micro')).toBe('text');
-    expect(decideTier({ ...capable, saveData: true }, 'micro')).toBe('text');
-    expect(decideTier(capable, 'micro')).toBe('full');
+    // Senza WebGL o con risparmio dati anche la scena immersiva lascia solo il testo.
+    expect(decideTier({ ...capable, reducedMotion: true, webgl: false }, 'immersive')).toBe('text');
+    expect(decideTier({ ...capable, saveData: true }, 'immersive')).toBe('text');
+    expect(decideTier(capable, 'immersive')).toBe('full');
   });
 
   it('scena immersiva con reduced-motion: un fotogramma statico per momento, non testo', () => {
@@ -78,7 +78,7 @@ describe('decideTier', () => {
 describe('batteria bassa', () => {
   it('batteria scarica e non in carica: scena statica, non testo', () => {
     expect(decideTier({ ...capable, lowBattery: true })).toBe('reduced');
-    expect(decideTier({ ...capable, lowBattery: true }, 'micro')).toBe('reduced');
+    expect(decideTier({ ...capable, lowBattery: true }, 'immersive')).toBe('reduced');
     expect(decideTier({ ...capable, lowBattery: false })).toBe('full');
   });
 

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { microScenes, sceneKind } from '../../src/scripts/three/kinds';
+import { sceneKind } from '../../src/scripts/three/kinds';
 import {
   isSceneName,
   sceneLoaders,
@@ -40,8 +40,7 @@ describe('registro delle scene', () => {
 });
 
 describe('tipi di scena', () => {
-  it('le micro-scene sono registrate, tutte le altre scene narrative immersive', () => {
-    for (const name of microScenes) expect(isSceneName(name)).toBe(true);
+  it('tutte le scene narrative sono immersive', () => {
     expect(sceneKind('lavori')).toBe('immersive');
     expect(sceneKind('trimind')).toBe('immersive');
     expect(sceneKind('sport')).toBe('immersive');
@@ -78,7 +77,6 @@ describe('isolamento di three', () => {
     'tokens.ts',
     'types.ts',
     'kinds.ts',
-    'progress.ts',
     'panel.ts',
     'orbit.ts',
   ]) {

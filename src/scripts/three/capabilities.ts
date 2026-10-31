@@ -9,12 +9,11 @@
 export type SceneTier = 'full' | 'reduced' | 'text';
 
 /**
- * Scena interattiva (Domotica: protagonista della sezione), micro-scena narrativa guidata dallo
- * scroll o scena immersiva (sfondo della sezione guidato dalle schede, PORT-76). Cambia solo la
- * risposta a reduced-motion: micro e immersiva restano come fotogramma statico (la fine, o un
- * fotogramma per scheda), che non si muove e illustra lo stesso testo.
+ * Scena interattiva o scena immersiva (sfondo della sezione guidato dalle schede, PORT-76). Cambia
+ * solo la risposta a reduced-motion: l'immersiva resta come fotogramma statico per scheda, che non
+ * si muove e illustra lo stesso testo.
  */
-export type SceneKind = 'interactive' | 'micro' | 'immersive';
+export type SceneKind = 'interactive' | 'immersive';
 
 export interface CapabilityInput {
   /** Contesto WebGL ottenibile. */

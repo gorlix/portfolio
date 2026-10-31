@@ -198,7 +198,7 @@ for (const route of ['/human/', '/en/human/']) {
     // da misurare solo Homelab, che fuori schermo deve fermarsi del tutto.
     await page.addStyleTag({ content: '#home .stage { display: none; }' });
     await page.evaluate(() => window.scrollTo(0, 0));
-    // Le scene in cima (micro-scene) si montano in modo asincrono: si conta solo quando sono pronte,
+    // Le scene in cima si montano in modo asincrono: si conta solo quando sono pronte,
     // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
     await expect
       .poll(() =>
@@ -282,18 +282,16 @@ for (const route of ['/human/', '/en/human/']) {
       await certificazioni.scrollIntoViewIfNeeded();
       await expect.poll(() => certificazioni.getAttribute('data-scene-state')).toBe('static');
       await expect(certificazioni.locator('canvas')).toBeAttached();
-      // Immersiva: un fotogramma per momento, nessun avanzamento.
+      // Immersiva: un fotogramma per momento.
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(200);
       expect(await certificazioni.getAttribute('data-scene-state')).toBe('static');
-      expect(await certificazioni.getAttribute('data-scene-progress')).toBeNull();
 
-      // Interessi immersiva (PORT-92): un fotogramma per momento, nessun avanzamento.
+      // Interessi immersiva (PORT-92): un fotogramma per momento.
       const interessi = page.locator('[data-scene="interessi"]');
       await interessi.scrollIntoViewIfNeeded();
       await expect.poll(() => interessi.getAttribute('data-scene-state')).toBe('static');
       await expect(interessi.locator('canvas')).toBeAttached();
-      expect(await interessi.getAttribute('data-scene-progress')).toBeNull();
     });
   });
 
@@ -417,11 +415,17 @@ for (const route of ['/human/', '/en/human/']) {
     await centreContatti(page, 'write');
     await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('running');
     // Ferma sullo scroll: accensione e rincorsa finiscono e non chiede altri fotogrammi.
-    await page.waitForTimeout(2500);
     const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
-    const settled = await frames();
-    await page.waitForTimeout(400);
-    expect(await frames()).toBe(settled);
+    await expect
+      .poll(
+        async () => {
+          const before = await frames();
+          await page.waitForTimeout(400);
+          return (await frames()) === before;
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
 
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('paused');
@@ -448,7 +452,6 @@ for (const route of ['/human/', '/en/human/']) {
     await centreContatti(page, 'write');
     await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('static');
     await expect(page.locator('#contatti .poster img')).toBeHidden();
-    expect(await contatti(page).getAttribute('data-scene-progress')).toBeNull();
     await context.close();
   });
 
