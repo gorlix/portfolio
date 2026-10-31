@@ -74,7 +74,7 @@ Le scelte qui sotto sono il **default concordato**. Claude Code può proporre al
 ### 3.4 Infrastruttura e hosting
 
 - **Cloudflare Pages** per il sito statico (o l'equivalente con asset statici su Workers, se Claude Code lo ritiene più indicato). Il sito è **online su `alessandrogorla.it` dal 2026-10-30**; ogni merge su `main` viene pubblicato automaticamente su Cloudflare Pages.
-- **CMS:** pannello **Sveltia** su `/admin/`, git-based, per modificare i YAML IT/EN di `src/content/` (configurazione generata dagli schemi Zod). Oggi è attiva solo la **fase 1, in locale** (nessun login); la **fase 2**, modifica da remoto con login GitHub, **non è attiva**. Dettagli in `docs/CMS.md`.
+- **CMS:** pannello **Sveltia** su `/admin/`, git-based, per modificare i YAML IT/EN di `src/content/` (configurazione generata dagli schemi Zod). Sono attive la **fase 1, in locale** (nessun login) e la **fase 2**, modifica da remoto con login GitHub (Worker OAuth su workers.dev, scope `public_repo`, `editorial_workflow`: ogni salvataggio è un branch + PR). Dettagli in `docs/CMS.md`.
 - **Immagine Open Graph statica** `public/og.png` (1200×630), rigenerabile con `pnpm make:og`; i tag social usano quella per ogni pagina.
 - **Header di sicurezza e CSP** tramite file `_headers`; reindirizzamenti con `_redirects`. CSP restrittiva: niente script o stili da domini esterni.
 - **Email dedicata** sul dominio con **Cloudflare Email Routing** (inoltro alla casella personale): nessuna casella nuova da gestire, e l'indirizzo personale non finisce nei file per macchine.

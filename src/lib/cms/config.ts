@@ -139,9 +139,17 @@ export function buildCmsConfig(): Json {
   const folders = names.filter((n) => collections[n].kind === 'folder');
 
   return {
-    backend: { name: 'github', repo: 'gorlix/portfolio', branch: 'main' },
-    // Fase 1: modalita locale. `base_url` del Worker OAuth si aggiunge in fase 2 (vedi docs/CMS.md).
-    publish_mode: 'simple',
+    backend: {
+      name: 'github',
+      repo: 'gorlix/portfolio',
+      branch: 'main',
+      // Login GitHub tramite il Worker OAuth (docs/CMS.md, fase 2). Senza `base_url` resta la sola modalita locale.
+      base_url: 'https://sveltia-cms-auth.ale-gorla2002.workers.dev',
+      // Scopo minimo per un repository pubblico: niente accesso ai repository privati.
+      auth_scope: 'public_repo',
+    },
+    // Ogni salvataggio crea un branch e una PR; "Publish" nel CMS la unisce. Mai scrittura diretta su `main`.
+    publish_mode: 'editorial_workflow',
     // Upload media disattivato in fase 1: foto e CV vivono in `src/assets` e `public/cv`, fuori dal CMS.
     media_folder: 'public/cv',
     public_folder: '/cv',
