@@ -3,10 +3,11 @@ import { expect, test } from '@playwright/test';
 import { heavyRoutes, lightRoutes } from './routes';
 
 // Mocha (scuro) e Latte (chiaro): il contrasto va verificato su entrambi.
+// Con reduced motion le dissolvenze di avvio (/agent, terminale) non falsano il colore misurato.
 for (const colorScheme of ['dark', 'light'] as const) {
   for (const route of [...lightRoutes, ...heavyRoutes]) {
     test(`axe WCAG 2.2 AA: ${route} (${colorScheme})`, async ({ browser }) => {
-      const context = await browser.newContext({ colorScheme });
+      const context = await browser.newContext({ colorScheme, reducedMotion: 'reduce' });
       const page = await context.newPage();
       await page.goto(route);
 

@@ -2,7 +2,12 @@
 import Base from '../../layouts/Base.astro';
 import { getSingleton } from '../../lib/data';
 import { localeStaticPaths, localizedPath } from '../../lib/i18n';
-import { machineFileNames, renderMachineFiles } from '../../lib/machine/files';
+import {
+  describeMachineFiles,
+  machineFileNames,
+  renderMachineFiles,
+} from '../../lib/machine/files';
+import { loadMachineModel } from '../../lib/machine/model';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import type { Locale } from '../../lib/schemas/common';
 
@@ -14,14 +19,26 @@ const [page, profile, files] = await Promise.all([
   getSingleton('profile', locale),
   renderMachineFiles(),
 ]);
+const info = await describeMachineFiles(files);
+const model = await loadMachineModel();
+const skillGroups = new Map<string, string[]>();
+for (const sk of model.skills) {
+  const g = sk.group[locale];
+  skillGroups.set(g, [...(skillGroups.get(g) ?? []), sk.name]);
+}
+const featured = model.projects.filter((pr) => pr.featured);
+const projectsShown = featured.length > 0 ? featured : model.projects;
+const infoByName = new Map(info.map((f) => [f.name, f]));
 const here = (path: string) => localizedPath(path, locale);
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
+const size = (bytes: number) => `${(bytes / 1024).toFixed(1)} KB`;
 const jsonLd = await loadJsonLd({
   locale,
   path: '/agent',
   name: pageTitle,
   type: 'WebPage',
 });
+const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^   ^^'].join('\n');
 ---
 
 <Base
@@ -30,6 +47,7 @@ const jsonLd = await loadJsonLd({
   title={pageTitle}
   jsonLd={jsonLd}
   description={page.metaDescription}
+  theme="mocha"
   stickyHeader
 >
   <Fragment slot="header">
@@ -42,44 +60,104 @@ const jsonLd = await loadJsonLd({
     </nav>
   </Fragment>
 
-  <div class="terminal">
+  <div class="console">
     <header class="bar">
-      <h1>{profile.name} · {page.titleSuffix}</h1>
+      <p class="unit"><span class="label">{page.unitLabel}</span> {profile.name} <span class="sep">·</span> {profile.role}</p>
     </header>
-    <div class="screen">
-      <p class="note">{page.languageNote}</p>
 
-      <table>
-        <caption>{page.table.caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{page.table.file}</th>
-            <th scope="col">{page.table.description}</th>
-            <th scope="col">{page.table.link}</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div class="screen">
+      <section class="hero">
+        <pre class="mascot" aria-hidden="true">{mascot}</pre>
+        <div class="intro">
+          <h1>{profile.name} · {page.titleSuffix}</h1>
+          <p class="greeting">{page.greeting}</p>
+          <ul class="boot" aria-label={page.boot.title}>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.profile}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.skills}: {model.skills.length}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.projects}: {model.projects.length}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.contacts}</li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="about">
+        <h2 id="about">{page.about.title}</h2>
+        <dl class="facts">
+          <div><dt>{page.about.role}</dt><dd>{profile.role}</dd></div>
+          <div><dt>{page.about.where}</dt><dd>{profile.location}</dd></div>
+          {profile.availability && <div><dt>{page.about.availability}</dt><dd>{profile.availability}</dd></div>}
+        </dl>
+        {profile.tagline && <p class="lead">{profile.tagline}</p>}
+      </section>
+
+      <section aria-labelledby="skills">
+        <h2 id="skills">{page.skills.title}</h2>
+        <p class="caption">{page.skills.intro}</p>
+        <dl class="groups">
           {
-            page.files.map((f) => (
-              <tr>
-                <th scope="row"><code>{f.name}</code></th>
-                <td>{f.description}</td>
-                <td><a href={`/${f.name}`} download>{page.download}<span class="sr-only"> {f.name}</span></a></td>
-              </tr>
+            [...skillGroups].map(([group, names]) => (
+              <div>
+                <dt>{group}</dt>
+                <dd>{names.join(', ')}</dd>
+              </div>
             ))
           }
-        </tbody>
-      </table>
+        </dl>
+      </section>
 
-      {
-        machineFileNames.map((name) => (
-          <section aria-labelledby={`f-${name}`}>
-            <h2 id={`f-${name}`}><span class="prompt">{page.command} </span>{name}</h2>
-            <pre tabindex="0" data-file={name}><code>{files[name]}</code></pre>
-            <p><a href={`/${name}`} download>{page.download} <code>{name}</code></a></p>
-          </section>
-        ))
-      }
+      <section aria-labelledby="projects">
+        <h2 id="projects">{page.projects.title}</h2>
+        <p class="caption">{page.projects.intro}</p>
+        <ul class="plain">
+          {
+            projectsShown.map((pr) => (
+              <li>
+                <p class="headline">{pr.name}</p>
+                {pr.description?.[locale] && <p>{pr.description[locale]}</p>}
+                {pr.repo && <p><a href={pr.repo}>{page.projects.repo}<span class="sr-only"> {pr.name}</span></a></p>}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section aria-labelledby="contact">
+        <h2 id="contact">{page.contact.title}</h2>
+        <p class="lead">{page.contact.intro}</p>
+        <dl class="facts">
+          <div><dt>{page.contact.email}</dt><dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd></div>
+          <div><dt>{page.contact.github}</dt><dd><a href={profile.links.github}>{profile.links.github}</a></dd></div>
+          <div><dt>{page.contact.linkedin}</dt><dd><a href={profile.links.linkedin}>{profile.links.linkedin}</a></dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="sources">
+        <h2 id="sources">{page.sources.title}</h2>
+        <p class="caption">{page.sources.intro}</p>
+        <p class="caption">{page.languageNote}</p>
+        <ul class="plain files">
+          {
+            page.sources.items.map((e) => (
+              <li>
+                <code class="fname">{e.name}</code>
+                <span>{e.description}</span>
+                <span class="meta">{size(infoByName.get(e.name)?.bytes ?? 0)} · sha256:{infoByName.get(e.name)?.sha256}</span>
+                <a href={`/${e.name}`} download>{page.download}<span class="sr-only"> {e.name}</span></a>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="caption">{page.sources.note}</p>
+        <p class="caption">{page.sources.rawIntro}</p>
+        {
+          machineFileNames.map((name) => (
+            <details>
+              <summary><span class="prompt">{page.command} </span>{name}</summary>
+              <pre tabindex="0" data-file={name}><code>{files[name]}</code></pre>
+            </details>
+          ))
+        }
+      </section>
     </div>
   </div>
 </Base>
@@ -99,7 +177,7 @@ const jsonLd = await loadJsonLd({
     font-family: var(--font-mono);
     font-size: 0.875rem;
   }
-  .terminal {
+  .console {
     max-width: 56rem;
     margin: 2rem auto;
     border: 1px solid var(--border);
@@ -117,68 +195,154 @@ const jsonLd = await loadJsonLd({
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
-  h1 {
+  .unit {
     margin: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
     color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+  .label {
+    color: var(--sec-homelab-ink);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .sep {
+    color: var(--border);
   }
   .screen {
-    padding: 1rem;
+    padding: 1.25rem 1rem 1.5rem;
     line-height: 1.6;
   }
-  .note {
-    margin: 0 0 1rem;
-    color: var(--text-muted);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-  caption {
-    padding-bottom: 0.5rem;
-    text-align: left;
-    color: var(--text-muted);
-  }
-  th,
-  td {
-    padding: 0.375rem 0.5rem;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-    vertical-align: top;
-  }
-  thead th {
-    font-weight: 700;
-  }
-  tbody th {
-    font-weight: 400;
-  }
-  section {
+  .screen section + section {
     margin-top: 2rem;
   }
-  h2 {
+  .hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem 1.5rem;
+    align-items: start;
+  }
+  .mascot {
+    margin: 0;
+    color: var(--sec-homelab-ink);
+    font-size: 0.9375rem;
+    line-height: 1.2;
+  }
+  h1 {
     margin: 0 0 0.5rem;
-    font-size: 1rem;
+    font-size: 1.125rem;
+  }
+  h2 {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.375rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sec-homelab-ink);
+  }
+  .greeting {
+    margin: 0 0 0.5rem;
+  }
+  .caption {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+  }
+  ul.boot,
+  ul.plain {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .boot {
+    margin-top: 0.75rem !important;
+    font-size: 0.875rem;
+  }
+  .ok {
+    color: var(--sec-homelab-ink);
+  }
+  .lead {
+    margin: 0.75rem 0 0;
+  }
+  .facts {
+    margin: 0;
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding: 0.125rem 0;
+    font-size: 0.875rem;
+  }
+  .facts dt,
+  .groups dt {
+    color: var(--text-muted);
+  }
+  .facts dd,
+  .groups dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .groups div {
+    padding: 0.375rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  .groups div:last-child {
+    border-bottom: 0;
+  }
+  .plain li {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .plain li:last-child {
+    border-bottom: 0;
+  }
+  .plain p {
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+  }
+  .headline {
+    font-size: 1rem !important;
+    font-weight: 700;
+  }
+  .files li {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) auto auto;
+    gap: 0 1rem;
+    font-size: 0.8125rem;
+  }
+  .meta {
+    color: var(--text-muted);
+  }
+  .fname {
+    font-size: 0.8125rem;
+  }
+  details {
+    margin-top: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background: var(--bg-deep);
+  }
+  summary {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
   }
   .prompt {
     color: var(--text-muted);
   }
   pre {
     margin: 0;
+  }
+  details pre {
     padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
     font-size: 0.8125rem;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-  }
-  .screen p {
-    margin: 0.5rem 0 0;
-  }
-  .screen .note {
-    margin: 0 0 1rem;
   }
   .sr-only {
     position: absolute;
@@ -187,5 +351,36 @@ const jsonLd = await loadJsonLd({
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  /* Avvio: solo opacità, nessuno spostamento. Il contenuto è sempre nel flusso. */
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+  .boot li {
+    animation: appear 0.3s ease-out backwards;
+  }
+  .boot li:nth-child(1) { animation-delay: 0.1s; }
+  .boot li:nth-child(2) { animation-delay: 0.25s; }
+  .boot li:nth-child(3) { animation-delay: 0.4s; }
+  .boot li:nth-child(4) { animation-delay: 0.55s; }
+  @media (prefers-reduced-motion: reduce) {
+    .boot li {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    .facts div {
+      grid-template-columns: 1fr;
+    }
+    .files li {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

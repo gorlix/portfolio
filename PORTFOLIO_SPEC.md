@@ -199,7 +199,7 @@ Root (testo puro, per macchine):
 **Due livelli distinti:**
 
 1. **File veri, nella root** (quelli che leggono davvero crawler e agenti): `/llms.txt`, `/agent.md`, `/profile.json`, `/robots.txt`, `/sitemap.xml`. Testo puro, niente grafica, sempre raggiungibili e aggiornati. Lingua principale **inglese**, con riferimenti all'italiano.
-2. **Pagina `/agent`:** vetrina estetica, **terminale minimale ma non brutto**, che mostra gli stessi file (`cat llms.txt`, `cat profile.json`) con link per scaricarli. Generata **dagli stessi dati**, così pagina e file non si contraddicono mai.
+2. **Pagina `/agent`:** vetrina estetica, **console diagnostica di un robot gentile**, sempre in tema Mocha, senza JS e senza 3D. Una macchina presenta Alessandro in frasi brevi e calde: sequenza di avvio (solo CSS, solo opacità) con peso e impronta SHA-256 dei cinque file calcolati alla build, poi voci descrittive ("la mappa", "la scheda", "il racconto"...) che spiegano a cosa serve ogni file, con link `download` veri. Il testo grezzo dei tre file generati resta nel sorgente dentro `<details>` (si aprono senza JS). Generata **dagli stessi dati**, così pagina e file non si contraddicono mai.
 
 **Requisiti**
 - **HTML semantico** puro: titoli ordinati, liste e tabelle vere, tutto nel sorgente (la maggior parte dei crawler AI non esegue JS).

@@ -1,21 +1,48 @@
-titleSuffix: Vista macchina
-metaDescription: "Vista per agenti AI del portfolio di Alessandro Gorla: gli stessi file che leggono i crawler (llms.txt, profile.json, agent.md), in HTML semantico."
+titleSuffix: Console macchina
+metaDescription: "Vista per agenti AI del portfolio di Alessandro Gorla: chi è, cosa sa fare, cosa ha costruito e come scrivergli, in HTML semantico."
 backToChoice: "~/ ← cambia percorso"
 menuLabel: Altri percorsi
 links:
   human: Conoscimi meglio
   recruiter: Profilo per recruiter
-languageNote: "I file sono in inglese (lingua principale per le macchine) in entrambe le versioni del sito."
+languageNote: "I file per macchine sono in inglese (lingua principale per le macchine) in entrambe le versioni del sito."
+unitLabel: Unità
+greeting: "Ciao, sono la console di Alessandro. Di solito parlo con altre macchine, ma mi hanno chiesto di presentarlo bene: ti dico chi è, cosa sa fare e come scrivergli. Niente trucchi, solo fatti."
+boot:
+  title: Avvio
+  ok: ok
+  profile: profilo caricato
+  skills: competenze
+  projects: progetti
+  contacts: contatti pronti
+about:
+  title: Chi è
+  role: Ruolo
+  where: Dove
+  availability: Disponibilità
+skills:
+  title: Cosa sa fare
+  intro: "In ordine di gruppo, come le vede lui."
+projects:
+  title: Cosa ha costruito
+  intro: "Progetti in evidenza, con il codice a portata di click."
+  repo: Codice
+contact:
+  title: Come parlargli
+  intro: "Se il profilo ti convince, scrivigli. Risponde una persona, non un'altra macchina."
+  email: Email
+  github: GitHub
+  linkedin: LinkedIn
+sources:
+  title: Per chi preferisce i file
+  intro: "Tutto quello che hai letto sta anche nei file che leggono i crawler. Eccoli, uno per uno."
+  items:
+    - { name: llms.txt, description: "La mappa: dove sta ogni pagina e ogni file." }
+    - { name: profile.json, description: "La scheda strutturata (schema.org Person)." }
+    - { name: agent.md, description: "Il profilo completo in Markdown." }
+    - { name: robots.txt, description: "Le regole per i crawler." }
+    - { name: sitemap.xml, description: "L'elenco di tutte le pagine." }
+  note: "Peso e impronta SHA-256 (abbreviata) sono calcolati sui file reali a ogni build."
+  rawIntro: "Il testo originale, identico byte per byte a quello scaricabile."
 command: $ cat
 download: scarica
-table:
-  caption: File per macchine nella root del sito
-  file: File
-  description: Contenuto
-  link: Link
-files:
-  - { name: llms.txt, description: Indice delle pagine e dei file }
-  - { name: profile.json, description: Profilo strutturato (schema.org Person) }
-  - { name: agent.md, description: Profilo completo in Markdown }
-  - { name: robots.txt, description: Regole per i crawler }
-  - { name: sitemap.xml, description: Mappa del sito }

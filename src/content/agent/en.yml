@@ -1,21 +1,48 @@
-titleSuffix: Machine view
-metaDescription: "AI agent view of Alessandro Gorla's portfolio: the same files crawlers read (llms.txt, profile.json, agent.md), as semantic HTML."
+titleSuffix: Machine console
+metaDescription: "AI agent view of Alessandro Gorla's portfolio: who he is, what he can do, what he has built and how to write to him, as semantic HTML."
 backToChoice: "~/ ← change path"
 menuLabel: Other paths
 links:
   human: Get to know me
   recruiter: Recruiter profile
-languageNote: "The files are in English (the primary language for machines) in both versions of the site."
+languageNote: "The machine-readable files are in English (the primary language for machines) in both versions of the site."
+unitLabel: Unit
+greeting: "Hi, I'm Alessandro's console. I usually talk to other machines, but I was asked to introduce him properly: who he is, what he can do and how to write to him. No tricks, just facts."
+boot:
+  title: Boot
+  ok: ok
+  profile: profile loaded
+  skills: skills
+  projects: projects
+  contacts: contacts ready
+about:
+  title: Who he is
+  role: Role
+  where: Where
+  availability: Availability
+skills:
+  title: What he can do
+  intro: "Grouped the way he sees them."
+projects:
+  title: What he has built
+  intro: "Featured projects, with the code one click away."
+  repo: Code
+contact:
+  title: How to talk to him
+  intro: "If the profile convinces you, write to him. A person answers, not another machine."
+  email: Email
+  github: GitHub
+  linkedin: LinkedIn
+sources:
+  title: For those who prefer files
+  intro: "Everything you have read is also in the files crawlers read. Here they are, one by one."
+  items:
+    - { name: llms.txt, description: "The map: where every page and file lives." }
+    - { name: profile.json, description: "The structured card (schema.org Person)." }
+    - { name: agent.md, description: "The full profile in Markdown." }
+    - { name: robots.txt, description: "The rules for crawlers." }
+    - { name: sitemap.xml, description: "The list of every page." }
+  note: "Size and SHA-256 fingerprint (shortened) are computed on the real files at every build."
+  rawIntro: "The original text, identical byte for byte to the downloadable file."
 command: $ cat
 download: download
-table:
-  caption: Machine-readable files in the site root
-  file: File
-  description: Contents
-  link: Link
-files:
-  - { name: llms.txt, description: Index of pages and files }
-  - { name: profile.json, description: Structured profile (schema.org Person) }
-  - { name: agent.md, description: Full profile in Markdown }
-  - { name: robots.txt, description: Crawler policy }
-  - { name: sitemap.xml, description: Sitemap }
