@@ -27,21 +27,21 @@ Cose da sapere:
 - `@sveltia/cms` e una dipendenza **a versione esatta** (Renovate la aggiorna). `pnpm cms:assets` (parte da solo prima di `dev` e `build`) copia in `public/admin/` lo script, i pezzi caricati a richiesta, i font (pacchetti `@fontsource`) e le stringhe in italiano; questi file sono generati e ignorati da git. Lo script di Sveltia di base cerca font, lingue e controllo aggiornamenti su `unpkg.com`/`cdn.jsdelivr.net`: `scripts/copy-cms.mjs` riscrive gli indirizzi verso copie locali e **fallisce** se Sveltia cambia quelle stringhe (aggiornamento di versione: ricontrolla).
 - **CSP** solo per `/admin/*` in `public/_headers`: `script-src 'self'` (niente `unsafe-eval` ne script inline), `style-src 'self' 'unsafe-inline'` (Sveltia/Svelte scrivono stili da script: e l'unico `unsafe-inline` del sito), `connect-src 'self' data:`, nessun dominio esterno. Con questa CSP Sveltia prova ancora a contattare `unpkg.com` (controllo aggiornamenti) e `githubstatus.com` (stato GitHub): le richieste sono **bloccate di proposito**, nella console compaiono come errori e non cambiano nulla. `/`, `/recruiter`, `/agent`, `/human` non cambiano; `scripts/check-budget.ts` e `validate-machine.ts` escludono `admin/` (codice di terzi, non una pagina del sito).
 
-## Fase 2 — modifica da remoto con login GitHub (NON attiva)
+## Fase 2 — modifica da remoto con login GitHub (attiva)
 
-Serve per modificare da qualsiasi browser/dispositivo (anche senza il repo sul disco): Sveltia fa login con GitHub e scrive i commit via API. Servono un'OAuth App e un piccolo Worker Cloudflare. **Nessun segreto nel repo**: id e segreto si impostano solo da dashboard o `wrangler`.
+Serve per modificare da qualsiasi browser/dispositivo (anche senza il repo sul disco): Sveltia fa login con GitHub e scrive via API. Componenti: una OAuth App su GitHub e un piccolo Worker Cloudflare (`sveltia-cms-auth`, su `*.workers.dev`, nessun DNS). **Nessun segreto nel repo**: id e segreto stanno solo nel Worker.
 
-Passi (a cura di Alessandro, servono i suoi account):
+Come e configurata:
 
-1. **Worker**: deploy di [`sveltia-cms-auth`](https://github.com/sveltia/sveltia-cms-auth) su Cloudflare Workers (es. `https://sveltia-cms-auth.<account>.workers.dev`, oppure un dominio dedicato).
-2. **GitHub OAuth App** (Settings → Developer settings → OAuth Apps → New): _Homepage URL_ = URL del sito, _Authorization callback URL_ = `https://<URL del Worker>/callback`. Annota il _Client ID_ e genera un _Client secret_.
-3. **Segreti del Worker** (dashboard Cloudflare → Worker → Settings → Variables and Secrets, oppure `wrangler secret put`):
-   - `GITHUB_CLIENT_ID` = Client ID
-   - `GITHUB_CLIENT_SECRET` = Client secret (tipo _secret_)
-   - `ALLOWED_DOMAINS` = dominio del sito che puo usare il login (es. quello di produzione)
-4. **Config**: in `src/lib/cms/config.ts` aggiungere `base_url: 'https://<URL del Worker>'` al `backend`, poi `pnpm cms:config` e commit.
-5. **CSP**: in `public/_headers`, regola `/admin/*`, aggiungere a `connect-src` `https://api.github.com` e l'origine del Worker (e a `form-action`/`frame-src` solo se il login lo richiede: provarlo con la console del browser aperta). Aggiornare il test in `tests/headers/headers.test.ts` (oggi vieta ogni `https:` in `/admin/*`).
-6. **Protezione**: la OAuth App deve poter scrivere solo su `gorlix/portfolio` (limitare l'accesso o usare un account con quel solo permesso); `main` resta protetto, quindi i salvataggi passano per branch + PR. Per questo, in fase 2, valutare `publish_mode: editorial_workflow`.
-7. Prova: `/admin/` in produzione → **Sign In with GitHub** → modifica un campo → verifica il commit/branch.
+- `backend.base_url` = origine del Worker, `backend.auth_scope: public_repo` (il repo e pubblico: niente accesso ai repository privati dell'account), `publish_mode: editorial_workflow` (in `src/lib/cms/config.ts`).
+- **Salvataggi**: ogni modifica crea un branch e una PR; **Publish** nel CMS fa il merge della PR. Non si scrive mai direttamente su `main`. Attenzione: `main` ha `enforce_admins: false`, quindi chi e admin del repo puo pubblicare anche prima che la CI finisca; controlla i check della PR prima di premere Publish.
+- **CSP** `/admin/*` (`public/_headers`): `connect-src` aggiunge solo `https://api.github.com`, `img-src` solo `https://avatars.githubusercontent.com` (avatar). Il popup del Worker non passa dalla CSP. Il test in `tests/headers` ammette solo queste due origini.
 
-Ripristino: togliere `base_url` e rigenerare il config riporta alla modalita solo locale.
+Setup (una tantum, a cura di Alessandro):
+
+1. **Worker** `sveltia-cms-auth` (codice ufficiale di [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth)) su Cloudflare Workers, con sottodominio workers.dev dell'account.
+2. **GitHub OAuth App** (Settings → Developer settings → OAuth Apps → New): _Homepage URL_ = URL del sito, _Authorization callback URL_ = `<URL del Worker>/callback`.
+3. **Segreti del Worker** (dashboard Cloudflare → Worker → Settings → Variables and Secrets, oppure `wrangler secret put`): `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (tipo _secret_), `ALLOWED_DOMAINS` = `alessandrogorla.it`.
+4. Prova: `/admin/` in produzione → **Sign In with GitHub** → modifica un campo → **Save** → verifica branch e PR → **Publish**.
+
+Ripristino: togliere `base_url` (e `auth_scope`) e rigenerare il config (`pnpm cms:config`) riporta alla sola modalita locale; revocare l'OAuth App su GitHub chiude l'accesso.

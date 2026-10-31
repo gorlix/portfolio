@@ -85,12 +85,19 @@ describe('_headers', () => {
     }
   });
 
-  it('/admin/*: CMS con script solo del sito, niente eval ne script inline, nessun dominio esterno', () => {
+  it('/admin/*: CMS con script solo del sito, niente eval ne script inline, solo le origini GitHub previste', () => {
     const value = csp('/admin/*') ?? '';
     expect(value).toContain("default-src 'none'");
     expect(value).toContain("script-src 'self';");
     expect(value).toContain("frame-ancestors 'none'");
-    expect(value).not.toMatch(/https?:|unsafe-eval|\*/);
+    expect(value).not.toMatch(/unsafe-eval|\*/);
+    // Unici domini esterni ammessi: API GitHub (connect-src) e avatar (img-src), origini esatte.
+    expect(value.match(/https?:\/\/[^\s;]+/g)?.sort()).toEqual([
+      'https://api.github.com',
+      'https://avatars.githubusercontent.com',
+    ]);
+    expect(value).toMatch(/connect-src [^;]*https:\/\/api\.github\.com(;|$)/);
+    expect(value).toMatch(/img-src [^;]*https:\/\/avatars\.githubusercontent\.com(;|$)/);
     // 'unsafe-inline' ammesso solo per gli stili (Sveltia li scrive da script).
     expect(value.replace(/style-src [^;]*;/, '')).not.toContain('unsafe-inline');
     expect(rules.find((r) => r.path === '/admin/*')?.headers['X-Robots-Tag']).toContain('noindex');
