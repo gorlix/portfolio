@@ -16,10 +16,12 @@ const current = (page: import('@playwright/test').Page) =>
 
 for (const route of ['/human/', '/en/human/']) {
   test.describe(`${route} barra del tempo`, () => {
-    test('un punto per sezione, sotto-segmenti per Sport e Beneficenza', async ({ page }) => {
+    test('un punto per sezione, sotto-segmenti per Sport, Interessi e Beneficenza', async ({
+      page,
+    }) => {
       await page.goto(route);
       await expect(page.locator('nav[data-timeline] > ul > li')).toHaveCount(sectionIds.length);
-      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(6);
+      await expect(page.locator('nav[data-timeline] .subs a')).toHaveCount(12);
       for (const a of await page.locator('nav[data-timeline] a').all()) {
         const id = (await a.getAttribute('href'))?.slice(1);
         await expect(page.locator(`#${id}`)).toBeAttached();
@@ -59,13 +61,19 @@ for (const route of ['/human/', '/en/human/']) {
       await expect(page).toHaveURL(/#lavori$/);
     });
 
-    test('i sotto-segmenti di Sport e Beneficenza seguono lo scroll', async ({ page }) => {
+    test('i sotto-segmenti seguono lo scroll', async ({ page }) => {
       await page.goto(route);
       for (const sub of [
         'sport-ski',
         'sport-hiking',
         'sport-tennis',
         'sport-volleyball',
+        'interessi-3d-printing',
+        'interessi-zsa-moonlander',
+        'interessi-supernote',
+        'interessi-obsidian',
+        'interessi-rust',
+        'interessi-food',
         'beneficenza-rotaract-abbiategrasso',
         'beneficenza-mdio-website',
       ]) {

@@ -17,6 +17,7 @@ const targets = [
   { path: '/human/', section: 'lavori', scene: 'lavori', prefix: 'lavori-poster' },
   { path: '/human/', section: 'domotica', scene: 'domotica', prefix: 'domotica-poster' },
   { path: '/human/', section: 'sport', scene: 'sport', prefix: 'sport-poster' },
+  { path: '/human/', section: 'interessi', scene: 'interessi', prefix: 'interessi-poster' },
   { path: '/human/', section: 'beneficenza', scene: 'beneficenza', prefix: 'beneficenza-poster' },
   {
     path: '/human/',

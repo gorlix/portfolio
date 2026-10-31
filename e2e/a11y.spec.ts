@@ -34,6 +34,7 @@ for (const colorScheme of ['dark', 'light'] as const) {
         'homelab',
         'domotica',
         'sport',
+        'interessi',
         'beneficenza',
         'trimind',
         'opensource',

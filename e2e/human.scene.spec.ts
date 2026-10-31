@@ -18,6 +18,8 @@ const nearScene = (page: Page) =>
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - window.innerHeight);
   });
 
+const interessiSlugs = ['3d-printing', 'zsa-moonlander', 'supernote', 'obsidian', 'rust', 'food'];
+
 for (const route of ['/human/', '/en/human/']) {
   test(`${route}: la scena si carica solo vicino alla sezione`, async ({ page }) => {
     const urls: string[] = [];
@@ -286,7 +288,7 @@ for (const route of ['/human/', '/en/human/']) {
       expect(await certificazioni.getAttribute('data-scene-state')).toBe('static');
       expect(await certificazioni.getAttribute('data-scene-progress')).toBeNull();
 
-      // Interessi (PORT-63): stessa regola, fotogramma finale con tutti gli oggetti.
+      // Interessi immersiva (PORT-92): un fotogramma per momento, nessun avanzamento.
       const interessi = page.locator('[data-scene="interessi"]');
       await interessi.scrollIntoViewIfNeeded();
       await expect.poll(() => interessi.getAttribute('data-scene-state')).toBe('static');
@@ -295,31 +297,9 @@ for (const route of ['/human/', '/en/human/']) {
     });
   });
 
-  test(`${route}: la micro-scena Interessi avanza con lo scroll`, async ({ page }) => {
-    await page.goto(route);
-    const scene = page.locator('[data-scene="interessi"]');
-    const at = (f: number) =>
-      scene.evaluate((el, fr) => {
-        const top = el.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo(0, top - window.innerHeight * fr);
-      }, f);
-    const value = async () =>
-      Number((await scene.getAttribute('data-scene-progress')) ?? Number.NaN);
-    // Non sul bordo: la scena Sport subito sopra sarebbe piu centrata e resterebbe lei l'attiva.
-    await at(0.65);
-    await expect.poll(() => scene.getAttribute('data-scene-state')).toBe('running');
-    const start = await value();
-    await at(0.35);
-    await expect.poll(value).toBeGreaterThan(start);
-    await at(0.1);
-    await expect.poll(value).toBe(1);
-  });
-
   // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
-  // Interessi (Lavori e Certificazioni sono diventate immersive con PORT-81 e PORT-87).
-  const micro = (page: Page) => page.locator('[data-scene="interessi"]');
-  const progress = async (page: Page) =>
-    Number((await micro(page).getAttribute('data-scene-progress')) ?? Number.NaN);
+  // Contatti, l'ultima rimasta.
+  const micro = (page: Page) => page.locator('[data-scene="contatti"]');
   /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
   const placeMicro = (page: Page, fraction: number) =>
     micro(page).evaluate((el, f) => {
@@ -396,25 +376,6 @@ for (const route of ['/human/', '/en/human/']) {
     expect(urls.filter(isLazyScene)).toEqual([]);
   });
 
-  test(`${route}: la micro-scena avanza e torna indietro con lo scroll`, async ({ page }) => {
-    await page.goto(route);
-    await placeMicro(page, 0.9);
-    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
-    await expect(micro(page).locator('canvas')).toBeAttached();
-    await expect.poll(() => progress(page)).toBeGreaterThanOrEqual(0);
-    const start = await progress(page);
-
-    await placeMicro(page, 0.5);
-    await expect.poll(() => progress(page)).toBeGreaterThan(start);
-    const middle = await progress(page);
-
-    await placeMicro(page, 0.1);
-    await expect.poll(() => progress(page)).toBe(1);
-
-    await placeMicro(page, 0.8);
-    await expect.poll(() => progress(page)).toBeLessThan(middle);
-  });
-
   test(`${route}: la micro-scena non blocca ne dirotta lo scroll`, async ({ page }) => {
     await page.goto(route);
     await placeMicro(page, 0.6);
@@ -427,12 +388,13 @@ for (const route of ['/human/', '/en/human/']) {
     if (!box) throw new Error('micro-scena senza riquadro');
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     const before = await page.evaluate(() => window.scrollY);
-    await page.mouse.wheel(0, 400);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before + 400);
-    await page.waitForTimeout(400);
-    expect(await page.evaluate(() => window.scrollY)).toBe(before + 400);
-
+    // Contatti sta in fondo alla pagina: si sale e poi si riscende.
     await page.mouse.wheel(0, -400);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before - 400);
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before - 400);
+
+    await page.mouse.wheel(0, 400);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
   });
 
@@ -467,7 +429,7 @@ for (const route of ['/human/', '/en/human/']) {
     await page.waitForTimeout(400);
     expect(await frames()).toBe(settled);
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
   });
 
@@ -585,6 +547,37 @@ for (const route of ['/human/', '/en/human/']) {
     await centreTopic(page, 'mdio-website');
     await expect.poll(() => beneficenza(page).getAttribute('data-scene-state')).toBe('static');
     await expect(page.locator('#beneficenza .poster img')).toBeHidden();
+    await context.close();
+  });
+
+  // Interessi immersiva (PORT-92): il banco, un momento per oggetto, ogni scheda col suo ancoraggio.
+  const interessi = (page: Page) => page.locator('[data-scene="interessi"]');
+  const centreInteresse = (page: Page, slug: string) =>
+    page.locator(`#interessi-${slug}`).evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      window.scrollTo(0, box.top + window.scrollY + box.height / 2 - window.innerHeight / 2);
+    });
+
+  test(`${route}: Interessi segue le schede, oggetto per oggetto`, async ({ page }) => {
+    await page.goto(route);
+    await centreInteresse(page, '3d-printing');
+    await expect.poll(() => interessi(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(interessi(page).locator('canvas')).toBeAttached();
+    const section = page.locator('#interessi');
+    for (const slug of interessiSlugs) {
+      await centreInteresse(page, slug);
+      await expect(section).toHaveAttribute('data-phase', 'cards');
+      await expect(section).toHaveAttribute('data-moment', slug);
+    }
+  });
+
+  test(`${route}: Interessi con reduced-motion e un fotogramma statico`, async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await centreInteresse(page, 'rust');
+    await expect.poll(() => interessi(page).getAttribute('data-scene-state')).toBe('static');
+    await expect(page.locator('#interessi .poster img')).toBeHidden();
     await context.close();
   });
 }

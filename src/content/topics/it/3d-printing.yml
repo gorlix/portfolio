@@ -1,4 +1,6 @@
 section: interessi
-links: []
+links:
+  - label: "Il mio profilo Printables"
+    url: "https://www.printables.com/@Gorlix_50644"
 title: Stampa 3D
 text: "La stampante 3D è la prova che anche l'hardware ha bisogno di una pipeline: progetto, stampo, qualcosa non combacia, correggo e ristampo. Smanetto, rompo e poi rimetto a posto meglio di prima."

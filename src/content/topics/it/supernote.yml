@@ -1,4 +1,10 @@
 section: interessi
-links: []
+links:
+  - label: "sn_make_space"
+    url: "https://github.com/gorlix/sn_make_space"
+  - label: "sn-tcp-tunnel"
+    url: "https://github.com/gorlix/sn-tcp-tunnel"
+  - label: "SuperFlow"
+    url: "https://github.com/gorlix/SuperFlow"
 title: Supernote
 text: "Leggo e scrivo su un Supernote Manta, e visto che un e-reader non mi bastava ci ho costruito attorno qualche strumento: sn_make_space, sn-tcp-tunnel (il mio preferito) e SuperFlow, ancora in lavorazione."

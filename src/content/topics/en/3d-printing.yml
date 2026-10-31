@@ -1,4 +1,6 @@
 section: interessi
-links: []
+links:
+  - label: "My Printables profile"
+    url: "https://www.printables.com/@Gorlix_50644"
 title: 3D printing
 text: "The 3D printer proves that hardware needs a pipeline too: I design, print, something doesn't fit, fix it and print again. I tinker, break things and put them back together better than before."

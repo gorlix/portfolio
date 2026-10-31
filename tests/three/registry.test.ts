@@ -40,7 +40,7 @@ describe('registro delle scene', () => {
 });
 
 describe('tipi di scena', () => {
-  it('le micro-scene sono registrate, Homelab, Domotica, Lavori, Trimind e Sport immersive', () => {
+  it('le micro-scene sono registrate, Homelab, Domotica, Lavori, Trimind, Sport e Interessi immersive', () => {
     for (const name of microScenes) expect(isSceneName(name)).toBe(true);
     expect(sceneKind('lavori')).toBe('immersive');
     expect(sceneKind('trimind')).toBe('immersive');
@@ -48,7 +48,8 @@ describe('tipi di scena', () => {
     expect(sceneKind('beneficenza')).toBe('immersive');
     expect(sceneKind('opensource')).toBe('immersive');
     expect(sceneKind('certificazioni')).toBe('immersive');
-    expect(sceneKind('interessi')).toBe('micro');
+    expect(sceneKind('interessi')).toBe('immersive');
+    expect(sceneKind('contatti')).toBe('micro');
     expect(sceneKind('homelab')).toBe('immersive');
     expect(sceneKind('domotica')).toBe('immersive');
   });
