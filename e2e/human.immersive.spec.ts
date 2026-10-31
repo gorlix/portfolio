@@ -132,7 +132,7 @@ for (const route of ['/human/', '/en/human/']) {
     // solo Homelab, che fuori schermo non deve chiedere fotogrammi (nemmeno dal racconto).
     await page.addStyleTag({ content: '#home .stage { display: none; }' });
     await page.evaluate(() => window.scrollTo(0, 0));
-    // Le scene in cima (micro-scene) si montano in modo asincrono: si conta solo quando sono pronte,
+    // Le scene in cima si montano in modo asincrono: si conta solo quando sono pronte,
     // altrimenti il loro primo fotogramma cade dentro la finestra di misura.
     await expect
       .poll(() =>

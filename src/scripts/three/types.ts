@@ -25,11 +25,6 @@ export interface SceneInstance {
   /** Ridimensiona alla misura del contenitore e, se ferma, ridisegna un fotogramma. */
   resize(width: number, height: number): void;
   /**
-   * Solo micro-scene: avanzamento richiesto dallo scroll, tra 0 e 1. La scena lo raggiunge con
-   * una breve rincorsa (solo tra start e stop); a livello 'reduced' resta ferma sulla fine.
-   */
-  setProgress?(progress: number): void;
-  /**
    * Solo scene immersive: posizione del racconto (0 = prima schermata, i = scheda i al centro,
    * valori intermedi tra una scheda e l'altra; vedi ../story.ts). A livello 'reduced' arriva gia
    * arrotondata a un momento. Con `interactive` falso la scena ignora i gesti.

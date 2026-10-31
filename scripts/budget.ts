@@ -28,10 +28,10 @@ export const chunkBudgets: ChunkBudget[] = [
       /^(homelab|domotica|lavori|trimind|opensource|certificazioni|scrivania|beneficenza|contatti|interessi|sport|placeholder)\./,
     maxGzip: 16 * KB,
   },
-  // Codice condiviso tra le scene (orbit, pannello, base delle micro-scene), se il bundler lo separa.
+  // Codice condiviso tra le scene (orbit, pannello), se il bundler lo separa.
   {
     name: 'condiviso scene',
-    pattern: /^(orbit|panel|tokens|micro|phases|penguin|framing|mesher|story)\./,
+    pattern: /^(orbit|panel|tokens|penguin|framing|mesher|story)\./,
     maxGzip: 4 * KB,
   },
   // 4,5 KB: include l'avvio senza gesto della scena della Home (PORT-79).

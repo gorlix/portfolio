@@ -7,7 +7,6 @@ import {
   type SceneTier,
 } from './capabilities';
 import { sceneKind } from './kinds';
-import { type Box, isOnScreen, pickActive, scrollProgress } from './progress';
 import { isSceneName, type SceneState, sceneLoaders, shouldAnimate } from './registry';
 import { isInteractive, snapPosition, stageOpacity, storyPosition } from './story';
 import type { SceneInstance } from './types';
@@ -20,11 +19,8 @@ import type { SceneInstance } from './types';
  * che parte da sola a pagina caricata e inattiva.
  * Il testo della sezione e gia nell'HTML: se qualcosa manca o fallisce, resta quello.
  *
- * Micro-scene (./kinds.ts): avanzano con la posizione del riquadro nel viewport, letta su `scroll`
- * passivo. Lo scroll non viene mai bloccato ne spostato; una sola micro-scena attiva per volta.
- *
  * Sezioni immersive (`[data-story]`, PORT-76): sfondo fisso con la scena, prima schermata e schede
- * (`[data-moment]`). Sullo stesso scroll passivo si calcola la posizione del racconto (./story.ts):
+ * (`[data-moment]`). Lo scroll non viene mai bloccato ne spostato: su `scroll` passivo si calcola la posizione del racconto (./story.ts):
  * la sezione riceve `data-phase` (hero | cards) e `--stage-opacity` anche prima che il 3D arrivi,
  * e la scena montata riceve la posizione per guidare camera e layer.
  */
@@ -70,42 +66,7 @@ const readData = (el: HTMLElement): unknown => {
   return block?.textContent ? JSON.parse(block.textContent) : undefined;
 };
 
-// --- Micro-scene guidate dallo scroll -------------------------------------------------------------
-
-interface MicroEntry {
-  instance: SceneInstance;
-  visible: boolean;
-}
-const micros = new Map<HTMLElement, MicroEntry>();
 let syncFrame = 0;
-
-const box = (el: HTMLElement): Box => {
-  const rect = el.getBoundingClientRect();
-  return { top: rect.top, height: rect.height };
-};
-
-/** Misura i riquadri a schermo, passa l'avanzamento e tiene accesa solo la scena attiva. */
-const syncMicros = (): void => {
-  syncFrame = 0;
-  const viewport = window.innerHeight;
-  const entries = [...micros].filter(([, entry]) => entry.visible);
-  const boxes = entries.map(([el]) => box(el));
-  const active = document.hidden ? -1 : pickActive(boxes, viewport);
-  entries.forEach(([el, { instance }], i) => {
-    const b = boxes[i] as Box;
-    if (!isOnScreen(b, viewport)) return;
-    const progress = scrollProgress(b, viewport);
-    el.dataset.sceneProgress = progress.toFixed(2);
-    instance.setProgress?.(progress);
-    if (i === active) {
-      instance.start();
-      setState(el, 'running');
-    } else {
-      instance.stop();
-      setState(el, 'paused');
-    }
-  });
-};
 
 // --- Sezioni immersive guidate dalle schede -------------------------------------------------------
 
@@ -146,23 +107,14 @@ const syncStories = (): void => {
 };
 
 const syncAll = (): void => {
-  syncMicros();
+  syncFrame = 0;
   syncStories();
 };
 
 /** Un solo calcolo per fotogramma, e solo se c'e qualcosa da aggiornare. */
 const scheduleSync = (): void => {
   if (syncFrame) return;
-  if (stories.length > 0) {
-    syncFrame = requestAnimationFrame(syncAll);
-    return;
-  }
-  for (const entry of micros.values()) {
-    if (entry.visible) {
-      syncFrame = requestAnimationFrame(syncAll);
-      return;
-    }
-  }
+  if (stories.length > 0) syncFrame = requestAnimationFrame(syncAll);
 };
 
 // --- Montaggio ------------------------------------------------------------------------------------
@@ -178,7 +130,6 @@ async function mountScene(el: HTMLElement): Promise<void> {
     toText(el, capabilities?.saveData ? 'savedata' : 'webgl');
     return;
   }
-  const micro = sceneKind(name) === 'micro' && level === 'full';
   const story = stories.find((s) => s.section.contains(el));
 
   setState(el, 'loading');
@@ -213,17 +164,6 @@ async function mountScene(el: HTMLElement): Promise<void> {
 
   let visible = false;
   const update = (): void => {
-    if (micro) {
-      const entry = micros.get(el);
-      if (entry) entry.visible = visible;
-      // Fuori schermo o scheda nascosta: ferma subito; il calcolo dello scroll decide il resto.
-      if (!visible || document.hidden) {
-        instance.stop();
-        setState(el, 'paused');
-      }
-      scheduleSync();
-      return;
-    }
     if (shouldAnimate(level, visible, document.hidden)) {
       instance.start();
       setState(el, 'running');
@@ -249,7 +189,6 @@ async function mountScene(el: HTMLElement): Promise<void> {
 
   const onVisibility = (): void => update();
   document.addEventListener('visibilitychange', onVisibility);
-  if (micro) micros.set(el, { instance, visible });
   if (story) {
     story.scene = { instance, level };
     syncStories();
@@ -260,7 +199,6 @@ async function mountScene(el: HTMLElement): Promise<void> {
     resize.disconnect();
     document.removeEventListener('visibilitychange', onVisibility);
     canvas.removeEventListener('webglcontextlost', onContextLost);
-    micros.delete(el);
     if (story?.scene?.instance === instance) delete story.scene;
     instance.dispose();
     canvas.remove();

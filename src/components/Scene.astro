@@ -46,10 +46,6 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
     margin-inline: auto;
     contain: layout paint;
   }
-  /* Micro-scena: illustrazione piccola dentro la narrazione, non protagonista. */
-  .scene[data-kind='micro'] {
-    max-width: 24rem;
-  }
   /* Scena immersiva: riempie lo sfondo fisso della sezione (lo "stage" della pagina). */
   .scene[data-kind='immersive'] {
     max-width: none;
@@ -67,10 +63,6 @@ const json = data === undefined ? undefined : JSON.stringify(data).replace(/</g,
     display: block;
     width: 100%;
     height: 100%;
-  }
-  /* La micro-scena non si tocca: rotella, dita e clic passano sempre alla pagina. */
-  .scene[data-kind='micro'] :global(canvas) {
-    pointer-events: none;
   }
 </style>
 
