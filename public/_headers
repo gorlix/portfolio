@@ -76,7 +76,11 @@ https://:version.:project.pages.dev/*
 # Login GitHub (fase 2): solo api.github.com (connect-src) e l'avatar (img-src); il popup del Worker OAuth non passa dalla CSP. 'unsafe-inline' solo per gli stili
 # (Sveltia/Svelte li scrivono da script); `script-src` resta 'self': niente unsafe-eval ne unsafe-inline.
 
+# COOP: `same-origin` (da /*) taglia window.opener verso il popup di login (Worker OAuth, altra origine):
+# il token non arriva al pannello. Qui lo si stacca e si usa same-origin-allow-popups.
 /admin/*
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://avatars.githubusercontent.com; connect-src 'self' data: https://api.github.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+  ! Cross-Origin-Opener-Policy
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
