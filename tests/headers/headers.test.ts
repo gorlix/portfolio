@@ -103,6 +103,16 @@ describe('_headers', () => {
     expect(rules.find((r) => r.path === '/admin/*')?.headers['X-Robots-Tag']).toContain('noindex');
   });
 
+  it('/admin/*: COOP same-origin-allow-popups (il popup di login deve poter rispondere al pannello)', () => {
+    const h = rules.find((r) => r.path === '/admin/*')?.headers ?? {};
+    expect(h['! Cross-Origin-Opener-Policy']).toBeDefined();
+    expect(h['Cross-Origin-Opener-Policy']).toBe('same-origin-allow-popups');
+    // Pages unisce i valori: senza il detach il risultato sarebbe invalido.
+    expect(rules.find((r) => r.path === '/*')?.headers['Cross-Origin-Opener-Policy']).toBe(
+      'same-origin',
+    );
+  });
+
   it('le CSP con unsafe-inline o script propri esistono solo per /admin (e /human, /, /en/)', () => {
     for (const rule of rules) {
       const value = rule.headers['Content-Security-Policy'] ?? '';
