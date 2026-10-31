@@ -987,11 +987,8 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                         </ul>
                       </dd>
                     </div>
-                    <div>
-                      <dt>{L.cv}</dt>
-                      <dd><a class="button" href={profile.cv} download>{L.cv}</a></dd>
-                    </div>
                   </dl>
+                  <p class="contact-cv"><a class="button" href={profile.cv} download>{L.cv}</a></p>
                 </article>
                 <article class="card" id="contatti-logout" data-moment="logout">
                   <p class="farewell">
@@ -1890,6 +1887,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     display: grid;
     gap: 0.5rem;
     margin: 1rem 0 0;
+  }
+  .contact-cv {
+    margin: 0.75rem 0 0;
   }
   .facts dt {
     font-family: var(--font-mono);
