@@ -259,7 +259,7 @@ for (const route of ['/human/', '/en/human/']) {
 
   test.describe('reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test(`${route}: Homelab, Domotica e micro-scene ferme`, async ({ page }) => {
+    test(`${route}: Homelab e Domotica ferme`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'networkidle' });
       await nearScene(page);
       // Homelab immersiva (PORT-76): un fotogramma statico per momento, mai un ciclo di animazione.
@@ -282,7 +282,7 @@ for (const route of ['/human/', '/en/human/']) {
       await certificazioni.scrollIntoViewIfNeeded();
       await expect.poll(() => certificazioni.getAttribute('data-scene-state')).toBe('static');
       await expect(certificazioni.locator('canvas')).toBeAttached();
-      // Immersiva: un fotogramma per momento, nessun avanzamento da micro-scena.
+      // Immersiva: un fotogramma per momento, nessun avanzamento.
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(200);
       expect(await certificazioni.getAttribute('data-scene-state')).toBe('static');
@@ -297,15 +297,13 @@ for (const route of ['/human/', '/en/human/']) {
     });
   });
 
-  // Micro-scene (PORT-58): avanzamento legato allo scroll, mai scroll bloccato. Campione:
-  // Contatti, l'ultima rimasta.
-  const micro = (page: Page) => page.locator('[data-scene="contatti"]');
-  /** Porta il bordo superiore della micro-scena a `fraction` dell'altezza del viewport. */
-  const placeMicro = (page: Page, fraction: number) =>
-    micro(page).evaluate((el, f) => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, top - window.innerHeight * f);
-    }, fraction);
+  // Contatti immersiva (PORT-99): la scrivania, due schede guidate dallo scroll.
+  const contatti = (page: Page) => page.locator('[data-scene="contatti"]');
+  const centreContatti = (page: Page, moment: string) =>
+    page.locator(`#contatti [data-moment="${moment}"]`).evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      window.scrollTo(0, box.top + window.scrollY + box.height / 2 - window.innerHeight / 2);
+    });
 
   // Scrivania della Home (PORT-79): parte da sola, dopo il primo contenuto visibile.
   const desk = (page: Page) => page.locator('#home [data-scene="scrivania"]');
@@ -372,23 +370,20 @@ for (const route of ['/human/', '/en/human/']) {
     page.on('request', (r) => urls.push(r.url()));
     await page.goto(route, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
-    expect(await micro(page).getAttribute('data-scene-state')).toBe('idle');
+    expect(await contatti(page).getAttribute('data-scene-state')).toBe('idle');
     expect(urls.filter(isLazyScene)).toEqual([]);
   });
 
-  test(`${route}: la micro-scena non blocca ne dirotta lo scroll`, async ({ page }) => {
+  test(`${route}: Contatti non blocca ne dirotta lo scroll`, async ({ page }) => {
     await page.goto(route);
-    await placeMicro(page, 0.6);
-    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
-    const canvas = micro(page).locator('canvas');
+    await centreContatti(page, 'write');
+    await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('running');
+    const canvas = contatti(page).locator('canvas');
     expect(await canvas.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none');
 
     // Rotella sopra la scena: la pagina scorre di quanto chiesto, ne piu ne meno.
-    const box = await micro(page).boundingBox();
-    if (!box) throw new Error('micro-scena senza riquadro');
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.move(640, 80);
     const before = await page.evaluate(() => window.scrollY);
-    // Contatti sta in fondo alla pagina: si sale e poi si riscende.
     await page.mouse.wheel(0, -400);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before - 400);
     await page.waitForTimeout(400);
@@ -398,7 +393,7 @@ for (const route of ['/human/', '/en/human/']) {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
   });
 
-  test(`${route}: fuori schermo la micro-scena si ferma e non chiede fotogrammi`, async ({
+  test(`${route}: Contatti a scroll fermo e fuori schermo non chiede fotogrammi`, async ({
     page,
   }) => {
     await page.addInitScript(() => {
@@ -417,62 +412,45 @@ for (const route of ['/human/', '/en/human/']) {
         timeout: 15_000,
       })
       .not.toMatch(/^(idle|loading)$/);
-    // Le scene immersive (scrivania, albero, casa) animano di continuo mentre sono visibili: si
-    // nascondono, qui conta solo la micro-scena.
-    await page.addStyleTag({ content: '[data-story] .stage { display: none; }' });
-    await placeMicro(page, 0.5);
-    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('running');
-    // Ferma sullo scroll: la rincorsa si assesta e non chiede altri fotogrammi.
-    await page.waitForTimeout(800);
+    // Le altre scene immersive animano di continuo mentre sono visibili: si nascondono.
+    await page.addStyleTag({ content: '[data-story]:not(#contatti) .stage { display: none; }' });
+    await centreContatti(page, 'write');
+    await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('running');
+    // Ferma sullo scroll: accensione e rincorsa finiscono e non chiede altri fotogrammi.
+    await page.waitForTimeout(2500);
     const frames = () => page.evaluate(() => (window as Window & { __frames?: number }).__frames);
     const settled = await frames();
     await page.waitForTimeout(400);
     expect(await frames()).toBe(settled);
 
     await page.evaluate(() => window.scrollTo(0, 0));
-    await expect.poll(() => micro(page).getAttribute('data-scene-state')).toBe('paused');
+    await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('paused');
   });
 
-  // Micro-scena sobria (PORT-64): Contatti, stesso contratto di Lavori.
-  for (const name of ['contatti']) {
-    const box = (page: Page) => page.locator(`[data-scene="${name}"]`);
-    const place = (page: Page, fraction: number) =>
-      box(page).evaluate((el, f) => {
-        const top = el.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo(0, top - window.innerHeight * f);
-      }, fraction);
-    const value = async (page: Page) =>
-      Number((await box(page).getAttribute('data-scene-progress')) ?? Number.NaN);
+  test(`${route}: Contatti segue le schede fino al logout`, async ({ page }) => {
+    await page.goto(route);
+    await centreContatti(page, 'write');
+    await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('running');
+    await expect(contatti(page).locator('canvas')).toBeAttached();
+    const section = page.locator('#contatti');
+    for (const moment of ['write', 'logout']) {
+      await centreContatti(page, moment);
+      await expect(section).toHaveAttribute('data-phase', 'cards');
+      await expect(section).toHaveAttribute('data-moment', moment);
+    }
+    await expect(section.locator('.farewell a')).toBeInViewport();
+  });
 
-    test(`${route}: micro-scena ${name} avanza con lo scroll e torna indietro`, async ({
-      page,
-    }) => {
-      await page.goto(route);
-      await place(page, 0.65);
-      await expect.poll(() => box(page).getAttribute('data-scene-state')).toBe('running');
-      await expect(box(page).locator('canvas')).toBeAttached();
-      const start = await value(page);
-      await place(page, 0.3);
-      await expect.poll(() => value(page)).toBeGreaterThan(start);
-      const later = await value(page);
-      await place(page, 0.7);
-      await expect.poll(() => value(page)).toBeLessThan(later);
-    });
-
-    test.describe(`reduced motion ${name}`, () => {
-      test.use({ reducedMotion: 'reduce' });
-      test(`${route}: micro-scena ${name} statica sul fotogramma finale`, async ({ page }) => {
-        await page.goto(route);
-        await box(page).scrollIntoViewIfNeeded();
-        await expect.poll(() => box(page).getAttribute('data-scene-state')).toBe('static');
-        await expect(box(page).locator('canvas')).toBeAttached();
-        await page.mouse.wheel(0, 300);
-        await page.waitForTimeout(200);
-        expect(await box(page).getAttribute('data-scene-state')).toBe('static');
-        expect(await box(page).getAttribute('data-scene-progress')).toBeNull();
-      });
-    });
-  }
+  test(`${route}: Contatti con reduced-motion e un fotogramma statico`, async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto(route, { waitUntil: 'networkidle' });
+    await centreContatti(page, 'write');
+    await expect.poll(() => contatti(page).getAttribute('data-scene-state')).toBe('static');
+    await expect(page.locator('#contatti .poster img')).toBeHidden();
+    expect(await contatti(page).getAttribute('data-scene-progress')).toBeNull();
+    await context.close();
+  });
 
   test(`${route}: dai contatti il ritorno alla scelta si raggiunge da tastiera`, async ({
     page,

@@ -740,6 +740,16 @@ collections:
               - name: posterSubject
                 i18n: true
                 widget: string
+          - name: contatti
+            i18n: true
+            widget: object
+            fields:
+              - name: posterSubject
+                i18n: true
+                widget: string
+              - name: write
+                i18n: true
+                widget: string
           - name: beneficenza
             i18n: true
             widget: object

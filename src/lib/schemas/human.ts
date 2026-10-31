@@ -159,6 +159,11 @@ export const humanSchema = z.strictObject({
   interessi: z.strictObject({
     posterSubject: text,
   }),
+  /** Sezione Contatti immersiva (PORT-99): la scrivania e il titolo della scheda dei canali. */
+  contatti: z.strictObject({
+    posterSubject: text,
+    write: text,
+  }),
   /** Sezione Beneficenza immersiva (PORT-93): il territorio; le schede sono i topic `beneficenza`. */
   beneficenza: z.strictObject({
     posterSubject: text,
@@ -430,6 +435,8 @@ export const humanTranslatable = [
   'scenes.sport',
   'sport.posterSubject',
   'interessi.posterSubject',
+  'contatti.posterSubject',
+  'contatti.write',
   'beneficenza.posterSubject',
   'scenes.scrivania',
 ];
