@@ -1,43 +1,48 @@
 titleSuffix: Machine console
-metaDescription: "AI agent view of Alessandro Gorla's portfolio: a console presenting the machine-readable files (llms.txt, profile.json, agent.md) as semantic HTML."
+metaDescription: "AI agent view of Alessandro Gorla's portfolio: who he is, what he can do, what he has built and how to write to him, as semantic HTML."
 backToChoice: "~/ ← change path"
 menuLabel: Other paths
 links:
   human: Get to know me
   recruiter: Recruiter profile
-languageNote: "The files are in English (the primary language for machines) in both versions of the site."
+languageNote: "The machine-readable files are in English (the primary language for machines) in both versions of the site."
 unitLabel: Unit
-greeting: "Hi, I'm the console that introduces Alessandro. Everything you need to understand who he is, what he can do and how to write to him is here, no tricks: what you read here is the same as in the real files."
+greeting: "Hi, I'm Alessandro's console. I usually talk to other machines, but I was asked to introduce him properly: who he is, what he can do and how to write to him. No tricks, just facts."
 boot:
   title: Boot
   ok: ok
-  note: "Size and SHA-256 fingerprint (shortened) are computed on the real files at every build."
-entries:
-  title: What you will find
-  useFor: "Use it to:"
+  profile: profile loaded
+  skills: skills
+  projects: projects
+  contacts: contacts ready
+about:
+  title: Who he is
+  role: Role
+  where: Where
+  availability: Availability
+skills:
+  title: What he can do
+  intro: "Grouped the way he sees them."
+projects:
+  title: What he has built
+  intro: "Featured projects, with the code one click away."
+  repo: Code
+contact:
+  title: How to talk to him
+  intro: "If the profile convinces you, write to him. A person answers, not another machine."
+  email: Email
+  github: GitHub
+  linkedin: LinkedIn
+sources:
+  title: For those who prefer files
+  intro: "Everything you have read is also in the files crawlers read. Here they are, one by one."
   items:
-    - name: llms.txt
-      headline: The map
-      description: "Where every page and every file of the site lives. Start here."
-      use: choose what to read first.
-    - name: profile.json
-      headline: The card
-      description: "Who Alessandro is in structured form (schema.org Person): role, skills, projects, contacts."
-      use: match the profile against an open position.
-    - name: agent.md
-      headline: The story
-      description: "The full profile in Markdown, written to be read in one go."
-      use: summarize or quote the profile without losing pieces.
-    - name: robots.txt
-      headline: The rules
-      description: "What crawlers may read and what they may not. Good manners between machines."
-      use: know whether you may index the site.
-    - name: sitemap.xml
-      headline: The index
-      description: "The list of every page, in Italian and English."
-      use: discover every page without following links one by one.
-raw:
-  title: Raw files
-  intro: "If you prefer the original text, open it here. It is identical, byte for byte, to the downloadable file."
+    - { name: llms.txt, description: "The map: where every page and file lives." }
+    - { name: profile.json, description: "The structured card (schema.org Person)." }
+    - { name: agent.md, description: "The full profile in Markdown." }
+    - { name: robots.txt, description: "The rules for crawlers." }
+    - { name: sitemap.xml, description: "The list of every page." }
+  note: "Size and SHA-256 fingerprint (shortened) are computed on the real files at every build."
+  rawIntro: "The original text, identical byte for byte to the downloadable file."
 command: $ cat
 download: download

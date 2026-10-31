@@ -2,12 +2,15 @@ import { expect, test } from '@playwright/test';
 
 for (const route of ['/agent/', '/en/agent/']) {
   test.describe(route, () => {
-    test('console con avvio, voci descrittive, file grezzi e download', async ({ page }) => {
+    test('presentazione umana, contatti, file in fondo e download', async ({ page }) => {
       await page.goto(route);
       await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-      await expect(page.getByRole('heading', { level: 2 })).toHaveCount(3);
-      await expect(page.locator('ul.boot li')).toHaveCount(5);
-      await expect(page.locator('ul.entries li')).toHaveCount(5);
+      await expect(page.getByRole('heading', { level: 2 })).toHaveCount(5);
+      await expect(page.locator('ul.boot li')).toHaveCount(4);
+      await expect(page.locator('ul.files li')).toHaveCount(5);
+      await expect(
+        page.locator('section[aria-labelledby="contact"] a[href^="mailto:"]'),
+      ).toHaveCount(1);
       await expect(page.locator('details > pre > code')).toHaveCount(3);
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'mocha');
       for (const file of ['llms.txt', 'profile.json', 'agent.md', 'robots.txt', 'sitemap.xml']) {

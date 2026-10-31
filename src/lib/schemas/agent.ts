@@ -25,30 +25,38 @@ export const agentSchema = z.strictObject({
   greeting: text,
   boot: z.strictObject({
     title: text,
-    /** Stato mostrato per ogni file generato alla build. */
+    /** Stato mostrato davanti a ogni riga di avvio. */
     ok: text,
-    /** Spiega che peso e impronta sono calcolati sui file veri. */
-    note: text,
+    profile: text,
+    skills: text,
+    projects: text,
+    contacts: text,
   }),
-  entries: z.strictObject({
+  about: z.strictObject({
     title: text,
-    /** Prefisso davanti a "usalo per" (stessa lingua del testo). */
-    useFor: text,
-    /** Una voce per file nella root, nell'ordine di `agentFileIds`. */
-    items: z
-      .array(
-        z.strictObject({
-          name: z.enum(agentFileIds),
-          headline: text,
-          description: text,
-          use: text,
-        }),
-      )
-      .length(agentFileIds.length),
+    role: text,
+    where: text,
+    availability: text,
   }),
-  raw: z.strictObject({
+  skills: z.strictObject({ title: text, intro: text }),
+  projects: z.strictObject({ title: text, intro: text, repo: text }),
+  contact: z.strictObject({
     title: text,
     intro: text,
+    email: text,
+    github: text,
+    linkedin: text,
+  }),
+  sources: z.strictObject({
+    title: text,
+    intro: text,
+    /** Una voce per file nella root, nell'ordine di `agentFileIds`. */
+    items: z
+      .array(z.strictObject({ name: z.enum(agentFileIds), description: text }))
+      .length(agentFileIds.length),
+    /** Spiega che peso e impronta sono calcolati sui file reali. */
+    note: text,
+    rawIntro: text,
   }),
   /** Prefisso del comando mostrato prima del nome del file. Identico nelle due lingue. */
   command: text,
@@ -67,13 +75,26 @@ export const agentTranslatable = [
   'greeting',
   'boot.title',
   'boot.ok',
-  'boot.note',
-  'entries.title',
-  'entries.useFor',
-  'entries.items.*.headline',
-  'entries.items.*.description',
-  'entries.items.*.use',
-  'raw.title',
-  'raw.intro',
+  'boot.profile',
+  'boot.skills',
+  'boot.projects',
+  'boot.contacts',
+  'about.title',
+  'about.role',
+  'about.where',
+  'about.availability',
+  'skills.title',
+  'skills.intro',
+  'projects.title',
+  'projects.intro',
+  'projects.repo',
+  'contact.title',
+  'contact.intro',
+  'contact.email',
+  'sources.title',
+  'sources.intro',
+  'sources.items.*.description',
+  'sources.note',
+  'sources.rawIntro',
   'download',
 ];

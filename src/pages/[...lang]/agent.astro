@@ -7,6 +7,7 @@ import {
   machineFileNames,
   renderMachineFiles,
 } from '../../lib/machine/files';
+import { loadMachineModel } from '../../lib/machine/model';
 import { loadJsonLd } from '../../lib/machine/page-jsonld';
 import type { Locale } from '../../lib/schemas/common';
 
@@ -19,6 +20,15 @@ const [page, profile, files] = await Promise.all([
   renderMachineFiles(),
 ]);
 const info = await describeMachineFiles(files);
+const model = await loadMachineModel();
+const skillGroups = new Map<string, string[]>();
+for (const sk of model.skills) {
+  const g = sk.group[locale];
+  skillGroups.set(g, [...(skillGroups.get(g) ?? []), sk.name]);
+}
+const featured = model.projects.filter((pr) => pr.featured);
+const projectsShown = featured.length > 0 ? featured : model.projects;
+const infoByName = new Map(info.map((f) => [f.name, f]));
 const here = (path: string) => localizedPath(path, locale);
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const size = (bytes: number) => `${(bytes / 1024).toFixed(1)} KB`;
@@ -61,46 +71,84 @@ const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^ 
         <div class="intro">
           <h1>{profile.name} · {page.titleSuffix}</h1>
           <p class="greeting">{page.greeting}</p>
-          <p class="note">{page.languageNote}</p>
+          <ul class="boot" aria-label={page.boot.title}>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.profile}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.skills}: {model.skills.length}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.projects}: {model.projects.length}</li>
+            <li><span class="ok">[ {page.boot.ok} ]</span> {page.boot.contacts}</li>
+          </ul>
         </div>
       </section>
 
-      <section aria-labelledby="boot">
-        <h2 id="boot">{page.boot.title}</h2>
-        <ul class="boot">
+      <section aria-labelledby="about">
+        <h2 id="about">{page.about.title}</h2>
+        <dl class="facts">
+          <div><dt>{page.about.role}</dt><dd>{profile.role}</dd></div>
+          <div><dt>{page.about.where}</dt><dd>{profile.location}</dd></div>
+          {profile.availability && <div><dt>{page.about.availability}</dt><dd>{profile.availability}</dd></div>}
+        </dl>
+        {profile.tagline && <p class="lead">{profile.tagline}</p>}
+      </section>
+
+      <section aria-labelledby="skills">
+        <h2 id="skills">{page.skills.title}</h2>
+        <p class="caption">{page.skills.intro}</p>
+        <dl class="groups">
           {
-            info.map((f) => (
+            [...skillGroups].map(([group, names]) => (
+              <div>
+                <dt>{group}</dt>
+                <dd>{names.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <section aria-labelledby="projects">
+        <h2 id="projects">{page.projects.title}</h2>
+        <p class="caption">{page.projects.intro}</p>
+        <ul class="plain">
+          {
+            projectsShown.map((pr) => (
               <li>
-                <span class="ok">[ {page.boot.ok} ]</span>
-                <code class="fname">{f.name}</code>
-                <span class="meta">{size(f.bytes)}</span>
-                <span class="meta">sha256:{f.sha256}</span>
+                <p class="headline">{pr.name}</p>
+                {pr.description?.[locale] && <p>{pr.description[locale]}</p>}
+                {pr.repo && <p><a href={pr.repo}>{page.projects.repo}<span class="sr-only"> {pr.name}</span></a></p>}
               </li>
             ))
           }
         </ul>
-        <p class="caption">{page.boot.note}</p>
       </section>
 
-      <section aria-labelledby="entries">
-        <h2 id="entries">{page.entries.title}</h2>
-        <ul class="entries">
+      <section aria-labelledby="contact">
+        <h2 id="contact">{page.contact.title}</h2>
+        <p class="lead">{page.contact.intro}</p>
+        <dl class="facts">
+          <div><dt>{page.contact.email}</dt><dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd></div>
+          <div><dt>{page.contact.github}</dt><dd><a href={profile.links.github}>{profile.links.github}</a></dd></div>
+          <div><dt>{page.contact.linkedin}</dt><dd><a href={profile.links.linkedin}>{profile.links.linkedin}</a></dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="sources">
+        <h2 id="sources">{page.sources.title}</h2>
+        <p class="caption">{page.sources.intro}</p>
+        <p class="caption">{page.languageNote}</p>
+        <ul class="plain files">
           {
-            page.entries.items.map((e) => (
+            page.sources.items.map((e) => (
               <li>
-                <p class="headline">{e.headline} <code class="fname">{e.name}</code></p>
-                <p>{e.description}</p>
-                <p class="use">{page.entries.useFor} {e.use}</p>
-                <p><a href={`/${e.name}`} download>{page.download}<span class="sr-only"> {e.name}</span></a></p>
+                <code class="fname">{e.name}</code>
+                <span>{e.description}</span>
+                <span class="meta">{size(infoByName.get(e.name)?.bytes ?? 0)} · sha256:{infoByName.get(e.name)?.sha256}</span>
+                <a href={`/${e.name}`} download>{page.download}<span class="sr-only"> {e.name}</span></a>
               </li>
             ))
           }
         </ul>
-      </section>
-
-      <section aria-labelledby="raw">
-        <h2 id="raw">{page.raw.title}</h2>
-        <p class="caption">{page.raw.intro}</p>
+        <p class="caption">{page.sources.note}</p>
+        <p class="caption">{page.sources.rawIntro}</p>
         {
           machineFileNames.map((name) => (
             <details>
@@ -197,40 +245,62 @@ const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^ 
   .greeting {
     margin: 0 0 0.5rem;
   }
-  .note,
   .caption {
     margin: 0.5rem 0 0;
     color: var(--text-muted);
     font-size: 0.8125rem;
   }
   ul.boot,
-  ul.entries {
+  ul.plain {
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .boot li {
-    display: grid;
-    grid-template-columns: 3.5rem minmax(0, 1fr) 5rem 9.5rem;
-    gap: 0 0.75rem;
-    padding: 0.125rem 0;
+  .boot {
+    margin-top: 0.75rem !important;
     font-size: 0.875rem;
   }
   .ok {
     color: var(--sec-homelab-ink);
   }
-  .meta {
+  .lead {
+    margin: 0.75rem 0 0;
+  }
+  .facts {
+    margin: 0;
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding: 0.125rem 0;
+    font-size: 0.875rem;
+  }
+  .facts dt,
+  .groups dt {
     color: var(--text-muted);
-    text-align: right;
   }
-  .entries li {
-    padding: 0.75rem 0;
+  .facts dd,
+  .groups dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .groups div {
+    padding: 0.375rem 0;
     border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
   }
-  .entries li:last-child {
+  .groups div:last-child {
     border-bottom: 0;
   }
-  .entries p {
+  .plain li {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .plain li:last-child {
+    border-bottom: 0;
+  }
+  .plain p {
     margin: 0.125rem 0 0;
     font-size: 0.875rem;
   }
@@ -238,13 +308,17 @@ const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^ 
     font-size: 1rem !important;
     font-weight: 700;
   }
-  .fname {
-    font-weight: 400;
-    color: var(--text-muted);
+  .files li {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) auto auto;
+    gap: 0 1rem;
     font-size: 0.8125rem;
   }
-  .use {
+  .meta {
     color: var(--text-muted);
+  }
+  .fname {
+    font-size: 0.8125rem;
   }
   details {
     margin-top: 0.5rem;
@@ -292,7 +366,6 @@ const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^ 
   .boot li:nth-child(2) { animation-delay: 0.25s; }
   .boot li:nth-child(3) { animation-delay: 0.4s; }
   .boot li:nth-child(4) { animation-delay: 0.55s; }
-  .boot li:nth-child(5) { animation-delay: 0.7s; }
   @media (prefers-reduced-motion: reduce) {
     .boot li {
       animation: none;
@@ -303,12 +376,11 @@ const mascot = ['    ,', '  .-"-.', ' ( o o )', " /'-v-'\\", '/(     )\\', ' ^^ 
     .hero {
       grid-template-columns: 1fr;
     }
-    .boot li {
-      grid-template-columns: 3rem minmax(0, 1fr);
+    .facts div {
+      grid-template-columns: 1fr;
     }
-    .boot .meta {
-      grid-column: 2;
-      text-align: left;
+    .files li {
+      grid-template-columns: 1fr;
     }
   }
 </style>

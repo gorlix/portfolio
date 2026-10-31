@@ -137,17 +137,84 @@ collections:
               - name: ok
                 i18n: true
                 widget: string
-              - name: note
+              - name: profile
                 i18n: true
-                widget: text
-          - name: entries
+                widget: string
+              - name: skills
+                i18n: true
+                widget: string
+              - name: projects
+                i18n: true
+                widget: string
+              - name: contacts
+                i18n: true
+                widget: string
+          - name: about
             i18n: true
             widget: object
             fields:
               - name: title
                 i18n: true
                 widget: string
-              - name: useFor
+              - name: role
+                i18n: true
+                widget: string
+              - name: where
+                i18n: true
+                widget: string
+              - name: availability
+                i18n: true
+                widget: string
+          - name: skills
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
+          - name: projects
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
+              - name: repo
+                i18n: true
+                widget: string
+          - name: contact
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
+              - name: email
+                i18n: true
+                widget: string
+              - name: github
+                i18n: duplicate
+                widget: string
+              - name: linkedin
+                i18n: duplicate
+                widget: string
+          - name: sources
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: intro
                 i18n: true
                 widget: string
               - name: items
@@ -165,23 +232,13 @@ collections:
                       - agent.md
                       - robots.txt
                       - sitemap.xml
-                  - name: headline
-                    i18n: true
-                    widget: string
                   - name: description
                     i18n: true
                     widget: text
-                  - name: use
-                    i18n: true
-                    widget: string
-          - name: raw
-            i18n: true
-            widget: object
-            fields:
-              - name: title
+              - name: note
                 i18n: true
-                widget: string
-              - name: intro
+                widget: text
+              - name: rawIntro
                 i18n: true
                 widget: string
           - name: command
