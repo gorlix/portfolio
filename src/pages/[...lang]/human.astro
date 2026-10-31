@@ -1274,6 +1274,13 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     max-width: 32rem;
     margin: 0 0 1rem 0.5rem;
   }
+  /* Banco e vetrata sono chiari dietro il testo: fondo proprio, cosi l'intro resta AA. */
+  section[data-section="interessi"] .hero .intro {
+    width: fit-content;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+  }
   @media (scripting: enabled) {
     section[data-story] > .hero {
       box-sizing: border-box;
