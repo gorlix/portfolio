@@ -68,7 +68,7 @@ export function shotsFor(portrait: boolean): Record<string, Shot> {
   // Schermo stretto: strette e dall'alto, il piano del banco riempie anche il fondo. Il punto
   // guardato sta dietro l'oggetto: sotto il titolo e sopra la scheda, mai coperto.
   if (portrait) {
-    table.overview = { target: [-30, 8.2, 2], from: [-1, 0.55, 0.22], spanH: 40, spanW: 15 };
+    table.overview = { target: [-26, 11, 2], from: [-1, 0.55, 0.22], spanH: 60, spanW: 15 };
     interessiOrder.forEach((slug, i) => {
       const x = stationX(i) + (slug === 'food' ? 0.5 : -1);
       // La scheda del tablet e la piu alta: oggetto un po' piu piccolo, pinguino sempre in vista.
