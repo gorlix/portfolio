@@ -3,7 +3,9 @@ backend:
   name: github
   repo: gorlix/portfolio
   branch: main
-publish_mode: simple
+  base_url: https://sveltia-cms-auth.ale-gorla2002.workers.dev
+  auth_scope: public_repo
+publish_mode: editorial_workflow
 media_folder: public/cv
 public_folder: /cv
 site_url: https://alessandrogorla.it
