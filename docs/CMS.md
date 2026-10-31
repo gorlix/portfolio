@@ -36,6 +36,7 @@ Come e configurata:
 - `backend.base_url` = origine del Worker, `backend.auth_scope: public_repo` (il repo e pubblico: niente accesso ai repository privati dell'account), `publish_mode: editorial_workflow` (in `src/lib/cms/config.ts`).
 - **Salvataggi**: ogni modifica crea un branch e una PR; **Publish** nel CMS fa il merge della PR. Non si scrive mai direttamente su `main`. Attenzione: `main` ha `enforce_admins: false`, quindi chi e admin del repo puo pubblicare anche prima che la CI finisca; controlla i check della PR prima di premere Publish.
 - **CSP** `/admin/*` (`public/_headers`): `connect-src` aggiunge solo `https://api.github.com`, `img-src` solo `https://avatars.githubusercontent.com` (avatar). Il popup del Worker non passa dalla CSP. Il test in `tests/headers` ammette solo queste due origini.
+- **COOP** `/admin/*` (`public/_headers`): `same-origin-allow-popups` solo qui. Il `same-origin` globale taglia `window.opener` e il popup di login resta bianco; il resto del sito non cambia.
 
 Setup (una tantum, a cura di Alessandro):
 
