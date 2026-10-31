@@ -1,21 +1,43 @@
-titleSuffix: Vista macchina
-metaDescription: "Vista per agenti AI del portfolio di Alessandro Gorla: gli stessi file che leggono i crawler (llms.txt, profile.json, agent.md), in HTML semantico."
+titleSuffix: Console macchina
+metaDescription: "Vista per agenti AI del portfolio di Alessandro Gorla: una console che presenta i file per macchine (llms.txt, profile.json, agent.md) in HTML semantico."
 backToChoice: "~/ ← cambia percorso"
 menuLabel: Altri percorsi
 links:
   human: Conoscimi meglio
   recruiter: Profilo per recruiter
 languageNote: "I file sono in inglese (lingua principale per le macchine) in entrambe le versioni del sito."
+unitLabel: Unità
+greeting: "Ciao, sono la console che presenta Alessandro. Qui trovi tutto ciò che serve per capire chi è, cosa sa fare e come scrivergli, senza trucchi: ciò che leggi qui è lo stesso che c'è nei file veri."
+boot:
+  title: Avvio
+  ok: ok
+  note: "Peso e impronta SHA-256 (abbreviata) sono calcolati sui file reali a ogni build."
+entries:
+  title: Cosa trovi qui
+  useFor: "Usalo per:"
+  items:
+    - name: llms.txt
+      headline: La mappa
+      description: "Dove si trova ogni pagina del sito e ogni file. Si parte da qui."
+      use: scegliere cosa leggere per primo.
+    - name: profile.json
+      headline: La scheda
+      description: "Chi è Alessandro in forma strutturata (schema.org Person): ruolo, competenze, progetti, contatti."
+      use: confrontare il profilo con una posizione aperta.
+    - name: agent.md
+      headline: Il racconto
+      description: "Il profilo completo in Markdown, scritto per essere letto in una volta sola."
+      use: riassumere o citare il profilo senza perdere pezzi.
+    - name: robots.txt
+      headline: Le regole
+      description: "Cosa possono leggere i crawler e cosa no. Buone maniere tra macchine."
+      use: sapere se puoi indicizzare il sito.
+    - name: sitemap.xml
+      headline: L'indice
+      description: "L'elenco di tutte le pagine, in italiano e in inglese."
+      use: scoprire ogni pagina senza seguire i link uno a uno.
+raw:
+  title: File grezzi
+  intro: "Se preferisci il testo originale, aprilo qui. È identico, byte per byte, a quello scaricabile."
 command: $ cat
 download: scarica
-table:
-  caption: File per macchine nella root del sito
-  file: File
-  description: Contenuto
-  link: Link
-files:
-  - { name: llms.txt, description: Indice delle pagine e dei file }
-  - { name: profile.json, description: Profilo strutturato (schema.org Person) }
-  - { name: agent.md, description: Profilo completo in Markdown }
-  - { name: robots.txt, description: Regole per i crawler }
-  - { name: sitemap.xml, description: Mappa del sito }

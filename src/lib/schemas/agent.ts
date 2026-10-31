@@ -19,19 +19,40 @@ export const agentSchema = z.strictObject({
   links: z.strictObject({ human: text, recruiter: text }),
   /** Spiega che i file sono in inglese in entrambe le lingue del sito. */
   languageNote: text,
+  /** Etichetta davanti al ruolo nella barra della console. */
+  unitLabel: text,
+  /** Saluto della macchina: due frasi brevi, calde. */
+  greeting: text,
+  boot: z.strictObject({
+    title: text,
+    /** Stato mostrato per ogni file generato alla build. */
+    ok: text,
+    /** Spiega che peso e impronta sono calcolati sui file veri. */
+    note: text,
+  }),
+  entries: z.strictObject({
+    title: text,
+    /** Prefisso davanti a "usalo per" (stessa lingua del testo). */
+    useFor: text,
+    /** Una voce per file nella root, nell'ordine di `agentFileIds`. */
+    items: z
+      .array(
+        z.strictObject({
+          name: z.enum(agentFileIds),
+          headline: text,
+          description: text,
+          use: text,
+        }),
+      )
+      .length(agentFileIds.length),
+  }),
+  raw: z.strictObject({
+    title: text,
+    intro: text,
+  }),
   /** Prefisso del comando mostrato prima del nome del file. Identico nelle due lingue. */
   command: text,
   download: text,
-  table: z.strictObject({
-    caption: text,
-    file: text,
-    description: text,
-    link: text,
-  }),
-  /** Una riga per file nella root, nell'ordine di tabella. */
-  files: z
-    .array(z.strictObject({ name: z.enum(agentFileIds), description: text }))
-    .length(agentFileIds.length),
 });
 
 export const agentTranslatable = [
@@ -42,10 +63,17 @@ export const agentTranslatable = [
   'links.human',
   'links.recruiter',
   'languageNote',
+  'unitLabel',
+  'greeting',
+  'boot.title',
+  'boot.ok',
+  'boot.note',
+  'entries.title',
+  'entries.useFor',
+  'entries.items.*.headline',
+  'entries.items.*.description',
+  'entries.items.*.use',
+  'raw.title',
+  'raw.intro',
   'download',
-  'table.caption',
-  'table.file',
-  'table.description',
-  'table.link',
-  'files.*.description',
 ];

@@ -1,21 +1,43 @@
-titleSuffix: Machine view
-metaDescription: "AI agent view of Alessandro Gorla's portfolio: the same files crawlers read (llms.txt, profile.json, agent.md), as semantic HTML."
+titleSuffix: Machine console
+metaDescription: "AI agent view of Alessandro Gorla's portfolio: a console presenting the machine-readable files (llms.txt, profile.json, agent.md) as semantic HTML."
 backToChoice: "~/ ← change path"
 menuLabel: Other paths
 links:
   human: Get to know me
   recruiter: Recruiter profile
 languageNote: "The files are in English (the primary language for machines) in both versions of the site."
+unitLabel: Unit
+greeting: "Hi, I'm the console that introduces Alessandro. Everything you need to understand who he is, what he can do and how to write to him is here, no tricks: what you read here is the same as in the real files."
+boot:
+  title: Boot
+  ok: ok
+  note: "Size and SHA-256 fingerprint (shortened) are computed on the real files at every build."
+entries:
+  title: What you will find
+  useFor: "Use it to:"
+  items:
+    - name: llms.txt
+      headline: The map
+      description: "Where every page and every file of the site lives. Start here."
+      use: choose what to read first.
+    - name: profile.json
+      headline: The card
+      description: "Who Alessandro is in structured form (schema.org Person): role, skills, projects, contacts."
+      use: match the profile against an open position.
+    - name: agent.md
+      headline: The story
+      description: "The full profile in Markdown, written to be read in one go."
+      use: summarize or quote the profile without losing pieces.
+    - name: robots.txt
+      headline: The rules
+      description: "What crawlers may read and what they may not. Good manners between machines."
+      use: know whether you may index the site.
+    - name: sitemap.xml
+      headline: The index
+      description: "The list of every page, in Italian and English."
+      use: discover every page without following links one by one.
+raw:
+  title: Raw files
+  intro: "If you prefer the original text, open it here. It is identical, byte for byte, to the downloadable file."
 command: $ cat
 download: download
-table:
-  caption: Machine-readable files in the site root
-  file: File
-  description: Contents
-  link: Link
-files:
-  - { name: llms.txt, description: Index of pages and files }
-  - { name: profile.json, description: Structured profile (schema.org Person) }
-  - { name: agent.md, description: Full profile in Markdown }
-  - { name: robots.txt, description: Crawler policy }
-  - { name: sitemap.xml, description: Sitemap }

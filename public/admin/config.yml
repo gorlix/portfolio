@@ -121,46 +121,75 @@ collections:
           - name: languageNote
             i18n: true
             widget: text
+          - name: unitLabel
+            i18n: true
+            widget: string
+          - name: greeting
+            i18n: true
+            widget: string
+          - name: boot
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: ok
+                i18n: true
+                widget: string
+              - name: note
+                i18n: true
+                widget: text
+          - name: entries
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: useFor
+                i18n: true
+                widget: string
+              - name: items
+                i18n: true
+                widget: list
+                min: 5
+                max: 5
+                fields:
+                  - name: name
+                    i18n: duplicate
+                    widget: select
+                    options:
+                      - llms.txt
+                      - profile.json
+                      - agent.md
+                      - robots.txt
+                      - sitemap.xml
+                  - name: headline
+                    i18n: true
+                    widget: string
+                  - name: description
+                    i18n: true
+                    widget: text
+                  - name: use
+                    i18n: true
+                    widget: string
+          - name: raw
+            i18n: true
+            widget: object
+            fields:
+              - name: title
+                i18n: true
+                widget: string
+              - name: intro
+                i18n: true
+                widget: string
           - name: command
             i18n: duplicate
             widget: string
           - name: download
             i18n: true
             widget: string
-          - name: table
-            i18n: true
-            widget: object
-            fields:
-              - name: caption
-                i18n: true
-                widget: string
-              - name: file
-                i18n: true
-                widget: string
-              - name: description
-                i18n: true
-                widget: text
-              - name: link
-                i18n: true
-                widget: string
-          - name: files
-            i18n: true
-            widget: list
-            min: 5
-            max: 5
-            fields:
-              - name: name
-                i18n: duplicate
-                widget: select
-                options:
-                  - llms.txt
-                  - profile.json
-                  - agent.md
-                  - robots.txt
-                  - sitemap.xml
-              - name: description
-                i18n: true
-                widget: text
       - name: theme
         label: Theme
         file: src/content/theme/{{locale}}.yml
