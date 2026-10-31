@@ -34,7 +34,7 @@ export interface PenguinColors {
   /** Occhi. */
   eye: ColorRepresentation;
 }
-export type PenguinPose = 'stand' | 'run' | 'jump' | 'ride' | 'wave' | 'ski' | 'bagher';
+export type PenguinPose = 'stand' | 'run' | 'jump' | 'ride' | 'wave' | 'ski' | 'bagher' | 'sit';
 export interface PenguinJoints {
   body: Group;
   head: Group;
@@ -51,7 +51,7 @@ export interface Penguin {
   /**
    * Azzera ogni articolazione, poi applica `pose`. Significato di `phase`:
    * run/ride/wave: ciclo (periodo 1); jump: 0..1 lungo l'arco; ski: inclinazione -1..1 (curva);
-   * bagher: 0..1 intensita; stand: ignorata.
+   * bagher: 0..1 intensita; stand, sit: ignorata.
    */
   setPose(pose: PenguinPose, phase?: number): void;
   dispose(): void;
@@ -239,6 +239,15 @@ export function createPenguin(colors: PenguinColors): Penguin {
       flipperR.rotation.z = 0.55 + 0.1 * c;
       footL.position.z = 0.05;
       footR.position.z = -0.05;
+    } else if (pose === 'sit') {
+      // Seduto a terra: corpo basso e un po' indietro, piedi in avanti, pinne a riposo.
+      body.position.y -= 0.17;
+      body.rotation.x = -0.14;
+      head.rotation.x = 0.12;
+      for (const f of [footL, footR]) {
+        f.position.z = 0.26;
+        f.rotation.x = -0.9;
+      }
     } else if (pose === 'wave') {
       flipperR.rotation.z = 2.5 + 0.3 * s;
       flipperL.rotation.z = -0.15;

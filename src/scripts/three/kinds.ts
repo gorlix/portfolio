@@ -5,7 +5,7 @@ import type { SceneKind } from './capabilities';
  * non si toccano e con reduced-motion restano come fotogramma statico finale.
  * Modulo senza dipendenze, letto sia da Scene.astro (in build) sia dal bootstrap.
  */
-export const microScenes = ['contatti'] as const;
+export const microScenes = [] as const;
 
 /**
  * Scene immersive (spec §7.3, PORT-76): sfondo fisso della sezione, usabile nella prima schermata
@@ -23,6 +23,7 @@ export const immersiveScenes = [
   'sport',
   'interessi',
   'beneficenza',
+  'contatti',
 ] as const;
 
 export function sceneKind(name: string): SceneKind {

@@ -4,6 +4,8 @@ import beneficenzaPosterDesktopSrc from '../../assets/human/beneficenza-poster-d
 import beneficenzaPosterMobileSrc from '../../assets/human/beneficenza-poster-mobile.png';
 import certificazioniPosterDesktopSrc from '../../assets/human/certificazioni-poster-desktop.png';
 import certificazioniPosterMobileSrc from '../../assets/human/certificazioni-poster-mobile.png';
+import contattiPosterDesktopSrc from '../../assets/human/contatti-poster-desktop.png';
+import contattiPosterMobileSrc from '../../assets/human/contatti-poster-mobile.png';
 import domoticaPosterDesktopSrc from '../../assets/human/domotica-poster-desktop.png';
 import domoticaPosterMobileSrc from '../../assets/human/domotica-poster-mobile.png';
 import interessiPosterDesktopSrc from '../../assets/human/interessi-poster-desktop.png';
@@ -86,6 +88,8 @@ const [
   beneficenzaPosterMobile,
   interessiPosterDesktop,
   interessiPosterMobile,
+  contattiPosterDesktop,
+  contattiPosterMobile,
 ] = await Promise.all([
   poster(posterDesktopSrc),
   poster(posterMobileSrc),
@@ -101,6 +105,8 @@ const [
   poster(beneficenzaPosterMobileSrc),
   poster(interessiPosterDesktopSrc),
   poster(interessiPosterMobileSrc),
+  poster(contattiPosterDesktopSrc),
+  poster(contattiPosterMobileSrc),
 ]);
 const posterReasons = ['webgl', 'savedata', 'error', 'nojs'] as const;
 /** Avviso del poster con il soggetto della sezione ("della scrivania", "della casa"). */
@@ -193,7 +199,8 @@ const immersive = (id: string) =>
   id === 'certificazioni' ||
   id === 'sport' ||
   id === 'interessi' ||
-  id === 'beneficenza';
+  id === 'beneficenza' ||
+  id === 'contatti';
 const H = page.homelab;
 const homelab = homelabModel(infra);
 const regionName = (id: string) => infra.regions.find((r) => r.id === id)?.name ?? id;
@@ -215,9 +222,6 @@ const num = (value: number, digits = 0) =>
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).format(value);
-
-/** Canali mostrati in Contatti (email, GitHub, LinkedIn, X, piu dev.to e CV se presenti). */
-const contactChannels = 6;
 
 const pageTitle = `${profile.name} · ${page.titleSuffix}`;
 const beacon = beaconConfig(import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN);
@@ -348,6 +352,22 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
                 />
               </picture>
               <Scene scene="interessi" label={page.scenes.interessi} accent="interessi" />
+            </div>
+          )}
+          {s.id === 'contatti' && (
+            <div class="stage">
+              <picture class="poster" aria-hidden="true">
+                <source media="(max-width: 48rem)" srcset={contattiPosterMobile.src} />
+                <img
+                  src={contattiPosterDesktop.src}
+                  width={contattiPosterDesktop.options.width}
+                  height={contattiPosterDesktop.options.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <Scene scene="contatti" label={page.scenes.contatti} accent="contatti" data={{ command: page.farewell.command }} />
             </div>
           )}
           {s.id === 'beneficenza' && (
@@ -941,34 +961,44 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
 
           {s.id === 'contatti' && (
             <>
-            <Scene scene="contatti" label={page.scenes.contatti} accent="contatti" data={{ count: contactChannels }} />
-            <dl class="facts">
-              <div>
-                <dt>{L.email}</dt>
-                <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+              <div class="hero lab" data-moment="overview">
+                <p class="intro">{page.intros[s.id]}</p>
+                <p class="poster-note" role="status">
+                  {posterNotice(page.contatti.posterSubject).map((n) => <span data-reason={n.reason}>{n.text}</span>)}
+                </p>
               </div>
-              <div>
-                <dt>{L.profiles}</dt>
-                <dd>
-                  <ul class="plain inline">
-                    <li><a href={profile.links.github}>GitHub</a></li>
-                    <li><a href={profile.links.linkedin}>LinkedIn</a></li>
-                    <li><a href={profile.links.devto}>dev.to</a></li>
-                    <li><a href={profile.links.x}>X</a></li>
-                  </ul>
-                </dd>
+
+              <div class="cards">
+                <article class="card" id="contatti-write" data-moment="write">
+                  <h3>{page.contatti.write}</h3>
+                  <dl class="facts">
+                    <div>
+                      <dt>{L.email}</dt>
+                      <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+                    </div>
+                    <div>
+                      <dt>{L.profiles}</dt>
+                      <dd>
+                        <ul class="plain inline">
+                          <li><a href={profile.links.github}>GitHub</a></li>
+                          <li><a href={profile.links.linkedin}>LinkedIn</a></li>
+                          <li><a href={profile.links.devto}>dev.to</a></li>
+                          <li><a href={profile.links.x}>X</a></li>
+                        </ul>
+                      </dd>
+                    </div>
+                  </dl>
+                  <p class="contact-cv"><a class="button" href={profile.cv} download>{L.cv}</a></p>
+                </article>
+                <article class="card" id="contatti-logout" data-moment="logout">
+                  <p class="farewell">
+                    <code>{page.farewell.command}</code>
+                    <br />
+                    {page.farewell.message}
+                    <a href={here('/')}>{page.backToChoice}</a>
+                  </p>
+                </article>
               </div>
-              <div>
-                <dt>{L.cv}</dt>
-                <dd><a class="button" href={profile.cv} download>{L.cv}</a></dd>
-              </div>
-            </dl>
-            <p class="farewell">
-              <code>{page.farewell.command}</code>
-              <br />
-              {page.farewell.message}
-              <a href={here('/')}>{page.backToChoice}</a>
-            </p>
             </>
           )}
         </section>
@@ -1027,6 +1057,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
   section[data-section="certificazioni"] > h2,
   section[data-section="sport"] > h2,
   section[data-section="interessi"] > h2,
+  section[data-section="contatti"] > h2,
   section[data-section="beneficenza"] > h2 {
     display: inline-block;
     padding: 0.25rem 2rem 0.25rem 0.5rem;
@@ -1597,9 +1628,7 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     background: var(--surface-hi);
   }
   .farewell {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
+    margin: 0;
     color: var(--text-muted);
   }
   .farewell code {
@@ -1858,6 +1887,9 @@ const jsonLd = await loadJsonLd({ locale, path: '/human', name: pageTitle, type:
     display: grid;
     gap: 0.5rem;
     margin: 1rem 0 0;
+  }
+  .contact-cv {
+    margin: 0.75rem 0 0;
   }
   .facts dt {
     font-family: var(--font-mono);
