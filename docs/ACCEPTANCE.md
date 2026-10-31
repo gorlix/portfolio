@@ -14,23 +14,32 @@ Ogni criterio rimanda al test che lo verifica in CI (check obbligatori su `main`
 
 ## Altri requisiti della fase 6 (§10) con verifica automatica
 
-| Requisito                                                                            | Verifica                                                                                                       |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Accessibilità WCAG 2.2 AA (axe, Mocha e Latte, anche con scene 3D montate)           | `e2e/a11y.spec.ts`                                                                                             |
-| Tastiera, focus visibile, "salta al contenuto", reflow a 320 px                      | `e2e/a11y-keyboard.spec.ts`                                                                                    |
-| Lighthouse ≥ 95 sui percorsi leggeri, limiti di script su `/human`, a ogni PR        | Check "Lighthouse" (`lighthouserc.json`)                                                                       |
-| Budget di peso (spec §3.5)                                                           | `pnpm check:budget`                                                                                            |
-| Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion) | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts`                                               |
-| Analitica solo su `/human`, solo con token valido                                    | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`                                                      |
-| Colori solo come token, contrasto                                                    | `pnpm check:theme`                                                                                             |
-| Nessun segnaposto `TODO` visibile sul sito, in nessun file per macchine              | `tests/i18n/build.test.ts` (nessun `TODO(Alessandro)`), `e2e/recruiter.nojs.spec.ts`, `e2e/human.nojs.spec.ts` |
+| Requisito                                                                                             | Verifica                                                                                                       |
+| ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Accessibilità WCAG 2.2 AA (axe, Mocha e Latte, anche con scene 3D montate)                            | `e2e/a11y.spec.ts`                                                                                             |
+| Tastiera, focus visibile, "salta al contenuto", reflow a 320 px                                       | `e2e/a11y-keyboard.spec.ts`                                                                                    |
+| Lighthouse ≥ 95 sui percorsi leggeri, limiti di script su `/human`, a ogni PR e a ogni push su `main` | Check "Lighthouse" (`lighthouserc.json`)                                                                       |
+| Budget di peso (spec §3.5)                                                                            | `pnpm check:budget`                                                                                            |
+| Fallback 3D (telefono, poca memoria, batteria bassa, risparmio dati, reduced-motion)                  | `tests/three/capabilities.test.ts`, `e2e/human.fallback.spec.ts`                                               |
+| Analitica solo su `/human`, solo con token valido                                                     | `tests/lib/analytics.test.ts`, `tests/i18n/build.test.ts`                                                      |
+| Colori solo come token, contrasto                                                                     | `pnpm check:theme`                                                                                             |
+| Nessun segnaposto `TODO` visibile sul sito, in nessun file per macchine                               | `tests/i18n/build.test.ts` (nessun `TODO(Alessandro)`), `e2e/recruiter.nojs.spec.ts`, `e2e/human.nojs.spec.ts` |
 
 ## Verifiche manuali (le fa Alessandro; esito da annotare qui)
 
-| Verifica                                 | Procedura                                                                                   | Esito   |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------- | ------- |
-| Screen reader (PORT-67)                  | Checklist NVDA/VoiceOver su tutte le pagine IT/EN                                           | da fare |
-| Fluidità su telefono reale (PORT-69)     | Checklist fps su un telefono di fascia media                                                | da fare |
-| Rich Results Test (PORT-71)              | URL di anteprima di `/human`, `/recruiter`, `/agent` su search.google.com/test/rich-results | da fare |
-| Beacon analitica in produzione (PORT-72) | Token in Cloudflare Pages, poi controllare che compaia solo su `/human`                     | da fare |
-| Dominio e DNS (PORT-48)                  | Fuori da questa verifica; i file per macchine puntano già al dominio previsto               | da fare |
+| Verifica                                 | Procedura                                                                                   | Esito                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------- |
+| Screen reader (PORT-67)                  | Checklist NVDA/VoiceOver su tutte le pagine IT/EN                                           | da fare                       |
+| Fluidità su telefono reale (PORT-69)     | Checklist fps su un telefono di fascia media                                                | da fare                       |
+| Rich Results Test (PORT-71)              | URL di anteprima di `/human`, `/recruiter`, `/agent` su search.google.com/test/rich-results | da fare                       |
+| Google Search Console                    | Proprietà del dominio, invio della sitemap, controllo di copertura e dati strutturati       | da fare                       |
+| Beacon analitica in produzione (PORT-72) | Token in Cloudflare Pages, poi controllare che compaia solo su `/human`                     | da fare                       |
+| Dominio (PORT-48)                        | Sito raggiungibile su `alessandrogorla.it`, deploy automatico da `main` su Cloudflare Pages | fatto (online dal 2026-10-30) |
+
+## Prove svolte sul sito online (2026-10-30)
+
+| Prova                                                                                           | Esito                  |
+| ----------------------------------------------------------------------------------------------- | ---------------------- |
+| Touch a 390×844 su 22 schede lunghe                                                             | OK                     |
+| JSON-LD di `/recruiter` contro schema.org (validazione locale, non il Rich Results Test online) | valido                 |
+| Richieste da client non browser a `llms.txt`, `agent.md`, `profile.json`, `robots.txt`          | risposta 200 per tutti |
