@@ -44,7 +44,7 @@
     "@playwright/test": "^1.64.1",
     "@sveltia/cms": "0.253.2",
     "@types/node": "^26.6.5",
-    "@types/three": "^0.186.0",
+    "@types/three": "^0.187.0",
     "ajv": "8.20.0",
     "fast-xml-parser": "^5.11.2",
     "fast-xml-validator": "^1.4.2",
